@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Assembly>C:\Users\zarrinmehr\Dropbox\Ph.D. Thesis\Applications\OccupancySimulationModel\OSM_Revit\bin\Release\OSM_Revit.dll</Assembly>
+    <AddInId>4C2C23E7-56BD-445F-A57F-FF42105BB6E1</AddInId>
+    <FullClassName>OSM_Revit.OSM_Revit_Panel</FullClassName>
+	<Name>OSM_Revit</Name>
+    <VendorId>Saied Zarrinmehr</VendorId>
+    <VendorDescription>Developed by Saied Zarrinmehr</VendorDescription>
+  </AddIn>
+</RevitAddIns>
