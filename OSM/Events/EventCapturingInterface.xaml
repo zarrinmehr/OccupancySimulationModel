@@ -1,0 +1,186 @@
+﻿<Window x:Class="SpatialAnalysis.Events.EventCapturingInterface"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local = "clr-namespace:SpatialAnalysis"
+        xmlns:Miscellaneous="clr-namespace:SpatialAnalysis.Miscellaneous" 
+        ShowInTaskbar="False" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
+         WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <Miscellaneous:BooleanToBooleanConverter x:Key="BooleanToBooleanConverter1" />
+        <Thickness x:Key="margin">0,0,0,3</Thickness>
+    </Window.Resources>
+    <StackPanel Margin="7">
+        <DockPanel Height="50">
+            <TextBlock DockPanel.Dock="Top" TextElement.FontSize="20" TextElement.FontWeight="Bold" 
+                       Text ="Capture Evaluation Events" 
+                    HorizontalAlignment="Center" VerticalAlignment="Center" ></TextBlock>
+            <TextBlock Name="_subTitle" DockPanel.Dock="Bottom" TextElement.FontWeight="Bold" 
+                       Text ="Optional Occupancy Scenario" 
+                    HorizontalAlignment="Center" ></TextBlock>
+        </DockPanel>
+        <StackPanel Name="_interface">
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="SemiBold">Event Recording and Analysis</TextBlock>
+                </GroupBox.Header>
+                <StackPanel>
+                    <DockPanel Height="30" Margin="7,0,7,0">
+                        <TextBlock Text="Name:" 
+                           VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                        <TextBox Name="_dataFieldName" Width="120" Height="23" VerticalAlignment="Center" HorizontalAlignment="Right" ></TextBox>
+                    </DockPanel>
+                    <DockPanel Height="20" Margin="20,0,0,0">
+                        <TextBlock FontStyle="Italic" Text="The captured event will be saved as a new 'Spatial Data' field"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Height="30" Margin="7,0,7,0">
+                        <TextBlock Text="Save Captured Agent States to File" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                        <Button Height="23" Width="120" Name="_recordTrailBtn" 
+                        VerticalAlignment="Center" HorizontalAlignment="Right">File Name</Button>
+                    </DockPanel>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <TextBlock Text="Event Frequency Analysis"></TextBlock>
+                        </GroupBox.Header>
+                        <StackPanel>
+                            <DockPanel>
+                                <CheckBox Name="_analyzeFrequency" IsChecked="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,10,0"></CheckBox>
+                                <TextBlock Text="Include Frequency Analysis of Event Occurrence" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            </DockPanel>
+                            <DockPanel  Margin="20,5,0,0">
+                                <TextBlock TextWrapping="Wrap" FontStyle="Italic">The frequency amplitudes of Fast Fourier Transform (FFT) will be recorded.</TextBlock>
+                            </DockPanel>
+                        </StackPanel>
+
+                    </GroupBox>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="SemiBold" Margin="{StaticResource margin}">Evaluation Event Setting</TextBlock>
+                </GroupBox.Header>
+                <StackPanel>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <DockPanel>
+                                <CheckBox Name="_includedataEvents" IsChecked="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,10,0"></CheckBox>
+                                <TextBlock Text="Include Spatial Data" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            </DockPanel>
+                        </GroupBox.Header>
+                        <StackPanel>
+                            
+                            <DockPanel  Margin="20,5,0,0">
+                                <TextBlock TextWrapping="Wrap" FontStyle="Italic">Events will be captured when the agent is in ALL of the selected<LineBreak></LineBreak>desirability intervals.</TextBlock>
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock Text="Set data desirability intervals for event capturing" 
+                            Margin="0,0,10,0"   VerticalAlignment="Center"
+                            HorizontalAlignment="Left" TextWrapping="WrapWithOverflow"></TextBlock>
+                                <Button Name="_dataCtlr" Height="23" Width="120" VerticalAlignment="Center"
+                            IsEnabled="{Binding ElementName=_includedataEvents, Path=IsChecked}"
+                         HorizontalAlignment="Right" Content ="Data Control Panel"></Button>
+                            </DockPanel>
+                        </StackPanel>
+
+                    </GroupBox>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <DockPanel>
+                                <CheckBox Name="_includeVisualEvents" IsChecked="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,10,0"></CheckBox>
+                                <TextBlock Text="Include Visibility Targets" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            </DockPanel>
+                        </GroupBox.Header>
+                        <StackPanel>
+                            
+                            <DockPanel>
+                                <TextBlock Text="Set target areas to capture visibility events"
+                           VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="WrapWithOverflow"></TextBlock>
+                                <Button Name="_visibilityEvent" Height="23" Width="120" VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Content ="Visual Event Setting" IsEnabled="{Binding ElementName=_includeVisualEvents, Path=IsChecked}"></Button>
+                            </DockPanel>
+                            <DockPanel>
+                                <CheckBox Name="_visibilityExists" IsChecked="True" Margin="10,0,5,0"
+                                  IsEnabled="{Binding ElementName=_includeVisualEvents, Path=IsChecked}"
+                                  VerticalAlignment="Center" HorizontalAlignment="Left" ></CheckBox>
+                                <TextBlock Text="Capture events when visibility exists" FontStyle="Italic"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+                            </DockPanel>
+                            <DockPanel>
+                                <CheckBox Name="_excludedVisibility" Margin="10,0,5,0" 
+                                  IsChecked="{Binding Path=IsChecked, ElementName=_includedVisibility, Converter={StaticResource BooleanToBooleanConverter1}}" 
+                                  IsEnabled="{Binding ElementName=_includeVisualEvents, Path=IsChecked}"
+                                  VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                                <TextBlock Text="Capture events when visibility does not exist" FontStyle="Italic"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+                            </DockPanel>
+                        </StackPanel>
+
+                    </GroupBox>
+                    <GroupBox Name="_activityEngamementEvnts">
+                        <GroupBox.Header>
+                            <DockPanel>
+                                <CheckBox Name="_includeActivityEngagementEvents" IsChecked="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,10,0"></CheckBox>
+                                <TextBlock Text="Include Activity Engagements" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            </DockPanel>
+                        </GroupBox.Header>
+                        <StackPanel>
+                            
+                            <DockPanel  Margin="20,5,0,0">
+                                <TextBlock TextWrapping="Wrap" FontStyle="Italic">Events will be captured in relation to engagement with ANY of <LineBreak></LineBreak>the selected activities.</TextBlock>
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock Text="Set activity engagement methods for event capturing" 
+                            Margin="0,0,10,0"   VerticalAlignment="Center"
+                            HorizontalAlignment="Left" TextWrapping="WrapWithOverflow"></TextBlock>
+                                <Button Name="_dataCtlr2" Height="23" Width="120" VerticalAlignment="Center"
+                            IsEnabled="{Binding ElementName=_includedataEvents, Path=IsChecked}"
+                         HorizontalAlignment="Right" Content ="Data Control Panel"></Button>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox BorderBrush="DarkGray" BorderThickness="1">
+            <GroupBox.Header>
+                    <TextBlock FontWeight="DemiBold" Text="Simulation Setting" Margin="{StaticResource margin}"></TextBlock>
+            </GroupBox.Header>
+            <StackPanel>
+                <DockPanel Height="25" >
+                    <TextBlock Text="Time Step (Milliseconds)  " VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <TextBox Name="_timeStep" Height="20" Text="20" Width="120" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                </DockPanel>
+                <DockPanel Height="25">
+                    <TextBlock Text="Total Simulation Duration (Hours)  " VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <TextBox Name="_timeDuration" Height="20" Text="4" Width="120" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                </DockPanel>
+                <DockPanel Height="25">
+                    <TextBlock Text="Time Sampling Rate (Per Time Steps)" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <TextBox Name="_timeSamplingRate" Height="20" Text="25" Width="120" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                </DockPanel>
+                <DockPanel Height="20" Margin="10,0,0,0">
+                        <TextBlock Text="Points per second: " FontStyle="Italic" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <TextBlock Name="_pointPerSeconds" VerticalAlignment="Center" FontStyle="Italic" HorizontalAlignment="Left"></TextBlock>
+                </DockPanel>
+                </StackPanel>
+            </GroupBox>
+            
+            
+        </StackPanel>
+        <Grid Name="_progress" Margin="5" Visibility="Collapsed">
+            <ProgressBar Name="_progressBar" Minimum="0" Maximum="100" Value="0" Height="20" 
+                         HorizontalAlignment="Stretch" VerticalAlignment="Center"></ProgressBar>
+            <TextBlock Name="_progressReport" Text="percent" 
+                       VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        </Grid>
+        <Grid Margin="10,10,10,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Name="_runBtm" Height="23" Width="120" Content="Run" Margin="0,0,20,0" HorizontalAlignment="Right"></Button>
+            <Button Grid.Column="1" Name="_closeBtm" Height="23" Width="120" Content="Close" Margin="20,0,0,0" HorizontalAlignment="Left"></Button>
+        </Grid>
+
+    </StackPanel>
+</Window>

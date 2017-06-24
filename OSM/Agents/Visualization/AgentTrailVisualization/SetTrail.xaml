@@ -1,0 +1,112 @@
+﻿<Window x:Class="SpatialAnalysis.Agents.Visualization.AgentTrailVisualization.SetTrail"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        SizeToContent="WidthAndHeight">
+    <StackPanel Margin="5,5,5,10">
+        <TextBlock Name="title"  Margin="10,10,10,5"
+                   Text="Set Walking Trail"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   TextElement.FontSize="20" 
+                   TextElement.FontWeight="Bold"></TextBlock>
+        <GroupBox Name="_create" BorderBrush="DarkGray">
+            <GroupBox.Header>
+                <TextBlock Text="Create Trail" FontWeight="DemiBold"></TextBlock>
+            </GroupBox.Header>
+            <StackPanel>
+                <DockPanel Height="25">
+                    <TextBlock Text="Pick a series of points to create a trail" Margin="0,0,10,0"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <Button Name="_drawBtm" Height="23" Width="120" Content="Pick Points"
+                        VerticalAlignment="Center" HorizontalAlignment="Right"></Button>
+                </DockPanel>
+                <DockPanel Height="25">
+                    <TextBlock Text="Select a file to import a series of points " Margin="0,0,10,0"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <Button Name="_importBtm" Height="23" Width="120" Content="Import Points"
+                        VerticalAlignment="Center" HorizontalAlignment="Right"></Button>
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Name="_edit" BorderBrush="DarkGray">
+            <GroupBox.Header>
+                <TextBlock Text="Edit Trail" FontWeight="DemiBold"></TextBlock>
+            </GroupBox.Header>
+            <StackPanel>
+                <DockPanel Height="25">
+                    <TextBlock DockPanel.Dock="Left" Text="Set Smoothness Factor"
+                             VerticalAlignment="Center"  HorizontalAlignment="Left"></TextBlock>
+                    <Slider DockPanel.Dock="Right" Name="_smoothness" Width="120" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" TickFrequency=".1" TickPlacement="TopLeft"
+                             Minimum="0" Maximum="1" Value="1"></Slider>
+                </DockPanel>
+                <TextBlock Text="Interpolate the trail between a polyline and a cubic spline."
+                           FontSize="11" FontStyle="Italic" Margin="5,0,5,0" TextWrapping="WrapWithOverflow"></TextBlock>
+                
+            </StackPanel>
+
+        </GroupBox>
+        <GroupBox  BorderBrush="DarkGray">
+            <GroupBox.Header>
+                <TextBlock Text="Visualize Trail" FontWeight="DemiBold"></TextBlock>
+            </GroupBox.Header>
+            <DockPanel Height="25" Margin="0,5,0,0">
+                <TextBlock DockPanel.Dock="Left" Text="Number of points per unite of Length"
+                               VerticalAlignment="Center"  HorizontalAlignment="Left"></TextBlock>
+                <ComboBox Name="_pointPerLengthUnite" DockPanel.Dock="Right" Width="120" Height="23"  
+                         SelectedIndex="3" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <sys:Int32>2</sys:Int32>
+                    <sys:Int32>3</sys:Int32>
+                    <sys:Int32>4</sys:Int32>
+                    <sys:Int32>5</sys:Int32>
+                    <sys:Int32>6</sys:Int32>
+                    <sys:Int32>7</sys:Int32>
+                    <sys:Int32>8</sys:Int32>
+                    <sys:Int32>9</sys:Int32>
+                    <sys:Int32>10</sys:Int32>
+                </ComboBox>
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Name="_setStates" BorderBrush="DarkGray">
+            <GroupBox.Header>
+                <TextBlock Text="Set States of Agents" FontWeight="DemiBold"></TextBlock>
+            </GroupBox.Header>
+            <StackPanel>
+                <DockPanel Height="25">
+                    <TextBlock DockPanel.Dock="Left" Text="Number of agent states per unite of time"
+                             VerticalAlignment="Center" Margin="0,0,10,0" HorizontalAlignment="Left"></TextBlock>
+                    <ComboBox Name="_subdivision" DockPanel.Dock="Right" Width="120" Height="23"  
+                         SelectedIndex="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <sys:Int32>1</sys:Int32>
+                        <sys:Int32>2</sys:Int32>
+                        <sys:Int32>3</sys:Int32>
+                        <sys:Int32>4</sys:Int32>
+                        <sys:Int32>5</sys:Int32>
+                        <sys:Int32>6</sys:Int32>
+                        <sys:Int32>7</sys:Int32>
+                        <sys:Int32>8</sys:Int32>
+                        <sys:Int32>9</sys:Int32>
+                        <sys:Int32>10</sys:Int32>
+                    </ComboBox>
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Name="_export" BorderBrush="DarkGray">
+            <GroupBox.Header>
+                <TextBlock Text="Export Trail" FontWeight="DemiBold"></TextBlock>
+            </GroupBox.Header>
+            <DockPanel Height="25">
+                <TextBlock Text="Select a file to export a trail points " Margin="0,0,10,0"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                <Button Name="_exportBtm" Height="23" Width="120" Content="Export Points"
+                        VerticalAlignment="Center" HorizontalAlignment="Right"></Button>
+            </DockPanel>
+        </GroupBox>
+        <Button Name="_closeBtm" Height="23" Width="120" Content="Close"  
+                Margin="10,10,10,5" VerticalAlignment="Center" HorizontalAlignment="Center"></Button>
+
+    </StackPanel>
+</Window>

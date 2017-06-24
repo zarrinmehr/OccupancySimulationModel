@@ -1,0 +1,260 @@
+﻿<Window x:Class="SpatialAnalysis.Agents.MandatoryScenario.Visualization.RealTimeMandatoryNavigationControler"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Title="Mandatory Walking Scenario" SizeToContent="WidthAndHeight" 
+        ResizeMode="CanMinimize" mc:Ignorable="d" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                xmlns:SpatialAnalysis="clr-namespace:SpatialAnalysis" 
+        xmlns:Miscellaneous="clr-namespace:SpatialAnalysis.Miscellaneous"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        d:DesignWidth="460">
+    <Window.Resources>
+        <Miscellaneous:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter"></Miscellaneous:BoolToFontWeightConverter>
+            <Miscellaneous:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <Miscellaneous:BooleanToBooleanConverter x:Key="BooleanToBooleanConverter"/>
+            <Miscellaneous:TextToDoubleConverter x:Key="TextToDoubleConverter"/>
+        <sys:Double x:Key="width">140</sys:Double>
+        <sys:Double x:Key="rowHeight">25</sys:Double>
+        <sys:Double x:Key="boxHeight">24</sys:Double>
+        <Thickness x:Key="textPading">-1</Thickness>
+        <Thickness x:Key="boarderThickness">1.75</Thickness>
+    </Window.Resources>
+    <StackPanel Orientation="Vertical">
+        <TextBlock Name="title"  Margin="10,10,10,0"
+                   Text="Mandatory Navigation Control Panel"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   TextElement.FontSize="20" 
+                   TextElement.FontWeight="Bold"></TextBlock>
+        <StackPanel Width="291" Margin="0,0,0,15">
+            <TextBlock  VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+                       TextWrapping="Wrap" FontSize="10.5" Margin="5,0,5,0">
+                Set and Test Agent Parameters. 
+            </TextBlock>
+        </StackPanel>
+
+        <Expander Margin="5" IsExpanded="True" BorderBrush="DarkGray" BorderThickness="1">
+            <Expander.Header>
+                <TextBlock Text="Physical Setting" FontWeight="DemiBold"></TextBlock>
+            </Expander.Header>
+            <StackPanel Orientation="Vertical">
+                <DockPanel Height="30" Margin="0,7,0,0">
+                    <Button Name="_addAgent" Height="23" Width="100" HorizontalAlignment="Left" Margin="10,0,0,0" 
+                            Content="Locate Agent"></Button>
+                    <Button Name="_clearAgent" Height="23" Width="100" HorizontalAlignment="Right"
+                            Content="Clear Agent" IsEnabled="False"></Button>
+                </DockPanel >
+                <DockPanel Height="30">
+                    <TextBlock Text="Velocity Cap Magnitude" Margin="10,0,10,0"
+                            VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_velocityMin"  Text="1" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_velocity" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="3"
+                                Maximum="{Binding ElementName=_velocityMax, Path=Text}" Minimum="{Binding ElementName=_velocityMin, Path=Text}"></Slider>
+                        <TextBox Name="_velocityMax" Text="5" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30">
+                    <TextBlock Text="Acceleration Magnitude" Margin="10,0,10,0"
+                            VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_accelerationMagnitudeMin"  Text="1" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_accelerationMagnitude" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="10"
+                                Maximum="{Binding ElementName=_accelerationMagnitudeMax, Path=Text}" Minimum="{Binding ElementName=_accelerationMagnitudeMin, Path=Text}"></Slider>
+                        <TextBox Name="_accelerationMagnitudeMax" Text="15" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30">
+                    <TextBlock Text="Angular Velocity Magnitude" Margin="10,0,10,0"
+                            VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_angularVelocityMin"  Text="0.1" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_angularVelocity" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="3.3"
+                                Maximum="{Binding ElementName=_angularVelocityMax, Path=Text}" Minimum="{Binding ElementName=_angularVelocityMin, Path=Text}"></Slider>
+                        <TextBox Name="_angularVelocityMax" Text="6.28" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30">
+                    <TextBlock Text="Body Size" Margin="10,0,10,0"
+                            VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_bodySizeMin"  Text="1" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_bodySize" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="1.5"
+                                Minimum="{Binding ElementName=_bodySizeMin, Path=Text}" Maximum="{Binding ElementName=_bodySizeMax, Path=Text}"></Slider>
+                        <TextBox Name="_bodySizeMax" Text="5" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30" >
+                    <TextBlock Text="Body Elasticity" Margin="10,0,10,0"
+                   VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_bodyElasticityMin"  Text="0" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_bodyElasticity" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="0.2"
+                                Maximum="{Binding ElementName=_bodyElasticityMax, Path=Text}" 
+                                Minimum="{Binding ElementName=_bodyElasticityMin, Path=Text}"></Slider>
+                        <TextBox Name="_bodyElasticityMax" Text="1.0" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30" >
+                    <TextBlock Text="Visibility Angle" Margin="10,0,10,0"
+                   VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_viewAngleMin"  Text="0" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_viewAngle" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="135"
+                                Maximum="{Binding ElementName=_viewAngleMax, Path=Text}" Minimum="{Binding ElementName=_viewAngleMin, Path=Text}"></Slider>
+                        <TextBox Name="_viewAngleMax" Text="180" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </Expander>
+        <Expander Margin="5" BorderBrush="DarkGray" BorderThickness="1">
+            <Expander.Header>
+                <TextBlock Text="Barrier Repulsion Setting" FontWeight="DemiBold"/>
+            </Expander.Header>
+            <StackPanel Orientation="Vertical">
+                <DockPanel Height="30" >
+                    <TextBlock Text="Barrier Repulsion Range" Margin="10,0,10,0"
+        				VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox x:Name="_minBarrierRepulsionRange"  Text="2.0" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <Slider x:Name="_barrierRepulsionRange" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="5"
+        					Minimum="{Binding Text, ElementName=_minBarrierRepulsionRange}" Maximum="{Binding Text, ElementName=_maxBarrierRepulsionRange}"/>
+                        <TextBox x:Name="_maxBarrierRepulsionRange" Text="6.0" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30" >
+                    <TextBlock Text="Maximum Repulsion" Margin="10,0,10,0"
+        				VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox x:Name="_minRepulsionChangeRate"  Text="2.0" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <Slider x:Name="_repulsionChangeRate" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="5"
+        					Minimum="{Binding Text, ElementName=_minRepulsionChangeRate}" Maximum="{Binding Text, ElementName=_maxRepulsionChangeRate}"/>
+                        <TextBox x:Name="_maxRepulsionChangeRate" Text="10.0" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel Height="30" >
+                    <TextBlock Text="Barrier Friction" Margin="10,0,10,0"
+                   VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_barrierFrictionMin"  Text="0" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_barrierFriction" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value="0.1"
+                                Maximum="{Binding ElementName=_barrierFrictionMax, Path=Text}" Minimum="{Binding ElementName=_barrierFrictionMin, Path=Text}"></Slider>
+                        <TextBox Name="_barrierFrictionMax" Text="1.0" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </Expander>
+        <Expander Margin="5" BorderBrush="DarkGray" BorderThickness="1">
+            <Expander.Header>
+                <TextBlock Text="Visual Setting" FontWeight="DemiBold"></TextBlock>
+            </Expander.Header>
+            <StackPanel Orientation="Vertical">
+                <DockPanel Height="30" >
+                    <TextBlock Text="Stroke Thickness" Margin="10,0,10,0"
+                   VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBox Name="_strokeThicknessMin"  Text="0.0" Width="35" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                        <Slider Name="_strokeThickness" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Value=".025"
+                                Minimum="{Binding ElementName=_strokeThicknessMin, Path=Text}" Maximum="{Binding ElementName=_strokeThicknessMax, Path=Text}"></Slider>
+                        <TextBox Name="_strokeThicknessMax" Text="0.1" Width="35" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBox>
+                    </StackPanel>
+                </DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"></RowDefinition>
+                        <RowDefinition Height="1*"></RowDefinition>
+                        <RowDefinition Height="1*"></RowDefinition>
+                        <RowDefinition Height="1*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Column="0" Grid.Row="0" Height="30" >
+                        <CheckBox Name="_showVisibiityAngle" IsChecked="True" 
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Cone of Vision"
+                               VerticalAlignment="Center" ></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="0" Height="30" >
+                        <CheckBox Name="_showDestination" Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Show Destination Area"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="1" Height="30" >
+                        <CheckBox Name="_captureVisualEvents" 
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Visual Events"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="1" Height="30" >
+                        <CheckBox Name="_showClosestBarrier" 
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Closest Barrier"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="3" Height="30" >
+                        <CheckBox Name="_walkThrough" IsEnabled="False"
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Agent View"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="2" Height="30" >
+                        <CheckBox Name="_showRepulsionTrajectory" 
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Barrier Repulsion Trajectory"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="2" Height="30" >
+                        <CheckBox Name="_showSafetyBuffer" 
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="Safety Buffer"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="3" Height="30" >
+                        <CheckBox Name="_visualTrigger" 
+                              Margin="10,0,10,0" VerticalAlignment="Center" HorizontalAlignment="Left"></CheckBox>
+                        <TextBlock Text="A Sequence Visually Triggered"
+                               VerticalAlignment="Center"></TextBlock>
+                    </DockPanel>
+                </Grid>
+
+
+
+                <Viewport3D Name="view3d" Width="400" Height="300" Margin="0,0,0,10" Visibility="Collapsed">
+                    <Viewport3D.Camera>
+                        <PerspectiveCamera x:Name="_camera"></PerspectiveCamera>
+                    </Viewport3D.Camera>
+                    <ModelVisual3D>
+                        <ModelVisual3D.Content>
+                            <Model3DGroup x:Name="_allModels">
+                                <!--<DirectionalLight Color="White" Direction="-1,-1,-3" ></DirectionalLight>-->
+                                <!--Add geometries in here to the allModels-->
+                            </Model3DGroup>
+                        </ModelVisual3D.Content>
+                    </ModelVisual3D>
+                </Viewport3D>
+            </StackPanel>
+        </Expander>
+
+        <!--<Expander Margin="5" BorderBrush="DarkGray" BorderThickness="1">
+            <Expander.Header>
+                <TextBlock Text="Scenario Setting" FontWeight="DemiBold"></TextBlock>
+            </Expander.Header>
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical">
+                    <DockPanel Height="30" ></DockPanel>
+                </StackPanel>
+            </StackPanel>
+        </Expander>-->
+
+        <Button Name="_hide" Margin="0,10,0,5" Content="Hide This Window" Width="150" Height="23"
+                Visibility="Collapsed"></Button>
+        <Button Name="_init" Margin="0,10,0,15" Width="150" Height="23">
+            <TextBlock Name="init_Title" Text="Start Animation" FontWeight="DemiBold" ></TextBlock>
+        </Button>
+
+    </StackPanel>
+</Window>

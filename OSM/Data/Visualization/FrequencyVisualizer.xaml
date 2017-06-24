@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="SpatialAnalysis.Data.Visualization.FrequencyVisualizer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <TransformGroup x:Key="transform">
+            <RotateTransform Angle="90" />
+            <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+        </TransformGroup>
+        <GridLength x:Key="Boarder1">15</GridLength>
+        <GridLength x:Key="Boarder2">1</GridLength>
+        <GridLength x:Key="AxisThickness">2</GridLength>
+        <SolidColorBrush x:Key="AxisBrush" Color="Black"></SolidColorBrush>
+        <SolidColorBrush x:Key="FontBrush" Color="Black"></SolidColorBrush>
+    </UserControl.Resources>
+    <Grid Name="layout">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FFCBCBCB" Offset="1" />
+                <GradientStop Color="Transparent" Offset="0.552" />
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width= "{StaticResource Boarder1}"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width= "{StaticResource Boarder1}"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="{StaticResource Boarder1}"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Text="0" Grid.Row="1" Grid.Column="1" FontSize="9" 
+                   Foreground="{StaticResource FontBrush}" FontWeight="DemiBold"
+                   VerticalAlignment="Top" HorizontalAlignment="Left"></TextBlock>
+        <TextBlock Text='&#960;' Grid.Row="1" Grid.Column="1" FontSize="9" 
+                   Foreground="{StaticResource FontBrush}" FontWeight="DemiBold"
+                   VerticalAlignment="Top" HorizontalAlignment="Right"></TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" Text="Frequency" Margin="0,0,0,0"
+                   Foreground="{StaticResource FontBrush}" 
+                   VerticalAlignment="Bottom" HorizontalAlignment="Center"></TextBlock>
+        <TextBlock Text="0" FontSize="9" 
+                   Foreground="{StaticResource FontBrush}" FontWeight="DemiBold"
+                   VerticalAlignment="Bottom" HorizontalAlignment="Right" LayoutTransform="{StaticResource transform}">
+        </TextBlock>
+        <TextBlock Name="_yMax" Text="Y Max" FontSize="9" Margin="0,5,0,0"
+                   Foreground="{StaticResource FontBrush}" FontWeight="DemiBold"
+                   VerticalAlignment="Top" HorizontalAlignment="Right" LayoutTransform="{StaticResource transform}">
+        </TextBlock>
+        <TextBlock Text="Amplitude" Margin="0,0,2,0"
+                   Foreground="{StaticResource FontBrush}" FontWeight="Bold"
+                   VerticalAlignment="Center" HorizontalAlignment="Right" 
+                   LayoutTransform="{StaticResource transform}">
+        </TextBlock>
+        <Line Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" Stretch="Fill" Stroke="Black" StrokeThickness=".3" X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}"></Line>
+        <Image Name="_graphsHost" Grid.Column="1" Grid.Row="0" 
+               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,-1,0,1"></Image>
+
+    </Grid>
+</UserControl>

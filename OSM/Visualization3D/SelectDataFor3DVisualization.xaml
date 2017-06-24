@@ -1,0 +1,32 @@
+﻿<Window x:Class="SpatialAnalysis.Visualization3D.SelectDataFor3DVisualization"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Title="Select Data for 3D Visualization" Height="344" Width="291">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition ></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <TextBlock TextElement.FontSize="20" TextElement.FontWeight="Bold" Text ="Select Data to Visualize" Grid.Row="0" 
+                   Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom"></TextBlock>
+        <TextBlock Text="Available Data" TextElement.Foreground="Gray" TextElement.FontStyle="Italic" Grid.Row="1" Grid.Column="0" 
+                   VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,0,0,0"></TextBlock>
+        <TextBlock Name="_selectedItem" Text="Selected item" TextElement.FontStyle="Italic" Grid.Row="1" Grid.Column="1" 
+                   VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,0,0,0"></TextBlock>
+        <ListBox Name="dataNames" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" SelectionMode="Single" Margin="5,0,5,0"></ListBox>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+            <CheckBox Name="_useCost" VerticalAlignment="Center" Margin="8,0,8,0"></CheckBox>
+            <TextBlock Text="Visualize the attributed cost to this data" VerticalAlignment="Center"></TextBlock>
+        </StackPanel>
+        <Button Content="Done!" Grid.Column="1" Grid.Row="4" Height="22" Width="120" Click="Okay_Click"></Button>
+        <Button Content="Cancel" Grid.Column="0" Grid.Row="4" Height="22" Width="120" Click="Cancel_Click"></Button>
+    </Grid>
+</Window>

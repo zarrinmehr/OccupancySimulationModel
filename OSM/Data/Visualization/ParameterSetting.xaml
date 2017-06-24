@@ -1,0 +1,104 @@
+﻿<Window x:Class="SpatialAnalysis.Data.Visualization.ParameterSetting"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" 
+        SizeToContent="WidthAndHeight"
+        Title="ParameterSetting" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignWidth="539">
+    <Window.Resources>
+        <sys:Double x:Key="width">110</sys:Double>
+        <sys:Double x:Key="rowHeight">25</sys:Double>
+        <sys:Double x:Key="boxHeight">20</sys:Double>
+        <Thickness x:Key="textPading">-1</Thickness>
+    </Window.Resources>
+    <StackPanel Margin="5,0,5,0">
+        <TextBlock Text="Parameter Setting" FontSize="20" FontWeight="Bold" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"></TextBlock>
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <GroupBox BorderBrush="Gray">
+                    <GroupBox.Header>
+                        <TextBlock Text="New Parameter" FontWeight="DemiBold" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel Margin="5,0,5,0">
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Parameter Name: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_name" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Minimum: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_min" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Maximum: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_max" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Default Value: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_value" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <Button Name="_createAndAdd" Content="Create and Add" Height="23" Width="120" Margin="7"></Button>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox BorderBrush="Gray">
+                    <GroupBox.Header>
+                        <TextBlock Text ="Edit Parameter" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel Margin="5,0,5,0">
+                        <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal">
+                            <TextBlock Text="Parameter Name: " VerticalAlignment="Center"></TextBlock>
+                            <TextBlock Name="_paramName" VerticalAlignment="Center" Width="130"></TextBlock>
+                        </StackPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Minimum: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_paramMin" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Maximum: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_paramMax" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Value: " 
+                       VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+                            <TextBox Name="_paramValue" HorizontalAlignment="Right" 
+                                     Padding="{StaticResource textPading}" Width="{StaticResource width}" Height="{StaticResource boxHeight}"></TextBox>
+                        </DockPanel>
+                        <Button Name="_update" IsEnabled="False" Content="Update Parameter" Height="23" Width="120" Margin="7"></Button>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+            <GroupBox Margin="5,0,0,0" Grid.Column="1" BorderBrush="Gray">
+                <GroupBox.Header>
+                    <TextBlock Text="Existing Parameters" FontWeight="DemiBold"></TextBlock>
+                </GroupBox.Header>
+                <DockPanel LastChildFill="True">
+                    <Button Height="23" Width="120" Name="_delete" DockPanel.Dock="Bottom" Margin="5">Delete Parameter</Button>
+                    <ListBox Name="_parameterList" SelectionMode="Single" Margin="3" Height="255"
+                             DockPanel.Dock="Top" MinHeight="100"></ListBox>
+                </DockPanel>
+            </GroupBox>
+        </Grid>
+        <StackPanel></StackPanel>
+        <Button Name="_close" Content="Close" Height="23" Width="120" Margin="5"></Button>
+        <Button Height="23" Width="120" Name="_insert" Margin="5">Inset Parameter</Button>
+    </StackPanel>
+    
+</Window>

@@ -1,0 +1,21 @@
+﻿<Window x:Class="SpatialAnalysis.CellularEnvironment.GetCellValue.DataCell"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" Topmost="True" WindowStartupLocation="CenterOwner"
+        Title="DataCell" Height="300" Width="424">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition ></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <TextBlock TextElement.FontSize="20" TextElement.FontWeight="Bold" Text ="Data Report" Grid.Row="0" 
+                   Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"></TextBlock>
+        <TextBlock Name="CellInfo" Text="Cell info" TextElement.Foreground="Gray" TextElement.FontStyle="Italic" Grid.Row="1" Grid.Column="0" 
+                   VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,0,0,0"></TextBlock>
+        <ListBox Name="dataNames" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" SelectionMode="Single" Margin="5,0,5,0"></ListBox>
+        <Button Name="Okay" Content="Done!" Grid.Column="0" Grid.Row="3" Height="22" Width="120" Click="Okay_Click"></Button>
+    </Grid>
+</Window>

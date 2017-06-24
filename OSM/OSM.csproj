@@ -1,0 +1,543 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A5DF304C-F73F-44C0-8F85-3ACDE0F33E5D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SpatialAnalysis</RootNamespace>
+    <AssemblyName>OSM</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ClipperLib">
+      <HintPath>..\..\..\..\..\Downloads\clipper_library\bin\Release\ClipperLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Jace, Version=0.8.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Downloads\Jace-master\Jace\bin\Release\Jace.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\..\..\..\..\Downloads\Dependencies 9-29-2016\mathnet-numerics-master\out\lib-signed\Net4.5.2\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualC" />
+    <Reference Include="System" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Activities" />
+    <Reference Include="System.ServiceModel.Channels" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Triangle">
+      <HintPath>..\..\OSM dependency libraries\Triangulation\Triangle.NET\Triangle\bin\Release\Triangle.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="WriteableBitmapEx.Wpf">
+      <HintPath>..\..\OSM55\OSM55\bin\Debug\WriteableBitmapEx.Wpf.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Visualization\About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\Agent.cs" />
+    <Compile Include="Agents\MandatoryScenario\MandatoryScenarioTrainer.cs" />
+    <Compile Include="Agents\MandatoryScenario\MandatoryScenarioSimulation.cs" />
+    <Compile Include="Agents\MandatoryScenario\Scenario.cs" />
+    <Compile Include="Agents\MandatoryScenario\Sequence.cs" />
+    <Compile Include="Agents\MandatoryScenario\Visualization\ActivityAreaVisualHost.cs" />
+    <Compile Include="Agents\MandatoryScenario\Visualization\EditMandatoryScenario.xaml.cs">
+      <DependentUpon>EditMandatoryScenario.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\MandatoryScenario\Visualization\MandatoryScenarioAnimationVisualHost.cs" />
+    <Compile Include="Agents\MandatoryScenario\Visualization\GenerateSequenceUI.xaml.cs">
+      <DependentUpon>GenerateSequenceUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\MandatoryScenario\Visualization\MandatoryScenarioTraining.xaml.cs">
+      <DependentUpon>MandatoryScenarioTraining.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\MandatoryScenario\Visualization\VisualAgentMandatoryScenario.cs" />
+    <Compile Include="Agents\MandatoryScenario\Visualization\RealTimeMandatoryNavigationControler.xaml.cs">
+      <DependentUpon>RealTimeMandatoryNavigationControler.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\MandatoryScenario\Visualization\VisualizeSequence.xaml.cs">
+      <DependentUpon>VisualizeSequence.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\OptionalScenario\OptionalScenarioTrainer.cs" />
+    <Compile Include="Agents\MandatoryScenario\Visualization\SelectAnActivity.xaml.cs">
+      <DependentUpon>SelectAnActivity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\SetDirection.cs" />
+    <Compile Include="Agents\Visualization\AgentTrailVisualization\SetTrail.xaml.cs">
+      <DependentUpon>SetTrail.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\OptionalScenario\FreeNavigationAgent.cs" />
+    <Compile Include="Agents\Visualization\WalkingTrailData.xaml.cs">
+      <DependentUpon>WalkingTrailData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\OptionalScenario\OptionalScenarioSimulation.cs" />
+    <Compile Include="Agents\OptionalScenario\Visualization\OptionalScenarioTraining.xaml.cs">
+      <DependentUpon>OptionalScenarioTraining.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellularEnvironment\RigidBodyAnalysis.cs" />
+    <Compile Include="Data\Gaussian.cs" />
+    <Compile Include="Data\Parameter.cs" />
+    <Compile Include="Data\SimulationResults.cs" />
+    <Compile Include="Data\Visualization\FrequencyVisualizer.xaml.cs">
+      <DependentUpon>FrequencyVisualizer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Visualization\GuassianFilterUI.xaml.cs">
+      <DependentUpon>GuassianFilterUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Visualization\ParameterSetting.xaml.cs">
+      <DependentUpon>ParameterSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SpatialDataCalculator.cs" />
+    <Compile Include="Agents\MandatoryScenario\Visualization\SequenceVisibilityEventHost.cs" />
+    <Compile Include="FieldUtility\Visualization\EditPotentialFieldsUI.xaml.cs">
+      <DependentUpon>EditPotentialFieldsUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FieldUtility\Visualization\FieldEdgeVisualHost.cs" />
+    <Compile Include="Geometry\BarrierPolygons.cs" />
+    <Compile Include="Geometry\StateBase.cs" />
+    <Compile Include="Agents\Visualization\AgentTrailVisualization\TrailVisualHost.cs" />
+    <Compile Include="Agents\OptionalScenario\Visualization\VisualAgentOptionalScenario.cs" />
+    <Compile Include="Agents\Visualization\AgentModel\MaleAgentShapeData.cs" />
+    <Compile Include="Agents\OptionalScenario\Visualization\RealTimeFreeNavigationControler.xaml.cs">
+      <DependentUpon>RealTimeFreeNavigationControler.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataType.cs" />
+    <Compile Include="Data\Visualization\SpatialDataControlPanel.xaml.cs">
+      <DependentUpon>SpatialDataControlPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Statistics\BoxPlot.xaml.cs">
+      <DependentUpon>BoxPlot.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Visualization\DataDescriptionAndComparison.xaml.cs">
+      <DependentUpon>DataDescriptionAndComparison.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ISpatialData.cs" />
+    <Compile Include="Data\Statistics\DataStatisticsVisualDrawing.cs" />
+    <Compile Include="Data\Statistics\DataStatVisualHost.xaml.cs">
+      <DependentUpon>DataStatVisualHost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Events\EvaluationEvent.cs" />
+    <Compile Include="Events\VisualEventVisualHost.cs" />
+    <Compile Include="Events\EventCapturingInterface.xaml.cs">
+      <DependentUpon>EventCapturingInterface.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Events\VisualEventSettings.xaml.cs">
+      <DependentUpon>VisualEventSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Events\OccupancyVisualEventSetting.cs" />
+    <Compile Include="Data\Visualization\SpatialDataPropertySetting.xaml.cs">
+      <DependentUpon>SpatialDataPropertySetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Miscellaneous\ExceptionReportExtension.cs" />
+    <Compile Include="Geometry\Trail.cs" />
+    <Compile Include="Miscellaneous\IntegrationMode.cs" />
+    <Compile Include="IsovistUtility\IsovistVisualization\AgentRouteParameterSetting.xaml.cs">
+      <DependentUpon>AgentRouteParameterSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Agents\OptionalScenario\Visualization\AgentBarrierVisualHost.cs" />
+    <Compile Include="Agents\OptionalScenario\Visualization\OptionalScenarioAnimationVisualHost.cs" />
+    <Compile Include="CellularEnvironment\CellUtility.cs" />
+    <Compile Include="CellularEnvironment\GetCellValue\IndexEdgeNode.cs" />
+    <Compile Include="CellularEnvironment\WeightedIndex.cs" />
+    <Compile Include="IsovistUtility\CellularIsovistCalculator.cs" />
+    <Compile Include="Optimization\Variable.cs" />
+    <Compile Include="Optimization\SimulatedAnnealingSolver.cs" />
+    <Compile Include="Visualization3D\MeshGeometry3DToContours.cs" />
+    <Compile Include="Visualization\ColorCodePolicy.cs" />
+    <Compile Include="Visualization\DebugReporter.xaml.cs">
+      <DependentUpon>DebugReporter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellularEnvironment\GetCellValue\DataCell.xaml.cs">
+      <DependentUpon>DataCell.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellularEnvironment\GetCellValue\DataValue.xaml.cs">
+      <DependentUpon>DataValue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Function.cs" />
+    <Compile Include="Data\CostFormulaSet\InterpolationFormulaSet.xaml.cs">
+      <DependentUpon>InterpolationFormulaSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Visualization\SetSpatialDataFieldCost.xaml.cs">
+      <DependentUpon>SetSpatialDataFieldCost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CostFormulaSet\TextFormulaSet.xaml.cs">
+      <DependentUpon>TextFormulaSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CostFormulaSet\VisualizeFunction.xaml.cs">
+      <DependentUpon>VisualizeFunction.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SpatialDataField.cs" />
+    <Compile Include="Data\Visualization\AddDataField.xaml.cs">
+      <DependentUpon>AddDataField.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FieldUtility\Visualization\GenerateActivityVisualHost.cs" />
+    <Compile Include="Data\Visualization\ManualAddSpatialData.cs" />
+    <Compile Include="Geometry\Polyline.cs" />
+    <Compile Include="IsovistUtility\AgentEscapeRoutes.cs" />
+    <Compile Include="IsovistUtility\IsovistEscapeRoutes.cs" />
+    <Compile Include="IsovistUtility\IsovistVisualization\SimplifiedEspaceRouteSetting.xaml.cs">
+      <DependentUpon>SimplifiedEspaceRouteSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OSMDocument.xaml.cs">
+      <DependentUpon>OSMDocument.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Visualization3D\SpatialDataToMesh.cs" />
+    <Compile Include="Visualization3D\FaceIndices.cs" />
+    <Compile Include="Visualization3D\VisualizerHost3D.xaml.cs">
+      <DependentUpon>VisualizerHost3D.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Visualization3D\SelectDataFor3DVisualization.xaml.cs">
+      <DependentUpon>SelectDataFor3DVisualization.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellularEnvironment\Cell.cs" />
+    <Compile Include="CellularEnvironment\CellularFloor.cs" />
+    <Compile Include="CellularEnvironment\CellularFloorBaseGeometry.cs" />
+    <Compile Include="CellularEnvironment\EdgeGlobalAddress.cs" />
+    <Compile Include="CellularEnvironment\Enums.cs" />
+    <Compile Include="CellularEnvironment\Index.cs" />
+    <Compile Include="CellularEnvironment\Interval.cs" />
+    <Compile Include="CellularEnvironment\Ray.cs" />
+    <Compile Include="CellularEnvironment\ResultOfIntersection.cs" />
+    <Compile Include="Interoperability\BIM_To_OSM_Base.cs" />
+    <Compile Include="Interoperability\I_OSM_To_BIM.cs" />
+    <Compile Include="FieldUtility\Enums.cs" />
+    <Compile Include="Geometry\UV.cs" />
+    <Compile Include="Geometry\UVLine.cs" />
+    <Compile Include="IsovistUtility\IsovistVisualization\BoundarySetting.xaml.cs">
+      <DependentUpon>BoundarySetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="IsovistUtility\IsovistVisualization\ProxemicsVisualHost.cs" />
+    <Compile Include="JustifiedGraph\JustifiedGraph.cs" />
+    <Compile Include="JustifiedGraph\Visualization\ConvexSpace.cs" />
+    <Compile Include="FieldUtility\Visualization\PathVisualHost.cs" />
+    <Compile Include="JustifiedGraph\Visualization\DrawJG.cs" />
+    <Compile Include="JustifiedGraph\Visualization\JustifiedGraphVisualHost.xaml.cs">
+      <DependentUpon>JustifiedGraphVisualHost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Visualization\BrushPicker.xaml.cs">
+      <DependentUpon>BrushPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellularEnvironment\Map.cs" />
+    <Compile Include="Data\ImportData\DataImportInterface.xaml.cs">
+      <DependentUpon>DataImportInterface.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FieldUtility\Visualization\FieldSelection.xaml.cs">
+      <DependentUpon>FieldSelection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Visualization\GetNumber.xaml.cs">
+      <DependentUpon>GetNumber.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="IsovistUtility\Isovist.cs" />
+    <Compile Include="IsovistUtility\IsovistVisualization\CellularVisualHost.cs" />
+    <Compile Include="IsovistUtility\IsovistVisualization\PolygonalIsovistVisualHost.cs" />
+    <Compile Include="Data\ImportData\ParseCVS.cs" />
+    <Compile Include="FieldUtility\Activity.cs" />
+    <Compile Include="FieldUtility\Visualization\GenerateActivityInterface.xaml.cs">
+      <DependentUpon>GenerateActivityInterface.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Data\Visualization\SpatialDataFieldSelection.xaml.cs">
+      <DependentUpon>SpatialDataFieldSelection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Visualization\DataVisualizerHost.xaml.cs">
+      <DependentUpon>DataVisualizerHost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Visualization\SelectDataFor2DVisualization.xaml.cs">
+      <DependentUpon>SelectDataFor2DVisualization.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FieldUtility\Visualization\GradiantFieldVisualHost.cs" />
+    <Compile Include="FieldUtility\Visualization\GradiantVisualHost.cs" />
+    <Compile Include="Visualization\GetNumberSlider.xaml.cs">
+      <DependentUpon>GetNumberSlider.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Visualization\ScenelVisualHost.cs" />
+    <Compile Include="Miscellaneous\WPFValueConverters.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cursor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Visualization\About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\MandatoryScenario\Visualization\EditMandatoryScenario.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\MandatoryScenario\Visualization\GenerateSequenceUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\MandatoryScenario\Visualization\MandatoryScenarioTraining.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\MandatoryScenario\Visualization\RealTimeMandatoryNavigationControler.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\MandatoryScenario\Visualization\VisualizeSequence.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\MandatoryScenario\Visualization\SelectAnActivity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\Visualization\AgentTrailVisualization\SetTrail.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\Visualization\WalkingTrailData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\OptionalScenario\Visualization\OptionalScenarioTraining.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Agents\OptionalScenario\Visualization\RealTimeFreeNavigationControler.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\FrequencyVisualizer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\GuassianFilterUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\ParameterSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\SpatialDataControlPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Statistics\BoxPlot.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\DataDescriptionAndComparison.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Statistics\DataStatVisualHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Events\EventCapturingInterface.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Events\VisualEventSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\SpatialDataPropertySetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FieldUtility\Visualization\EditPotentialFieldsUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="IsovistUtility\IsovistVisualization\AgentRouteParameterSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellularEnvironment\GetCellValue\DataCell.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CellularEnvironment\GetCellValue\DataValue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Data\CostFormulaSet\InterpolationFormulaSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\SetSpatialDataFieldCost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\CostFormulaSet\TextFormulaSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\CostFormulaSet\VisualizeFunction.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Visualization\DebugReporter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\AddDataField.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="IsovistUtility\IsovistVisualization\SimplifiedEspaceRouteSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OSMDocument.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Visualization3D\VisualizerHost3D.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Visualization3D\SelectDataFor3DVisualization.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="IsovistUtility\IsovistVisualization\BoundarySetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="JustifiedGraph\Visualization\JustifiedGraphVisualHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Visualization\BrushPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\ImportData\DataImportInterface.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FieldUtility\Visualization\FieldSelection.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Visualization\GetNumber.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FieldUtility\Visualization\GenerateActivityInterface.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Data\Visualization\SpatialDataFieldSelection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\DataVisualizerHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Data\Visualization\SelectDataFor2DVisualization.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Visualization\GetNumberSlider.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

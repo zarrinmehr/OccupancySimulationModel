@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="SpatialAnalysis.CellularEnvironment.GetCellValue.DataValue"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="24" Width="246">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <TextBlock Name="DataName" Text="Data Name:" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left"
+                    FontWeight="SemiBold"></TextBlock>
+        <TextBlock Name="Value" Text="data value:" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"></TextBlock>
+    </Grid>
+</UserControl>

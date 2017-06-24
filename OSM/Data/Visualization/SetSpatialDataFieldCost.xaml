@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="SpatialAnalysis.Data.Visualization.SetSpatialDataFieldCost"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="23" d:DesignWidth="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Orientation="Horizontal">
+            <CheckBox Name="_include" Margin="15,0,3,0" VerticalAlignment="Center" Checked="_include_Checked" 
+                      Unchecked="_include_Unchecked"></CheckBox>
+            <TextBlock Name="_spatialDataFieldName" Text="Spatial Data Field Name" VerticalAlignment="Center" 
+                       Margin="3,0,0,0"></TextBlock>
+        </StackPanel>
+        
+        <ComboBox Grid.Column="1" Name="_method" AllowDrop="True" ></ComboBox>
+        <Button Name="_vis" Grid.Column="2" Content="Visualize" Margin="0,0,2,0"></Button>
+        
+        
+        
+    </Grid>
+</UserControl>

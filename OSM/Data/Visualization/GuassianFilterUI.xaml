@@ -1,0 +1,92 @@
+﻿<Window x:Class="SpatialAnalysis.Data.Visualization.GaussianFilterUI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        ShowInTaskbar="False" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Width="518">
+    <Window.Resources>
+        <sys:Double x:Key="width">100</sys:Double>
+        <sys:Double x:Key="height_F">25</sys:Double>
+        <sys:Double x:Key="height">22</sys:Double>
+        <Thickness x:Key="margin">2,0,5,5</Thickness>
+        <Thickness x:Key="textMargin">0,4,3,0</Thickness>
+        <Thickness x:Key="astristicMarggin">0,4,0,0</Thickness>
+    </Window.Resources>
+    <StackPanel>
+        <DockPanel Height="40">
+            <TextBlock FontSize="20" FontWeight="Bold" Text ="Smoothen Data" 
+                    HorizontalAlignment="Center" VerticalAlignment="Center" ></TextBlock>
+        </DockPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.3*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="{StaticResource margin}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="12"></ColumnDefinition>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="*" Grid.Row="0" Margin="{StaticResource astristicMarggin}" 
+                               FontWeight="DemiBold" FontSize="16"
+                               VerticalAlignment="Top" HorizontalAlignment="Center"></TextBlock>
+                    <TextBlock Text="*" Grid.Row="1" Margin="{StaticResource astristicMarggin}" 
+                               FontWeight="DemiBold" FontSize="16"
+                               VerticalAlignment="Top" HorizontalAlignment="Center"></TextBlock>
+                    <TextBlock Text="*" Grid.Row="2" Margin="{StaticResource astristicMarggin}" 
+                               FontWeight="DemiBold" FontSize="16"
+                               VerticalAlignment="Top" HorizontalAlignment="Center"></TextBlock>
+                    <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Margin="{StaticResource textMargin}">
+                        The Gaussian filter will be clipped by the field of visibility (isovist) of each cell.
+                    </TextBlock>
+                    <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" Margin="{StaticResource textMargin}">
+                        The cells that are not present in the data will be considered as visual barriers.
+                    </TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="1" TextWrapping="Wrap" Margin="{StaticResource textMargin}">
+                            The standard deviation of the Gaussian distribution will be calculated so that the weighting factor at the given range becoms smaller than 0.00001
+                    </TextBlock>
+                </Grid>
+
+                <GroupBox Margin="0,5,0,0">
+                    <GroupBox.Header>
+                        <TextBlock Text="Name of Filtered Data" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <TextBox Name="_name" Height="{StaticResource height}"></TextBox>
+                </GroupBox>
+                <GroupBox >
+                    <GroupBox.Header>
+                        <TextBlock Text="Gaussian Filter" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        
+                        <DockPanel Height="{StaticResource height_F}">
+                            <TextBlock Text="Neighborhood Size: " VerticalAlignment="Center" ></TextBlock>
+                            <TextBox Text="7" Name="_range" Width="{StaticResource width}" Height="{StaticResource height}"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"></TextBox>
+                        </DockPanel>
+                    </StackPanel>
+                </GroupBox>
+                <DockPanel Height="{StaticResource height_F}" Margin="15,10,15,10">
+                    <Button Name="_apply" Content="Apply" Width="{StaticResource width}" Height="{StaticResource height}"
+                                 HorizontalAlignment="Left" VerticalAlignment="Center"></Button>
+                    <Button Name="_cancel" Content="Cancel" Width="{StaticResource width}" Height="{StaticResource height}"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"></Button>
+                </DockPanel>
+            </StackPanel>
+
+            <GroupBox Grid.Column="1" Margin="0,0,5,5">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="DemiBold">Select Data to Filter</TextBlock>
+                </GroupBox.Header>
+                <ListBox Name="dataNames" SelectionMode="Single" Height="260"></ListBox>
+            </GroupBox>
+        </Grid>
+    </StackPanel>
+</Window>

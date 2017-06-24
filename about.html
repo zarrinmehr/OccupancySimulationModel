@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>About OSM</title>
+<style>
+h2{
+	margin-bottom:0pt;
+}
+p{
+	margin-top:0pt;
+}
+</style>
+</head>
+
+<body>
+<h1 align=center style='margin-bottom:5pt;text-align:center'>
+	Occupancy Simulation Model
+</h1>
+
+<p align=center style='margin-top:0in;text-align:center'>
+	<span style='font-weight:normal;mso-bidi-font-weight: bold; font-size:20pt; color:#444444;'>
+		SAIED ZARRINMEHR
+	</span>
+</p>
+
+<h2>What is OSM</h2>
+<p>
+Occupancy Simulation Model (OSM) is a software package for the simulation, visualization and 
+evaluation of occupancy scenarios. Specifically, it is composed of 
+Mandatory Occupancy Scenario Model (MOSM) and Optional Occupancy Scenario Model (OOSM).  
+OSM is an under development project that uses an Agent-Based 
+Model (ABM) to simulate building occupants and their unique preferences 
+as well as a rich 3D model (either BIM or CAD) to represent the built environment.
+ From this perspective it is similar to force-based crowd simulation models. The difference is 
+that OSM is not concerned with safety and mainly focuses on evaluation 
+of occupants&rsquo; experiences during occupancy scenarios. An agent in OSM is also smarter 
+that the agents in most crowd simulation models in several ways. Instead of merely trying 
+to avoid collisions with barriers and other agents or becoming engaged in rudimentary 
+scenarios, in OSM an agent can react to environmental qualities and visual events. An agent 
+can also be parametrically tuned to mimic the behavior of a human in real buildings. 
+OSM utilizes Discrete-Event Simulation (DES) for modeling mandatory occupancy scenarios. After training, 
+an agent in OSM can collect information of hours of occupancy scenario. This information 
+can then be subjected to visual, sequential and spatial query to create a scientific foundation 
+for evaluation and comparison of design alternatives. In summary, OSM can help designers understand the 
+impact of their design decisions on the occupants at the post-occupancy phase to make their  
+decisions more informed. 
+</p>
+<p>
+OSM also offers functionalities for visibility analysis including efficient calculation 
+of polygonal and cellular visibility fields (i.e. isovists) from vantage points, 
+calculation of visibility area from specified areas, proxemics analysis, and extraction of Justified Graphs (JG) 
+in a semi-automatic way. However, OSM <i>should not be considered</i> 
+as an alternative to existing Space Syntax software such as Depthmap. 
+It also provides a mechanisms for saving and loading spatial data in CSV format. 
+With OSM, occupancy scenarios can be animated and spatial data can be visualized in both 
+2 and 3 dimensions.
+
+</p>
+<p>
+OSM was developed purely in C# programming language. Its programming logic is based on complete separation of 
+simulation engine from visualization engine, which is developed in XAML format using 
+Windows Presentation Foundation (WPF). The source-code is available from 
+<a href="https://github.com/zarrinmehr/OSM">GitHub</a>
+under <a href="https://github.com/zarrinmehr/OSM/blob/master/LICENSE"> MIT License</a>. 
+OSM lays out a fully interoperable framework 
+with BIM and CAD software that can be achieved with providing implementation for an interface 
+and an abstract class. The existing source-code provides examples of their implementations 
+for Autodesk Revit 2017 using its API libraries and can be directly used.
+</p>
+
+<h2>Tutorials</h2>
+<p>
+More information about OSM and its applications can be found in the following link:
+</p>
+<p>LINK TO BE ADDED</p>
+
+
+<h2>Contributors</h2>
+<p>
+This software was developed as a part of Ph.D. dissertation of 
+<a href="https://www.linkedin.com/in/saied-zarrinmehr-8b799557/">Saied Zarrinmehr</a>
+in the Department of Architecture at Texas A&M University. This project was not 
+supported/sponsored by any external funding. 
+OSM was developed with the intellectual support of the following colleagues 
+of mine at<a href="http://bim-sim.org/"> BIMSIM Group</a> in the Ph.D. Program of 
+Architecture and Master's program of Computer Science.
+</p>
+
+<table style="margin-left:25px">
+  <tr>
+	<th align="left" style="font-weight:normal">
+		<a href="https://www.linkedin.com/in/mohammad-rahmani-asl-90440b56">Mohammad Rahmani Asl</a>
+	</th>
+	<th align="left" style="font-weight:normal">
+	</th> 
+	<th align="left" style="font-weight:normal">
+	</th>
+  </tr>
+  <tr>
+	<td>
+		<a href="https://www.linkedin.com/in/chengde-wu-20836862/">Chengde Wu</a>
+	</td>
+	<td>
+	</td> 
+	<td>
+	</td>
+  </tr>
+</table>
+<p>
+OSM also received generous advising and intellectual support from the following professors:
+</p>
+<table style="margin-left:25px">
+  <col width="200">
+  <col width="270">
+  <col width="200">
+  <tr>
+	<th align="left" style="font-weight:normal">
+		Professor <a href="https://www.arch.tamu.edu/directory/people/mclayton/">Mark Clayton</a> 
+	</th>
+	<th align="left" style="font-weight:normal">
+		<i>(Chair of Ph.D. Committee)</i>
+	</th> 
+	<th align="left" style="font-weight:normal">
+		CEO at <a href="https://www.smartreview.biz/home">SMARTreview</a>
+	</th>
+  </tr>
+  <tr>
+	<td>
+		Professor <a href="https://www.arch.tamu.edu/directory/people/wyan/">Wei Yan</a>
+	</td>
+	<td>
+		<i>(Co-Chair of Ph.D. Committee)</i>
+	</td> 
+	<td></td>
+  </tr>
+    <tr>
+	<td>
+		Professor <a href="https://www.arch.tamu.edu/directory/people/gbooth/">Geoffrey Booth</a>
+	</td>
+	<td>
+		<i>(Member of Ph.D. Committee)</i>
+	</td> 
+	<td></td>
+  </tr>
+  <tr>
+	<td>
+		Professor <a href="https://www.arch.tamu.edu/directory/people/kglowacki/">Kevin Glowacki</a>
+	</td>
+	<td></td> 
+	<td></td>
+  </tr>
+</table>
+<h2>Copyright Acknowledgement</h2>
+<p>OSM is developed based on extensive use of the following libraries, which are open-source and 
+publicly available subject to various licensing systems. </p>
+<ul>
+	<li>
+		<b><a href="https://github.com/pieterderycke/Jace">Jace.NET</a></b>
+		is compiled as a DLL and is included in the references of OSM. 
+		This library is available under 
+		<a href="https://github.com/pieterderycke/Jace/blob/master/LICENSE.md">MIT License</a>.
+	</li>
+
+	<li>
+		<b><a href="https://numerics.mathdotnet.com/">Math.NET Numerics</a></b>
+		is compiled as a DLL and is included in the references of OSM. 
+		This library is available under 
+		<a href="https://numerics.mathdotnet.com/License.html">MIT/X11 License</a>.
+	</li>
+
+	<li>
+		<b><a href="https://triangle.codeplex.com/">Triangle.NET: </a></b>
+		Two additional functions were added to the <i>Triangle.NET</i> project. 
+		This library was then compiled as a DLL and is included in the references of OSM.
+		It is available under 
+		<a href="https://triangle.codeplex.com/license">MIT License</a>.
+	</li>
+
+	<li>
+		<b><a href="https://github.com/teichgraf/WriteableBitmapEx/">WriteableBitmapEx</a></b>
+		is compiled as a DLL and is included in the references of OSM. 
+		This library is available under 
+		<a href="https://github.com/teichgraf/WriteableBitmapEx/blob/master/LICENSE">MIT/X11 License</a>.
+	</li>
+
+	<li>
+		<b><a href="http://www.angusj.com/delphi/clipper.php">Clipper Library</a></b>
+		is compiled as a DLL and is included in the references of OSM. 
+		This library is available under 
+		<a href="http://www.boost.org/LICENSE_1_0.txt">Boost Software License</a>.
+	</li>
+
+	<li>
+		<b><a href=" https://www.codeproject.com/Articles/97871/WPF-simple-zoom-and-drag-support-in-a-ScrollViewer">WPF 
+		simple zoom and drag support in a ScrollViewer: </a></b>
+		This project is integrated in the OSM's source-code in the following files: 
+		OSMDocument.xaml, OSMDocument.xaml.cs, JustifiedGraphVisualHost.xaml, 
+		and JustifiedGraphVisualHost.xaml.cs. The code also includes notes 
+		(i.e. comments) to give credit to the original developers according 
+		to <a href="https://www.codeproject.com/info/cpol10.aspx"> The Code Project Open License (CPOL) 1.02</a> license.
+
+	</li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,244 @@
+﻿<Window x:Class="SpatialAnalysis.Agents.MandatoryScenario.Visualization.MandatoryScenarioTraining"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                xmlns:local="clr-namespace:SpatialAnalysis.Agents.Visualization.AgentTrailVisualization"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:SpatialAnalysis="clr-namespace:SpatialAnalysis"
+        xmlns:Miscellaneous="clr-namespace:SpatialAnalysis.Miscellaneous"
+        Title="MandatoryScenarioTraining" 
+                SizeToContent="WidthAndHeight"
+                WindowStartupLocation="CenterOwner" 
+        ShowInTaskbar="False"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <Miscellaneous:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter"></Miscellaneous:BoolToFontWeightConverter>
+            <Miscellaneous:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <Miscellaneous:BooleanToBooleanConverter x:Key="BooleanToBooleanConverter"/>
+        <sys:Double x:Key="width">140</sys:Double>
+        <sys:Double x:Key="rowHeight">25</sys:Double>
+        <sys:Double x:Key="boxHeight">24</sys:Double>
+        <Thickness x:Key="textPading">-1</Thickness>
+        <Thickness x:Key="boarderThickness">1.75</Thickness>
+        <Thickness Bottom="-2"  Left="7" Right="0" Top="-2" x:Key="parameterIndention"></Thickness>
+    </Window.Resources>
+    <StackPanel Margin="0,0,10,0">
+        <TextBlock Name="title"  Margin="10,10,10,5"
+			Text="Train Agent for Mandatory Scenario"
+			VerticalAlignment="Center"
+			HorizontalAlignment="Center"
+			TextElement.FontSize="20" 
+			TextElement.FontWeight="Bold"/>
+        <Grid Name="_mainInterface" x:FieldModifier="private" MinWidth="710" Height="315">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.3*"/>
+                <ColumnDefinition Width="1.05*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <GroupBox Margin="5,0,5,0" BorderBrush="Gray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="Simulated Annealing Setting" FontWeight="Bold"/>
+                    </GroupBox.Header>
+                    <StackPanel >
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Number of Iterations"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Left"/>
+                            <TextBox x:Name="_numberOfIterations" x:FieldModifier="private"
+								Text="1000"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Right"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Minimum Temperature"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Left"/>
+                            <TextBox x:Name="_minimumTemperature" x:FieldModifier="private"
+								Text="0"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Right"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Maximum Temperature"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Left"/>
+                            <TextBox x:Name="_maximumTemperature" x:FieldModifier="private"
+								Text="10"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Right"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Margin="5,0,5,0" BorderBrush="Gray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="Time-Step" FontWeight="Bold"/>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <DockPanel Height="{StaticResource rowHeight}" >
+                            <TextBlock Text="Time-Step (Milliseconds)  " VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <TextBox x:Name="_timeStep" Text="17" VerticalAlignment="Center" HorizontalAlignment="Right"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Margin="5,0,5,0" BorderBrush="Gray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="General Cost and Desirability Setting" FontWeight="Bold"/>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Parametrize Data Cost and Desirability"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Left"/>
+                            <Button x:Name="_dataCtrlPanel" x:FieldModifier="private"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Right"
+								Content="Data Control Panel"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock Text="Create and Edit Parameters" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <Button x:Name="_paramCtrlPanel" x:FieldModifier="private"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Right"
+								Content="Parameter Control Panel"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Margin="5,0,5,0" BorderBrush="Gray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="Activity Setting" FontWeight="Bold"/>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <DockPanel Height="{StaticResource rowHeight}">
+                            <TextBlock VerticalAlignment="Center">Neighborhood Range for Potential Field</TextBlock>
+                            <TextBox Name="_neighborhoodRangePotential" Text="5" VerticalAlignment="Center" HorizontalAlignment="Right"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                        <DockPanel Height="{StaticResource rowHeight}" >
+                            <CheckBox Name="_applyFilter" IsChecked="False" VerticalAlignment="Center" Margin="5,0,5,0"></CheckBox>
+                            <TextBlock Text="Apply Gaussian Filter" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <TextBox Name="_gaussianRangeDefault" Text="7" VerticalAlignment="Center" HorizontalAlignment="Right"
+								Padding="{StaticResource textPading}" 
+								Width="{StaticResource width}" 
+								Height="{StaticResource boxHeight}"/>
+                        </DockPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+            <GroupBox Grid.Column="1" BorderBrush="Gray" BorderThickness="{StaticResource boarderThickness}">
+                <GroupBox.Header>
+                    <TextBlock Text="Agent Setting" FontWeight="Bold"/>
+                </GroupBox.Header>
+                <ListBox Width="315">
+                    
+                    
+                    
+                    <TextBlock Text="Physical Setting" FontWeight="DemiBold"/>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_velocityMagnetude" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Velocity Magnetude" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_velocityMagnetude, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_velocityMagnetude, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_accelerationMagnitude" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Destination Seeking Force Magnitude" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_accelerationMagnitude, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_accelerationMagnitude, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_angularVelocity" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Angular Velocity" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_angularVelocity, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_angularVelocity, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_bodySize" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Body Size" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_bodySize, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_bodySize, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_bodyElasticity" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Body Elasticity" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_bodyElasticity, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_bodyElasticity, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <TextBlock Text="Barrier Setting" FontWeight="DemiBold"/>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_barrierRepulsionRange" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Barrier Repulsion Range" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_barrierRepulsionRange, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_barrierRepulsionRange, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_repulsionChangeRate" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Repulsion Change Rate" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_repulsionChangeRate, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_repulsionChangeRate, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_barrierFriction" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Barrier Friction" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_barrierFriction, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_barrierFriction, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_angularDeviationCost" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Angular Deviation Cost" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_angularDeviationCost, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_angularDeviationCost, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                </ListBox>
+            </GroupBox>
+
+        </Grid>
+
+        <StackPanel x:Name="_progressPanel" MaxWidth="700" Margin="10,0,10,0" Visibility="Collapsed">
+            <Grid Margin="10" Width="400">
+                <ProgressBar x:Name="_progressBar" Minimum="0" Value="0" Maximum="100"
+					Height="{StaticResource boxHeight}" 
+					VerticalAlignment="Stretch" 
+					HorizontalAlignment="Stretch"/>
+                <TextBlock x:Name="_progressReport" Text="report" 
+					VerticalAlignment="Center" 
+					HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Best Fitness Value: " FontWeight="Bold" />
+                <TextBlock x:Name="_bestFitnessValue" Text="someValue" Margin="39,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Current Fitness Value: " FontWeight="Bold"/>
+                <TextBlock x:Name="_currentFitnessValue" Text="someValue" Margin="20,0,0,0"/>
+            </StackPanel>
+            <TextBlock Text="Description of Parameters: " FontWeight="Bold"/>
+            <TextBlock x:Name="_updateMessage" Text="MESSEGE" Margin="10,0,0,0"/>
+
+        </StackPanel>
+
+        <Button x:Name="_run_close" x:FieldModifier="private" Margin="10" Content="Run" 
+			Width="{StaticResource width}" 
+			Height="{StaticResource boxHeight}"/>
+
+    </StackPanel>
+</Window>

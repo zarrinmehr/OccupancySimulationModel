@@ -1,0 +1,147 @@
+﻿<Window x:Class="SpatialAnalysis.Visualization3D.VisualizerHost3D"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Title="3D Data Visualizer"  Height="500" Width="800">
+    <Grid Name="MainGrid" ShowGridLines="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="LightGray">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition />
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Viewport3D Name="Visualizer3D" Grid.Row="1" Grid.Column="1" >
+            <Viewport3D.Camera>
+                <!--<PerspectiveCamera x:Name="camera" Position="-15,20,15" LookDirection="20,-15,-10" UpDirection="0,0,1"></PerspectiveCamera>-->
+                <PerspectiveCamera x:Name="camera" Position="15,20,15" LookDirection="-20,-15,-10" UpDirection="0,0,1"></PerspectiveCamera>
+            </Viewport3D.Camera>
+            <ModelVisual3D>
+                <ModelVisual3D.Content>
+                    <Model3DGroup x:Name="AllModels">
+                        <!--<DirectionalLight Color="White" Direction="-1,-1,-3" ></DirectionalLight>-->
+                        <DirectionalLight Color="White" Direction="-1,1,-3"></DirectionalLight>
+                        <GeometryModel3D x:Name="groundModel">
+                            <GeometryModel3D.Geometry>
+                                <MeshGeometry3D x:Name="groundMesh" ></MeshGeometry3D>
+                            </GeometryModel3D.Geometry>
+                            <GeometryModel3D.Material>
+                                <DiffuseMaterial x:Name="groundMeshMaterial" Brush="Gray"></DiffuseMaterial>
+                            </GeometryModel3D.Material>
+                        </GeometryModel3D>
+                    </Model3DGroup>
+                </ModelVisual3D.Content>
+            </ModelVisual3D>
+        </Viewport3D>
+        
+        <Canvas Name="Scene" Grid.Row="1" Grid.Column="1"></Canvas>
+        <Canvas Grid.Row="0" Grid.Column="1"  Background="Gray"></Canvas>
+        <Canvas Grid.Row="2" Grid.Column="1"  Background="Gray"></Canvas>
+        <Slider Name="ZScaler" Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="60,0,0,0" 
+                HorizontalAlignment="Stretch" VerticalAlignment="Center" ></Slider>
+        <TextBlock Name="UIMessage" Foreground="DarkRed" Grid.Row="2" Grid.Column="1" FontWeight="Bold" Margin="10,0,0,0"
+                   HorizontalAlignment="Left" Text="Scale Z" VerticalAlignment="Center"></TextBlock>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
+            <Menu Name="Menues" Background="Gray">
+                <MenuItem Header="Fix Camera Horizen" Click="CameraHorizon_Click"></MenuItem>
+                <MenuItem Header="Data Visualization">
+                    <MenuItem Name="applyColor" Header="Set Color">
+                        <MenuItem Name="setBrush_menu" IsChecked="True" Header="Set Solid Brush" Click="setSurfaceBrush_Click"></MenuItem>
+                        <MenuItem Name="setDataColor_menu" Header="Color-Code Data" Click="setDataColor_Click"></MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="Set Geometry">
+                        <MenuItem Name="geometryType_Menu" Header="Geometry Type">
+                            <MenuItem Name="showGrid_menu" Header="Show Grid" Click="showGrid_Click"></MenuItem>
+                            <MenuItem Name="showContuors_menu" Header="Show Contours" Click="showContours_menu_Click"></MenuItem>
+                            <MenuItem Name="noGeometry_menu" Header="Clear Geometry" IsChecked="True" Click="noGeometryMenu_Click"></MenuItem>
+                        </MenuItem>
+                        <MenuItem Name="geomThickness_menu" Header="Thickness" IsEnabled="False" Click="geomThickness_Click"></MenuItem>
+                        <MenuItem Name="geomBbrush_menu" Header="Brush" IsEnabled="False" Click="goembrush_Click"></MenuItem>
+                        <MenuItem Name="geomTextureRes_menu" Header="Texture Resolution" IsEnabled="False" Click="geomTextureRes_Click"></MenuItem>
+                    </MenuItem>
+
+                    
+                </MenuItem>
+                <MenuItem Header="Import 3D Model" >
+                    <MenuItem Header="Import Model Geometry" Name="importModel" Click="importModel_Click"></MenuItem>
+                    <MenuItem Header="Set Model Brush" IsEnabled="False" Name="setModelGeometryBrush" Click="setModelGeometryBrush_Click"></MenuItem>
+                </MenuItem>
+
+
+            </Menu>
+
+        </StackPanel>
+        
+        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Background="Black">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="18"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="18"/>
+                <RowDefinition Height="18"/>
+                <RowDefinition Height="18"/>
+                
+                
+                <RowDefinition/>
+
+            </Grid.RowDefinitions>
+            <Button Name="chooseData" Grid.Row="0" Content="Select Data" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Height="23" Width="140" Click="chooseData_Click"></Button>
+            <TextBlock Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                       Text="Data Name:" FontWeight="Bold" Foreground="White"></TextBlock>
+            <TextBlock Name="dataName" Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0" 
+                       Foreground="White"></TextBlock>
+            <TextBlock Grid.Row="3" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                       Text="Data Type:" FontWeight="Bold" Foreground="White"></TextBlock>
+            <TextBlock Name="dataType" Grid.Row="4" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0" 
+                       Foreground="White"></TextBlock>
+            <TextBlock Grid.Row="5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                       Text="Maximum Data Value:" FontWeight="Bold" Foreground="White"></TextBlock>
+            <TextBlock Name="maxVal" Grid.Row="6" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0" 
+                       Foreground="White"></TextBlock>
+            <TextBlock Grid.Row="7" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                       Text="Minimum Data Value:" FontWeight="Bold" Foreground="White"></TextBlock>
+            <TextBlock Name="minVal" Grid.Row="8" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0" 
+                       Foreground="White"></TextBlock>
+            <TextBlock Grid.Row="9" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                       Text="Data Vertical Scale:" FontWeight="Bold" Foreground="White"></TextBlock>
+
+            <TextBlock Name="scaledZ" Grid.Row="10" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"
+                        Foreground="White"></TextBlock>
+            <TextBlock Grid.Row="11" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                       Text="Data Vertical Translation:" FontWeight="Bold" Foreground="White"></TextBlock>
+
+
+            <TextBlock Name="translationZ" Grid.Row="12" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"
+                        Foreground="White"></TextBlock>
+
+            <Button Grid.Row="13" Height="23" Width="140" Content="Export data to OBJ" Click="Exporter_Click"></Button>
+            <Button Grid.Row="14" Height="23" Width="140" Content="Export view to PNG" Click="PNGExport_Click"></Button>
+            <TextBlock Grid.Row="15" Text="Navigation Guide" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,0"
+                           FontWeight="Bold" Foreground="DarkRed"></TextBlock>
+            <TextBlock Grid.Row="16"  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"
+                           Text="Pan: Right Click" Foreground="DarkRed"></TextBlock>
+            <TextBlock Grid.Row="17"  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"
+                           Text="Orbit: Shift + Right Click" Foreground="DarkRed"></TextBlock>
+            <TextBlock Grid.Row="18"  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"
+                           Text="Zoom: Mouse Middle Scroll " Foreground="DarkRed"></TextBlock>
+           
+        </Grid>
+    </Grid>
+</Window>

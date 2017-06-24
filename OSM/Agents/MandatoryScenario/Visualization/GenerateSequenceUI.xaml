@@ -1,0 +1,150 @@
+﻿<Window x:Class="SpatialAnalysis.Agents.MandatoryScenario.Visualization.GenerateSequenceUI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:SpatialAnalysis="clr-namespace:SpatialAnalysis"
+        xmlns:Miscellaneous="clr-namespace:SpatialAnalysis.Miscellaneous"
+        
+        ShowInTaskbar="False" SizeToContent ="Height"
+        WindowStartupLocation="CenterOwner"
+        
+        Title="Generate Sequence" Width="410" ResizeMode="NoResize"  >
+    <Window.Resources>
+        <Miscellaneous:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter"></Miscellaneous:BoolToFontWeightConverter>
+            <Miscellaneous:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <Miscellaneous:BooleanToBooleanConverter x:Key="BooleanToBooleanConverter"/>
+        <sys:Double x:Key="width">130</sys:Double>
+        <sys:Double x:Key="height">24</sys:Double>
+        <sys:Double x:Key="addWidth">24</sys:Double>
+        <sys:Double x:Key="addHeight">24</sys:Double>
+        <Thickness x:Key="boarderThickness">1.25</Thickness>
+        <Thickness x:Key="margin">5,5,5,5</Thickness>
+        <Thickness Bottom="-2"  Left="7" Right="0" Top="-2" x:Key="parameterIndention"></Thickness>
+    </Window.Resources>
+    <StackPanel Margin="0,4,4,4">
+        <TextBlock Text="Generate Sequence" Margin="10,10,10,5"
+                   			VerticalAlignment="Center" DockPanel.Dock="Top"
+			HorizontalAlignment="Center"
+			TextElement.FontSize="20" 
+			TextElement.FontWeight="Bold"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <DockPanel>
+                <GroupBox DockPanel.Dock="Top" BorderBrush="DarkGray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="Sequence Name" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <DockPanel LastChildFill="True">
+                        <TextBox DockPanel.Dock="Top" Name="_sequenceName" Width="{StaticResource width}" Height="{StaticResource height}" Margin="{StaticResource margin}"></TextBox>
+                        <TextBlock DockPanel.Dock="Top" Name="_selectedSequenceName" Width="{StaticResource width}" Height="{StaticResource height}" Visibility="Collapsed" Margin="{StaticResource margin}"></TextBlock>
+                        <GroupBox DockPanel.Dock="Bottom">
+                            <GroupBox.Header>
+                                <TextBlock Text="Available Sequences" ></TextBlock>
+                            </GroupBox.Header>
+                            <ListBox Name="_existingSequences" SelectionMode="Single" Height="108"></ListBox>
+                        </GroupBox>
+                    </DockPanel>
+                </GroupBox>
+
+            </DockPanel>
+            <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                <GroupBox BorderBrush="DarkGray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="Include Visual Awareness Field" FontWeight="SemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="{StaticResource margin}">
+                            <CheckBox Name="_includeVisualAwarenessField" VerticalAlignment="Top" Margin="0,2,0,0" IsChecked="False"></CheckBox>
+                            <TextBlock Width="150" TextWrapping="Wrap" Margin="10,0,0,0" FontStyle="Italic">
+                                The sequence will be only triggered 
+                                upon visual contact with the 
+                                assigned areas.</TextBlock>
+                        </StackPanel>
+                        <Button Name="_addVisualAwareness" Width="{StaticResource width}" Height="{StaticResource height}" Margin="{StaticResource margin}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" Content="Assign Visibility" 
+                                IsEnabled="{Binding ElementName=_includeVisualAwarenessField, Path=IsChecked}"></Button>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox BorderBrush="DarkGray" BorderThickness="{StaticResource boarderThickness}">
+                    <GroupBox.Header>
+                        <TextBlock Text="Activation Time interval (Sec)" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <TextBox Name="_activationTime" Width="{StaticResource width}" Height="{StaticResource height}" Margin="{StaticResource margin}">15</TextBox>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+
+        <GroupBox BorderBrush="DarkGray" BorderThickness="{StaticResource boarderThickness}">
+            <GroupBox.Header>
+                <TextBlock Text="Activity Arrangment" FontWeight="SemiBold"></TextBlock>
+            </GroupBox.Header>
+            <Grid Height="220">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="30"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <DockPanel LastChildFill="True">
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <TextBlock Text="Available Activities"></TextBlock>
+                        </GroupBox.Header>
+                        <ListBox Name="_availablePoentialFields" SelectionMode="Single"></ListBox>
+                    </GroupBox>
+                </DockPanel>
+                <DockPanel LastChildFill="True" Grid.Column="2">
+
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <TextBlock Text="Order of Activities Fields"></TextBlock>
+                        </GroupBox.Header>
+                        <ListBox Name="_orderedActivities" SelectionMode="Single"></ListBox>
+                    </GroupBox>
+                </DockPanel>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,20,0,5">
+                    <Button Name="_up" Content="^" Margin="0,0,0,5"
+                        Height="{StaticResource addHeight}"
+                        Width="{StaticResource addWidth}"
+                        ></Button>
+                    <Button Name="_add" Content=">" Margin="0,0,0,5"
+                        Height="{StaticResource addHeight}"
+                        Width="{StaticResource addWidth}"
+                        ></Button>
+                    <Button Name="_remove" Content="&lt;" Margin="0,0,0,5"
+                                                Height="{StaticResource addHeight}"
+                        Width="{StaticResource addWidth}"
+                        ></Button>
+                    <Button Name="_down" 
+                        Height="{StaticResource addHeight}"
+                        Width="{StaticResource addWidth}">
+                        <Button.Content>
+                            <TextBlock Text="^">
+                                <TextBlock.LayoutTransform>
+                                    <RotateTransform Angle="180"></RotateTransform>
+                                </TextBlock.LayoutTransform>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+
+
+
+
+            </Grid>
+        </GroupBox>
+        
+        
+        
+
+        <Button Name="_okay" Content="Generate" Width="{StaticResource width}"
+                            Height="{StaticResource height}" Margin="7"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"></Button>
+
+    </StackPanel>
+    
+</Window>

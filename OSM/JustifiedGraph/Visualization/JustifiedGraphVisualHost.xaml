@@ -1,0 +1,44 @@
+﻿<Window x:Class="SpatialAnalysis.JustifiedGraph.Visualization.JustifiedGraphVisualHost"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:JGViewer = "clr-namespace:SpatialAnalysis.JustifiedGraph.Visualization"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Title="Justified Graph Visual Host" Height="500" Width="800" >
+    <Grid Name="MainGrid" ShowGridLines="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="DarkGray">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="23"/>
+            <RowDefinition />
+            <RowDefinition Height="23"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Name="scrollViewer" Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" >
+            <Grid Name="grid" Width="Auto" Height="Auto" RenderTransformOrigin="0.5,0.5">
+                <Viewbox Name="viewbox" Focusable="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid Name="ViewHolder" Margin="0"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="700" Height="350">
+                        <JGViewer:DrawJG Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="JGVisualizer" Width="Auto" Height="Auto"/>
+                    </Grid>
+                </Viewbox>
+            </Grid>
+        </ScrollViewer>
+        <Canvas Grid.Row="0" Background="Gray"></Canvas>
+        <Canvas Grid.Row="2" Background="Gray"></Canvas>
+        <Slider Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Width="200" Margin="0,0,10,0"
+                Minimum="1" Name="slider" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <ComboBox Name="MovementMode" Grid.Row="2" Width="140" Height="19" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                  Margin="2,0,0,0" Background="Gray" SelectedIndex="0">
+            <TextBlock Text="Move Nodes Horizontally" FontSize="10" ></TextBlock>
+            <TextBlock Text="Move Nodes Freely" FontSize="10" ></TextBlock>
+        </ComboBox>
+
+        <StackPanel Name="MainPanel" Orientation="Horizontal"  Grid.Row="0">
+
+            <Menu Name="Menues" Background="Gray">
+                <MenuItem Name="SaveScene" Header="Entire Scene to PNG" Click="Save_Click"/>
+                <MenuItem Name="SaveVisibleScene" Header="Visible Scene to PNG" Click="SaveVisible_Click"/>
+            </Menu>
+        </StackPanel>
+
+    </Grid>
+</Window>

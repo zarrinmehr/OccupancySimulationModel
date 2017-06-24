@@ -1,0 +1,133 @@
+﻿<Window x:Class="SpatialAnalysis.FieldUtility.Visualization.GenerateFields"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        SizeToContent="Height" Width="474">
+    <Window.Resources>
+        <sys:Double x:Key="width">140</sys:Double>
+        <sys:Double x:Key="height">25</sys:Double>
+        <Thickness x:Key="margin">5,5,5,5</Thickness>
+        <Thickness x:Key="marginBottom">5,0,5,5</Thickness>
+    </Window.Resources>
+    <StackPanel Margin="2,0,2,10">
+        <TextBlock Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0"  TextElement.FontSize="20" 
+                   TextElement.FontWeight="Bold" Text ="Generate New Activity" Margin="10"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" ></TextBlock>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,5,0">
+                <GroupBox BorderThickness="1" BorderBrush="Gray">
+                    <GroupBox.Header>
+                        <TextBlock Text="Activity Engagement Area" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <Button Name="_addPoint" Width="{StaticResource width}" Height="{StaticResource height}" Margin="{StaticResource margin}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" Content="Pick a Cell" ></Button>
+                        <Button Name="_addRegion" Width="{StaticResource width}" Height="{StaticResource height}" 
+                                Margin="{StaticResource margin}"
+                                Content="Create a Region" HorizontalAlignment="Center"></Button>
+                        <Button Name="_addDirection" Width="{StaticResource width}" Height="{StaticResource height}" 
+                                Margin="{StaticResource margin}" IsEnabled="False"
+                                Content="Set Agent's Direction" HorizontalAlignment="Center"></Button>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox BorderThickness="1" BorderBrush="Gray">
+                    <GroupBox.Header>
+                        <TextBlock Text="Navigation Potential Field" FontWeight="SemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel Margin="0,5,0,0">
+                        <GroupBox>
+                            <GroupBox.Header>
+                                <TextBlock Text="Assign desirability to spatial data"></TextBlock>
+                            </GroupBox.Header>
+                            <Button Name="_setCosts" Content="Set Costs" Margin="{StaticResource margin}" 
+                            HorizontalAlignment="Center"
+                            Width="{StaticResource width}" Height="{StaticResource height}" ></Button>
+                        </GroupBox>
+                        <GroupBox>
+                            <GroupBox.Header>
+                                <TextBlock Text="Associate cost to the angular deviation" ></TextBlock>
+                            </GroupBox.Header>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="{StaticResource margin}">
+                                    <CheckBox Name="_includeAngularCost" VerticalAlignment="Top" Margin="0,2,0,0" IsChecked="False"></CheckBox>
+                                    <TextBlock Margin="10,0,0,0">Include</TextBlock>
+                                </StackPanel>
+                                <TextBlock Text="Change Angular Deviation Cost: " Margin="{StaticResource margin}"></TextBlock>
+                                <Button Name="_parameters" Margin="{StaticResource marginBottom}" HorizontalAlignment="Center"
+                                 Width="{StaticResource width}" Height="{StaticResource height}" Content="Update Parameters"
+                                 IsEnabled="{Binding ElementName=_includeAngularCost, Path=IsChecked}"></Button>
+
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox>
+                            <GroupBox.Header>
+                                <TextBlock Text="Neighborhood Range for Potential Field"></TextBlock>
+                            </GroupBox.Header>
+                            <TextBox Text="5" Name="_range" Margin="{StaticResource margin}"
+                             Width="{StaticResource width}" Height="{StaticResource height}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"></TextBox>
+                        </GroupBox>
+                        
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+            <DockPanel Grid.Column="1" Grid.Row="0" LastChildFill="True">
+                <StackPanel DockPanel.Dock="Bottom">
+                    <Button Name="OKAY" Content="Done!"  HorizontalAlignment="Center"
+                            Margin="{StaticResource margin}"
+                            Width="{StaticResource width}" Height="{StaticResource height}"></Button>
+                    <Button Name="CANCEL" Content="Cancel" HorizontalAlignment="Center"
+                            Margin="{StaticResource marginBottom}"
+                            Width="{StaticResource width}" Height="{StaticResource height}"></Button>
+                </StackPanel>
+                <GroupBox DockPanel.Dock="Bottom" BorderThickness="1" BorderBrush="Gray">
+                    <GroupBox.Header>
+                        <TextBlock Text="Engagement Time (Sec)" FontWeight="DemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <DockPanel Margin="{StaticResource margin}">
+                            <TextBlock Text="Min:" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Name="_min" HorizontalAlignment="Right" Text="4"
+                                     Width="{StaticResource width}" Height="{StaticResource height}"></TextBox>
+                        </DockPanel>
+                        <DockPanel Margin="{StaticResource marginBottom}">
+                            <TextBlock Text="Max:" VerticalAlignment="Center"></TextBlock>
+                            <TextBox Name="_max" HorizontalAlignment="Right" Text="6"
+                                     Width="{StaticResource width}" Height="{StaticResource height}"></TextBox>
+                        </DockPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox DockPanel.Dock="Top" BorderThickness="1" BorderBrush="Gray">
+                    <GroupBox.Header>
+                        <TextBlock Text="Name" FontWeight="SemiBold"></TextBlock>
+                    </GroupBox.Header>
+                    <DockPanel LastChildFill="True">
+                        <GroupBox DockPanel.Dock="Top">
+                            <GroupBox.Header>
+                                <TextBlock Text="Name of Engaged Activity"></TextBlock>
+                            </GroupBox.Header>
+                            <TextBox Name="_fieldName" VerticalAlignment="Center" 
+                                HorizontalAlignment="Stretch" Height="{StaticResource height}" Margin="{StaticResource margin}"></TextBox>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Bottom">
+                            <GroupBox.Header>
+                                <TextBlock Text="Names of Existing Activities"></TextBlock>
+                            </GroupBox.Header>
+                            <ListBox Name="_availableFields" Margin="{StaticResource margin}" Height="115"></ListBox>
+                        </GroupBox>
+                    </DockPanel>
+                    
+                </GroupBox>
+            </DockPanel>
+        </Grid>
+    </StackPanel>
+    
+
+</Window>

@@ -1,0 +1,183 @@
+﻿<Window x:Class="SpatialAnalysis.OSMDocument"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local = "clr-namespace:SpatialAnalysis"
+        xmlns:IsovistVisualization = "clr-namespace:SpatialAnalysis.IsovistUtility.IsovistVisualization"
+        xmlns:FieldVisualization = "clr-namespace:SpatialAnalysis.FieldUtility.Visualization"
+        xmlns:Scenes = "clr-namespace:SpatialAnalysis.Visualization"
+        xmlns:JGViewer = "clr-namespace:SpatialAnalysis.JustifiedGraph.Visualization"
+        xmlns:FreeNavigation = "clr-namespace:SpatialAnalysis.Agents.OptionalScenario.Visualization" 
+        xmlns:MandatoryNavigation = "clr-namespace:SpatialAnalysis.Agents.MandatoryScenario.Visualization"
+        xmlns:DataVisualization="clr-namespace:SpatialAnalysis.Data.Visualization"
+        xmlns:Data="clr-namespace:SpatialAnalysis.Data"
+        xmlns:AgentsTraining="clr-namespace:SpatialAnalysis.Agents.Visualization.AgentTrailVisualization"
+        xmlns:Agents="clr-namespace:SpatialAnalysis.Agents"
+        xmlns:Events="clr-namespace:SpatialAnalysis.Events"
+        xmlns:Sequence="clr-namespace:SpatialAnalysis.Agents.MandatoryScenario.Visualization"
+        Height="500" Width="800" Topmost="False" >
+    <Grid Name="MainGrid" ShowGridLines="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="23"/>
+            <RowDefinition />
+            <RowDefinition Height="23"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Name="_scrollViewer" Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Background="DarkGray">
+            <Grid x:Name="_grid" Width="Auto" Height="Auto" RenderTransformOrigin="0.5,0.5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="97*"/>
+                    <ColumnDefinition Width="678*"/>
+                </Grid.ColumnDefinitions>
+                <Viewbox Name="_viewbox" Focusable="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.ColumnSpan="2">
+                    <Grid Name="ViewHolder" Margin="0"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="700" Height="365">
+                        <Scenes:ScenelVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="FieldViewer" Width="Auto" Height="Auto"/>
+                        <Image Name="agentVisiblArea" Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            Width="Auto" Height="Auto"/>
+                        <Image Name="activityVisiblArea" Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            Width="Auto" Height="Auto"/>
+                        <DataVisualization:DataVisualizerHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+                                           x:Name="DataViewer" Width="Auto" Height="Auto"/>
+                        <FieldVisualization:FieldEdgeVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="_fieldEdgeViewer" Width="Auto" Height="Auto"/>
+                        <FreeNavigation:AgentBarrierVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="BarrierBufferVisualizer" Width="Auto" Height="Auto"/>
+                        <IsovistVisualization:CellularVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="CellularViewer" Width="Auto" Height="Auto"/>
+                        <IsovistVisualization:PolygonalIsovistVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="PolygonalIsovistViewer" Width="Auto" Height="Auto"/>
+                        <IsovistVisualization:ProxemicsVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="ProxemicsViewer" Width="Auto" Height="Auto"/>
+                        <FieldVisualization:GradientActivityVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="gradiantFieldViewer" Width="Auto" Height="Auto"/>
+                        <FieldVisualization:GradientVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                      x:Name="gradientViewer" Width="Auto" Height="Auto"/>
+                        <FieldVisualization:PathVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="PathVisualer" Width="Auto" Height="Auto"/>
+                        <DataVisualization:ManualAddDataField Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="DataAdder" Width="Auto" Height="Auto"/>
+                        <FieldVisualization:GenerateActivityVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="FieldAdder" Width="Auto" Height="Auto"/>
+                        <Sequence:SequenceVisibilityEventHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                     x:Name="sequenceVisibilityEventHost" Width="Auto" Height="Auto"/>
+                        <Scenes:ScenelVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="PhysicalBarrierViewer" Width="Auto" Height="Auto"/>
+                        <Events:VisualEventVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="eventSetting" Width="Auto" Height="Auto"/>
+                        <FreeNavigation:OptionalScenarioAnimationVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="freeNavigation" Width="Auto" Height="Auto"/>
+                        <MandatoryNavigation:ActivityAreaVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="activityAreaVisualHost" Width="Auto" Height="Auto"/>
+                        <MandatoryNavigation:MandatoryScenarioAnimationVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="mandatoryNavigation" Width="Auto" Height="Auto"/>
+                        <AgentsTraining:TrailVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="trailVisualization" Width="Auto" Height="Auto"/>
+                        <Scenes:ScenelVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="VisualBarrierViewer" Width="Auto" Height="Auto"/>
+                        <Scenes:ScenelVisualHost Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="GridViewer" Width="Auto" Height="Auto"/>
+                        <Canvas Grid.Row="0" Grid.Column="0" Margin="0"  HorizontalAlignment="Stretch" Name="FloorScene" 
+                                                VerticalAlignment="Stretch" Width="Auto" Height="Auto" />
+                        <JGViewer:ConvexSpace Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                            x:Name="JGViewer" Width="Auto" Height="Auto"/>
+                    </Grid>
+                </Viewbox>
+            </Grid>
+        </ScrollViewer>
+        <!--Background Setting only-->
+        <!--<Canvas Grid.Row="0" Background="Gray"></Canvas>-->
+        <Canvas Grid.Row="2" Background="Gray"></Canvas>
+        <TextBlock Name="UIMessage" Foreground="DarkRed" Grid.Row="2" FontWeight="Bold" Margin="10,0,0,0"
+                   HorizontalAlignment="Left" Text="UI Message" VerticalAlignment="Center"></TextBlock>
+        <Slider Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Width="200" Margin="0,0,10,0"
+                Minimum="1" Name="slider" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+
+        <StackPanel Orientation="Horizontal"  Grid.Row="0" Background="Gray">
+            <Button Name="CommandReset" Width="23" Background="Gray">
+                <Image Name="MouseBtn" Source="Resources/cursor.png" ></Image>
+            </Button>
+            <Menu Name="Menues" Background="Gray">
+                <MenuItem Name="gridSetting" Header="Grid" Width="Auto" Click="SetGridSize_Click"/>
+                <MenuItem Header="Numerical Setting" Visibility="Collapsed">
+                    
+                    <MenuItem Header="Integration Mode">
+                        <MenuItem Name="_eulerForward" Header="Euler Forward" IsChecked="True" Click="eulerForward_Click"></MenuItem>
+                        <MenuItem Name="_RK4" Header="Runge–Kutta 4" Click="RK4_Click"></MenuItem>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Name="DataManagement" Header="Spatial Data" Width="Auto" IsEnabled="False" >
+                    <MenuItem Name="Import" Header="Import" Width="Auto" Click="import_Click"></MenuItem>
+                    <MenuItem Name="Export" Header="Export" Width="Auto" Click="export_Click" ></MenuItem>
+                    <Separator/>
+                    <MenuItem Name="_createNewSpatialDataField" Header="Create Spatial Data Field"></MenuItem>
+                    <MenuItem Name="RemoveSpatialDataField" Header="Remove Spatial Data Field" Click="removeData_Click"></MenuItem>
+                    <Separator />
+                    
+                    <MenuItem Name="SmoothenData" Header="Smoothen Data" Click="smoothenData_Click"></MenuItem>
+                    <Separator />
+                    <MenuItem Name="GetData" IsEnabled="False" Header="Get Cell Data" Click="getCoord_Click"></MenuItem>
+                    <MenuItem Name="_dataStats" Header="Data Description and Comparison" Click="dataStats_Click"></MenuItem>
+                    <Separator />
+                    <MenuItem Name="_dataControlPanel"  Click="dataControlPanel_Click">
+                        <MenuItem.Header>
+                            <TextBlock FontWeight="Bold" FontStyle="Italic" >Data Control Panel</TextBlock>
+                        </MenuItem.Header>
+                    </MenuItem>
+                    <MenuItem Name="_parameterSetting" Header="Parameter Setting" Click="parameterSetting_Click"></MenuItem>
+                    <Separator />
+                    <MenuItem Name="_reverseColorCode" Header="Reverse Color Code" Click="_reverseColorCode_Click"></MenuItem>
+                    <MenuItem Name="Data3DVisualizer" Header="3D Visualization" Click="data3DVisualizer_Click"></MenuItem>
+                </MenuItem>
+
+                <MenuItem Name="ViewUtil" Header="View" Width="Auto">
+                    <!--will be addded in the code-->
+                    <MenuItem Header="Save Scene" Width="Auto">
+                        <MenuItem Name="SaveScene" Header="Entire Scene to PNG" Click="Save_Click"/>
+                        <MenuItem Name="SaveVisibleScene" Header="Visible Scene to PNG" Click="SaveVisible_Click"/>
+                    </MenuItem>
+                    <Separator />
+                </MenuItem>
+                <MenuItem Name="OptionalScenarios" IsEnabled="False" Header="Optional Scenario">
+                    <MenuItem Name="barrierBuffer" Header="Set Barrier Buffer" Click="barrierBuffer_Click"></MenuItem>
+                    <MenuItem Name="_calculatePossibleDestinations" IsEnabled="False" Header="Calculate Possible Destinations" Click="calculatePossibleDestinations_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Name="_activities" Header="Activity" IsEnabled="False">
+                    <MenuItem Name="ActiveFieldName" Header="Choose Active Field"></MenuItem>
+                    <MenuItem Header="Gradient Interpolation Setting">
+                        <MenuItem Name="InterpolationRange" Header="Interpolation Range" Click="interpolationRange_Click"></MenuItem>
+                        <MenuItem Name="InterpolationMethod" Header="Interpolation Method" >
+                            <MenuItem Name="Linear" Header="Linear Spline" IsChecked="False" Click="interpolation_Click"></MenuItem>
+                            <MenuItem Name="CubicSpline" Header="Cubic Spline" IsChecked="True" Click="interpolation_Click"></MenuItem>
+                        </MenuItem>
+                    </MenuItem>
+
+                </MenuItem>
+                <MenuItem Name="MandatoryScenario" IsEnabled="False" Header="Mandatory Scenario">
+                    <MenuItem Name="_creScenario" Header="Edit Scenario" Click="editScenario_Click"></MenuItem>
+                    <MenuItem Name="_visualizeSequence" Header="Visualize Sequence" Click="visualizeSequence_Click"/>
+                    </MenuItem>
+                <MenuItem Name="IsovistMenu" Header="Isovist" Width="Auto" IsEnabled="False">
+                    <MenuItem Name="DepthOfView" Header="Set Depth Of Isovist" Click="depthOfView_Click"/>
+                    <MenuItem Name="barrierTypeMenu" Header="Isovist Barrier Type">
+                        <MenuItem Header="Visual Barriers" IsCheckable="True" IsChecked="True" Click="barrierType_Click"></MenuItem>
+                        <MenuItem Header="Physical Barriers" IsCheckable="True" IsChecked="False" Click="barrierType_Click"></MenuItem>
+                        <MenuItem Header="Field Edges" IsCheckable="True" IsChecked="False" Click="barrierType_Click"></MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="Visualization Environment">
+                        <MenuItem Name="SceneEnv" Header="OSM" IsChecked="True" FontWeight="Bold" Click="SceneEnv_Click"/>
+                        <MenuItem Name="RevitEnv" Header="BIM" IsChecked="False" Click="RevitEnv_Click" />
+                    </MenuItem>
+                    <MenuItem Name="IsovistInfo" Header="Isovist Information" Click="isovistInfo_Click"/>
+                </MenuItem>
+                <!--for debug purposes this menu can be activated and the code can be trigerred with debug_Click event-->
+
+                <MenuItem Header="Debug" Click="debug_Click" Visibility="Collapsed"></MenuItem>
+                <!--<MenuItem Header="About" Click="about_Clicked"></MenuItem>-->
+            </Menu>
+
+        </StackPanel>
+
+    </Grid>
+</Window>

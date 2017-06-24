@@ -1,0 +1,32 @@
+﻿<Window x:Class="SpatialAnalysis.IsovistUtility.IsovistVisualization.BoundarySetting"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Title="Boundary Setting" Height="260" Width="195">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1.5*"/>
+
+
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width ="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock TextElement.FontSize="20" TextElement.FontWeight="Bold" Name="title" Text="Set Proximity" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+        <TextBlock Text="Raduis 1" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <TextBox Text="1.50" Grid.Row="1" Grid.Column="1" Height="23" HorizontalAlignment= "Left" Margin="10,0,0,0" Name="R1Text" VerticalAlignment="Center" Width="50" />
+        <TextBlock Text="Raduis 2" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <TextBox Text="4.00" Grid.Row="2" Grid.Column="1" Height="23" HorizontalAlignment= "Left" Margin="10,0,0,0" Name="R2Text" VerticalAlignment="Center" Width="50" />
+        <TextBlock Text="Raduis 3" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <TextBox Text="12.00" Grid.Row="3" Grid.Column="1" Height="23" HorizontalAlignment= "Left" Margin="10,0,0,0" Name="R3Text" VerticalAlignment="Center" Width="50" />
+        <TextBlock Text="Raduis 4" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <TextBox Text="25.00" Grid.Row="4" Grid.Column="1" Height="23" HorizontalAlignment= "Left" Margin="10,0,0,0" Name="R4Text" VerticalAlignment="Center" Width="50" />
+        <Button Name="Done" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Content="Set" HorizontalAlignment="Center" VerticalAlignment="Center" Height="23" Width="120"/>
+    </Grid>
+</Window>
