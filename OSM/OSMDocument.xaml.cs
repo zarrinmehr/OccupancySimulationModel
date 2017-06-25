@@ -1673,8 +1673,7 @@ namespace SpatialAnalysis
         {
             About about = new About();
             about.Owner = this;
-            Uri address = new Uri("https://rawgit.com/zarrinmehr/OSM/master/about.html");
-            
+            Uri address = new Uri("https://rawgit.com/zarrinmehr/OccupancySimulationModel/master/about.html");
             about.html_Page.Source = address;
             about.ShowDialog();
         }
