@@ -24,8 +24,6 @@ SOFTWARE.
 */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -33,9 +31,6 @@ using System.Windows.Input;
 using SpatialAnalysis.Geometry;
 using SpatialAnalysis.CellularEnvironment;
 using System.Windows.Shapes;
-using SpatialAnalysis.Agents.Visualization.AgentModel;
-using System.Windows.Media.Imaging;
-using SpatialAnalysis.Interoperability;
 using System.Windows.Threading;
 using System.Threading;
 using System.Windows.Media.Media3D;
@@ -178,6 +173,7 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
 
         void _settings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            this.stopAnimation();
             if (this.agent != null)
             {
                 this.cleanUpAgent();
@@ -715,25 +711,7 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
         }
         void _initStop_Click(object sender, RoutedEventArgs e)
         {
-            this._host.FreeNavigationAgentCharacter = FreeNavigationAgent.Create(this.agent.CurrentState);// new FreeNavigationAgent(this.agent);
-            this._getWalkingTrailDataMenu.IsEnabled = true;
-            this._settings._walkThrough.IsEnabled = false;
-            this._settings._walkThrough.IsChecked = false;
-            this._settings._walkThrough.Checked -= _walkThrough_Checked;
-            this._settings._walkThrough.Unchecked -= _walkThrough_Unchecked;
-            this._settings._hide.Visibility = System.Windows.Visibility.Collapsed;
-            this._settings._hide.Click -= _hide_Click;
-            this._settings.init_Title.Text = "Start Animation";
-            this.agent.StopAnimation();
-            this._settings._init.Click += _initStart_Click;
-            this._settings._init.Click -= _initStop_Click;
-            this._animationInProgress = false;
-            //double total = 0;
-            //foreach (var item in this.agent.TimeSteps)
-            //{
-            //    total += item;
-            //}
-            //MessageBox.Show("Avarage timestep: " + (total / agent.TimeSteps.Count).ToString());
+            this.stopAnimation();
             var reporter = new SpatialAnalysis.Visualization.DebugReporter();
             reporter.AddReport(VisualAgentOptionalScenario.Debuger.ToString());
             VisualAgentOptionalScenario.Debuger.Clear();
@@ -742,6 +720,25 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
 
         }
 
+        public void stopAnimation()
+        {
+            if (this._animationInProgress)
+            {
+                this._host.FreeNavigationAgentCharacter = FreeNavigationAgent.Create(this.agent.CurrentState);// new FreeNavigationAgent(this.agent);
+                this._getWalkingTrailDataMenu.IsEnabled = true;
+                this._settings._walkThrough.IsEnabled = false;
+                this._settings._walkThrough.IsChecked = false;
+                this._settings._walkThrough.Checked -= _walkThrough_Checked;
+                this._settings._walkThrough.Unchecked -= _walkThrough_Unchecked;
+                this._settings._hide.Visibility = System.Windows.Visibility.Collapsed;
+                this._settings._hide.Click -= _hide_Click;
+                this._settings.init_Title.Text = "Start Animation";
+                this.agent.StopAnimation();
+                this._settings._init.Click += _initStart_Click;
+                this._settings._init.Click -= _initStop_Click;
+                this._animationInProgress = false;
+            }
+        }
 
         private void updateCamera()
         {
@@ -754,6 +751,7 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
         // clear agent and the events related to it
         private void _clearAgent_Click(object sender, RoutedEventArgs e)
         {
+            this.stopAnimation();
             this.cleanUpAgent();
         }
 
