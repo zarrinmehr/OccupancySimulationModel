@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>OSM_Revit</Name>
+    <Assembly>OSM\OSM_Revit.dll</Assembly>
+    <AddInId>4c2c23e7-56bd-445f-a57f-ff42105bb6e1</AddInId>
+    <FullClassName>OSM_Revit.OSM_Revit_Panel</FullClassName>
+    <VendorId>szarinmehr@gmail.com</VendorId>
+    <VendorDescription>Developed by Saied Zarrinmehr</VendorDescription>
+  </AddIn>
+</RevitAddIns>

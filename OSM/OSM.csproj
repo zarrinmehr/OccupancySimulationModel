@@ -60,16 +60,36 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ClipperLib">
-      <HintPath>..\..\..\..\..\Downloads\clipper_library\bin\Release\ClipperLib.dll</HintPath>
+      <HintPath>..\CompiledReferences\ClipperLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Jace, Version=0.8.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Downloads\Jace-master\Jace\bin\Release\Jace.dll</HintPath>
+    <Reference Include="Jace">
+      <HintPath>..\CompiledReferences\Jace.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MathNet.Numerics">
-      <HintPath>..\..\..\..\..\Downloads\Dependencies 9-29-2016\mathnet-numerics-master\out\lib-signed\Net4.5.2\MathNet.Numerics.dll</HintPath>
+      <HintPath>..\CompiledReferences\MathNet.Numerics.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualC" />
     <Reference Include="System" />
@@ -91,11 +111,13 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Triangle">
-      <HintPath>..\..\OSM dependency libraries\Triangulation\Triangle.NET\Triangle\bin\Release\Triangle.dll</HintPath>
+      <HintPath>..\CompiledReferences\Triangle.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="WriteableBitmapEx.Wpf">
-      <HintPath>..\..\OSM55\OSM55\bin\Debug\WriteableBitmapEx.Wpf.dll</HintPath>
+      <HintPath>..\CompiledReferences\WriteableBitmapEx.Wpf.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -534,6 +556,14 @@
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /E /Y "$(SolutionDir)OSM_Revit\$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"
+xcopy /E /Y "$(ProjectDir)$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

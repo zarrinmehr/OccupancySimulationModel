@@ -35,9 +35,28 @@
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ClipperLib">
-      <HintPath>..\OSM\bin\Release\ClipperLib.dll</HintPath>
+      <HintPath>..\CompiledReferences\ClipperLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPI">
       <HintPath>..\..\..\..\..\..\..\Program Files\Autodesk\Revit 2019\RevitAPI.dll</HintPath>
@@ -111,9 +130,18 @@
     <ProjectReference Include="..\OSM\OSM.csproj">
       <Project>{a5df304c-f73f-44c0-8f85-3acde0f33e5d}</Project>
       <Name>OSM</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /E /Y "$(SolutionDir)OSM\$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"
+xcopy /E /Y "$(ProjectDir)$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
