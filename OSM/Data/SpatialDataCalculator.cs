@@ -92,7 +92,7 @@ namespace SpatialAnalysis.Data.Visualization
                 this.Rays.Add(index, weightedIndices);
             }
         }
-        private double getStaticCostOfEdge(Index current, Index next, Dictionary<Cell, double> cost)
+        private double getStaticCostOfEdge(Index current, Index next, double distance_cost_factor, Dictionary<Cell, double> cost)
         {
             Index relativeIndex = next - current;
             WeightedIndex[] indicesAndWeights;
@@ -114,7 +114,7 @@ namespace SpatialAnalysis.Data.Visualization
                     //to account for the cost
                     costValue += item.WeightingFactor * cost[cell];
                     //to account for the distance
-                    costValue += item.WeightingFactor;
+                    costValue += item.WeightingFactor * distance_cost_factor;
                 }
                 else
                 {
@@ -171,6 +171,11 @@ namespace SpatialAnalysis.Data.Visualization
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
             //Calculating static costs
+            double distance_cost_factor = Parameter.DefaultParameters[AgentParameters.MAN_DistanceCost].Value;
+            if (distance_cost_factor < 0)
+            {
+                throw new ArgumentException("Parameter MAN_DistanceCost cannot have a negative value: "+ distance_cost_factor.ToString());
+            }
             Dictionary<Cell, double> costs = this._host.cellularFloor.GetStaticCost();
             #region set the initial potential to positive infinity; define heap and labeled where the potential is zero;
             SortedSet<WeightedIndex> heap = new SortedSet<WeightedIndex>();
@@ -210,7 +215,7 @@ namespace SpatialAnalysis.Data.Visualization
                         !marked[I, J])
                     {
                         var neighborIndex = indices[I, J];
-                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, costs);
+                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, distance_cost_factor, costs);
                         if (edgeCost <= 0)
                         {
                             throw new ArgumentException("Negative cost for edge found: " + edgeCost.ToString() +
@@ -269,6 +274,11 @@ namespace SpatialAnalysis.Data.Visualization
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
             //Calculating static costs
+            double distance_cost_factor = Parameter.DefaultParameters[AgentParameters.MAN_DistanceCost].Value;
+            if (distance_cost_factor < 0)
+            {
+                throw new ArgumentException("Parameter MAN_DistanceCost cannot have a negative value: " + distance_cost_factor.ToString());
+            }
             Dictionary<Cell, double> costs = this._host.cellularFloor.GetStaticCost();
             #region set the initial potential to positive infinity; define heap and labeled where the potential is zero;
             SortedSet<WeightedIndex> heap = new SortedSet<WeightedIndex>();
@@ -303,7 +313,7 @@ namespace SpatialAnalysis.Data.Visualization
                         !marked[I, J])
                     {
                         var neighborIndex = indices[I, J];
-                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, costs);
+                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, distance_cost_factor, costs);
                         if (edgeCost <= 0)
                         {
                             throw new ArgumentException("Negative cost for edge found: " + edgeCost.ToString() +
@@ -376,6 +386,11 @@ namespace SpatialAnalysis.Data.Visualization
             var destinations = new HashSet<Cell> { destination };
             var trailIndices = new HashSet<Index>(trail);
             //Calculating static costs
+            double distance_cost_factor = Parameter.DefaultParameters[AgentParameters.MAN_DistanceCost].Value;
+            if (distance_cost_factor < 0)
+            {
+                throw new ArgumentException("Parameter MAN_DistanceCost cannot have a negative value: " + distance_cost_factor.ToString());
+            }
             Dictionary<Cell, double> costs = this._host.cellularFloor.GetStaticCost();
             #region set the initial potential to positive infinity; define heap and labeled where the potential is zero;
             SortedSet<WeightedIndex> heap = new SortedSet<WeightedIndex>();
@@ -421,7 +436,7 @@ namespace SpatialAnalysis.Data.Visualization
                         !marked[I, J])
                     {
                         var neighborIndex = indices[I, J];
-                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, costs);
+                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, distance_cost_factor, costs);
                         if (edgeCost <= 0)
                         {
                             throw new ArgumentException("Negative cost for edge found: " + edgeCost.ToString() +
@@ -491,6 +506,11 @@ namespace SpatialAnalysis.Data.Visualization
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
             //Calculating static costs
+            double distance_cost_factor = Parameter.DefaultParameters[AgentParameters.MAN_DistanceCost].Value;
+            if (distance_cost_factor < 0)
+            {
+                throw new ArgumentException("Parameter MAN_DistanceCost cannot have a negative value: " + distance_cost_factor.ToString());
+            }
             Dictionary<Cell, double> costs = this._host.cellularFloor.GetStaticCost();
             #region set the initial potential to positive infinity; define heap and labeled where the potential is zero;
             SortedSet<WeightedIndex> heap = new SortedSet<WeightedIndex>();
@@ -532,7 +552,7 @@ namespace SpatialAnalysis.Data.Visualization
                         !marked[I, J])
                     {
                         var neighborIndex = indices[I, J];
-                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, costs);
+                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, distance_cost_factor, costs);
                         if (edgeCost <= 0)
                         {
                             throw new ArgumentException("Negative cost for edge found: " + edgeCost.ToString() +
@@ -613,6 +633,11 @@ namespace SpatialAnalysis.Data.Visualization
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
             //Calculating static costs
+            double distance_cost_factor = Parameter.DefaultParameters[AgentParameters.MAN_DistanceCost].Value;
+            if (distance_cost_factor < 0)
+            {
+                throw new ArgumentException("Parameter MAN_DistanceCost cannot have a negative value: " + distance_cost_factor.ToString());
+            }
             Dictionary<Cell, double> costs = this._host.cellularFloor.GetStaticCost();
             #region set the initial potential to positive infinity; define heap and labeled where the potential is zero;
             SortedSet<WeightedIndex> heap = new SortedSet<WeightedIndex>();
@@ -653,7 +678,7 @@ namespace SpatialAnalysis.Data.Visualization
                         radiusSquared >= UV.GetLengthSquared(this._host.cellularFloor.Cells[I, J], target))
                     {
                         var neighborIndex = indices[I, J];
-                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, costs);
+                        double edgeCost = this.getStaticCostOfEdge(neighborIndex, current, distance_cost_factor, costs);
                         if (edgeCost <= 0)
                         {
                             throw new ArgumentException("Negative cost for edge found: " + edgeCost.ToString() +

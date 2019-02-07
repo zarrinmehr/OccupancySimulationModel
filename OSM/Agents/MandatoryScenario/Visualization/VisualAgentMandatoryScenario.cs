@@ -39,6 +39,7 @@ using SpatialAnalysis.Agents.Visualization.AgentModel;
 using SpatialAnalysis.Data;
 using SpatialAnalysis.FieldUtility;
 using SpatialAnalysis.Miscellaneous;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
 {
@@ -134,11 +135,11 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         /// <summary>
         /// The color code applied when the barrier repulsion is applied
         /// </summary>
-        public static readonly Brush InsideRange = Brushes.DarkRed;
+        public static readonly Brush UrgentSequence = Brushes.DarkRed;
         /// <summary>
         /// The color code applied when the barrier repulsion is not applied
         /// </summary>
-        public static readonly Brush OutsideRange = Brushes.DarkGreen;
+        public static readonly Brush RegularScequence = Brushes.DarkGreen;
         private const double _timeCycle = 200.0d;
         private Random _random { get; set; }
         /// <summary>
@@ -170,7 +171,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             this._transformGeometry = new MatrixTransform(this._matrix);
             this.SetGeometry();
             this._random = new Random(DateTime.Now.Millisecond);
-            this.Fill = VisualAgentMandatoryScenario.OutsideRange;
+            this.Fill = VisualAgentMandatoryScenario.UrgentSequence;
         }
         protected override System.Windows.Media.Geometry DefiningGeometry
         {
@@ -1012,14 +1013,14 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                     double q = walkedLength - R;
                     int n = (int)Math.Floor(q * 4);
                     double t = q - n * 0.250;
-                    double tolerance = 0.02d;
+                    double tolerance = 0.02d;// 
                     bool c1 = n == 0 && t > 0.25d - tolerance;
                     bool c2 = n == 1 && t < tolerance;
                     bool c3 = n == 2 && t > 0.25d - tolerance;
                     bool c4 = n == 3 && t < tolerance;
                     if (!(c1 || c2 || c3 || c4))
                     {
-                        agent.TotalWalkedLength += agent.AngularVelocity * h;
+                        agent.TotalWalkedLength += UnitConversion.Convert(3.14d, Length_Unit_Types.FEET, agent._cellularFloor.UnitType) * h;
                     }
                 }
             }
@@ -1042,16 +1043,36 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             {
                 string currentSequence = (agent.CurrentSequence == null) ? "Not Set" : agent.CurrentSequence.Name;
                 string currentActivity = (agent.CurrentActivity == null) ? "Not Set" : agent.CurrentActivity.Name;
-
-                string report = string.Format("Engagement Status: '{0}',\tPhysical Movement Status: '{1}',\tCurrent Sequence: '{2}',\t Current Activity: '{3}',\tTime: {4}",
-                    agent.AgentEngagementStatus.ToString(),
-                    agent.AgentPhysicalMovementMode.ToString(),
-                    currentSequence,
-                    currentActivity,
-                    ((int)agent.TotalWalkTime).ToString());
-                UIMessage.Text = report;
+                if (agent.AgentEngagementStatus != MandatoryScenarioStatus.Free)
+                {
+                    string report = string.Format("Engagement Status: '{0}',\tPhysical Movement Status: '{1}',\tCurrent Sequence: '{2}',\t Current Activity: '{3}',\tTime: {4}",
+                        agent.AgentEngagementStatus.ToString(),
+                        agent.AgentPhysicalMovementMode.ToString(),
+                        currentSequence,
+                        currentActivity,
+                        ((int)agent.TotalWalkTime).ToString());
+                    UIMessage.Text = report;
+                }
+                else
+                {
+                    string report = string.Format("Engagement Status: '{0}',\tPhysical Movement Status: '{1}',\tCurrent Sequence: 'NONE',\t Current Activity: 'NONE',\tTime: {2}",
+                        agent.AgentEngagementStatus.ToString(),
+                        agent.AgentPhysicalMovementMode.ToString(),
+                        ((int)agent.TotalWalkTime).ToString());
+                    UIMessage.Text = report;
+                }
             }
-
+            //assign color to the agent
+            if (agent.CurrentSequence != null && agent.CurrentSequence.PriorityType == SEQUENCE_PRIORITY_LEVEL.URGENT)
+            {
+                agent.Fill = VisualAgentMandatoryScenario.UrgentSequence;
+                agent.Stroke = VisualAgentMandatoryScenario.UrgentSequence;
+            }
+            else
+            {
+                agent.Fill = VisualAgentMandatoryScenario.RegularScequence;
+                agent.Stroke = VisualAgentMandatoryScenario.RegularScequence;
+            }
             agent.SetGeometry();
             #endregion
         }
@@ -1261,7 +1282,16 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                         if (this.CurrentActivityFieldIndex == this.CurrentSequence.ActivityCount - 1)//the sequence is finished
                         {
                             //reactivate the sequence and put it on the list
-                            this.OccupancyScenario.ReActivate(this.CurrentSequence, this.TotalWalkTime);
+                            if (this.CurrentSequence.PriorityType == SEQUENCE_PRIORITY_LEVEL.PARTIAL)
+                            {
+                                PartialSequence incompleteSequence = (PartialSequence)this.CurrentSequence;
+                                this.OccupancyScenario.ReActivate(incompleteSequence.OriginalSequence, this.TotalWalkTime);
+                                incompleteSequence.Reset();
+                            }
+                            else
+                            {
+                                this.OccupancyScenario.ReActivate(this.CurrentSequence, this.TotalWalkTime);
+                            }
                             //checking if a new sequence should be raised or the agent should go back to the main station
                             if (this.TotalWalkTime < this.OccupancyScenario.ExpectedTasks.First().Key)//should go back to the station
                             {
@@ -1325,9 +1355,18 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         {
             try
             {
-                this.CurrentSequence = this.OccupancyScenario.ExpectedTasks.First().Value;
-                double time = this.OccupancyScenario.ExpectedTasks.First().Key;
-                this.OccupancyScenario.ExpectedTasks.Remove(time);
+                Sequence firstSequence = this.OccupancyScenario.ExpectedTasks.First().Value;
+                //Complete the partial sequence first if the next sequence is the queue does not have urgent priority
+                if (firstSequence.PriorityType != SEQUENCE_PRIORITY_LEVEL.URGENT && !this.OccupancyScenario.PartialSequenceToBeCompleted.IsEmpty)
+                {
+                    this.CurrentSequence = this.OccupancyScenario.PartialSequenceToBeCompleted;
+                }
+                else
+                {
+                    this.CurrentSequence = firstSequence;
+                    double time = this.OccupancyScenario.ExpectedTasks.First().Key;
+                    this.OccupancyScenario.ExpectedTasks.Remove(time);
+                }
                 this.CurrentActivityFieldIndex = 0;
                 this.CurrentActivity = this.AllActivities[this.CurrentSequence.ActivityNames[this.CurrentActivityFieldIndex]];
             }
@@ -1404,8 +1443,8 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                     if (this.EdgeCollisionState.NormalizedRepulsion.DotProduct(newState.Direction) >= 0.0d)//this.VisibilityCosineFactor)
                     {
                         //render agent color
-                        this.Fill = VisualAgentMandatoryScenario.OutsideRange;
-                        this.Stroke = VisualAgentMandatoryScenario.OutsideRange;
+                        //this.Fill = VisualAgentMandatoryScenario.UrgentSequence;
+                        //this.Stroke = VisualAgentMandatoryScenario.UrgentSequence;
                     }
                     else
                     {
@@ -1413,16 +1452,16 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                         if (repulsionMagnetude != 0.0d)
                         {
                             //render agent color
-                            this.Fill = VisualAgentMandatoryScenario.InsideRange;
-                            this.Stroke = VisualAgentMandatoryScenario.InsideRange;
+                            //this.Fill = VisualAgentMandatoryScenario.RegularScequence;
+                            //this.Stroke = VisualAgentMandatoryScenario.RegularScequence;
                             //calculate repulsion force
                             repulsionForce = this.EdgeCollisionState.NormalizedRepulsion * repulsionMagnetude;
                         }
                         else
                         {
                             //render agent color
-                            this.Fill = VisualAgentMandatoryScenario.OutsideRange;
-                            this.Stroke = VisualAgentMandatoryScenario.OutsideRange;
+                            //this.Fill = VisualAgentMandatoryScenario.UrgentSequence;
+                            //this.Stroke = VisualAgentMandatoryScenario.UrgentSequence;
                         }
                     }
                 }
@@ -1431,22 +1470,47 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                     throw new ArgumentNullException("Collision Analyzer failed!");
                 }
                 #endregion
+
+
                 // find Acceleration force and update velocity
                 UV acceleration = new UV(0, 0);
                 switch (this.AgentPhysicalMovementMode)
                 {
-                    //try to stop agent
+                    //try to stop agent and assume the engagment position
                     case PhysicalMovementMode.StopAndOrient:
                         if (newState.Velocity.GetLengthSquared()>0)
                         {
-                            if (newState.Velocity.GetLengthSquared() < this.AccelerationMagnitude * this.TimeStep * this.AccelerationMagnitude * this.TimeStep &&
-                                UV.GetLengthSquared(this.CurrentState.Location, this.CurrentActivity.DefaultState.Location) < this._cellularFloor.CellSize)
+                            UV deltaLOcation = this.CurrentState.Location - this.CurrentActivity.DefaultState.Location;
+                            double deltaX = deltaLOcation.GetLength();
+                            //figuring out the velocity
+                            if (newState.Velocity.GetLengthSquared() < this.AccelerationMagnitude * this.TimeStep * this.AccelerationMagnitude * this.TimeStep && deltaX<this.BodySize/2)
                             {
                                 newState.Velocity *= 0;
+                                direction = this.CurrentActivity.DefaultState.Direction.Copy();
                             }
                             else
                             {
                                 newState.Velocity = this.StopAndOrientVelocity();
+                            }
+                            //figuring out the direction
+                            /*
+                                if the agent is guaranteed to be able to stop at the destination then it will start 
+                                taking the direction appropriate for engagement with the activity
+                              DERIVING EQUATION 
+                                calculate estatimated time to stop
+                                x = 1/2 at^2
+                                t = sqrt(2x/a)
+                                the maximum velocity that can be gained or reduced is 
+                                v = at 
+                                v = a*sqrt(2x/a)=sqrt(2xa)
+                                v^2= 2ax
+                                if the length-squared of v is smaller than 2ax it is guaranteed that the agent can savely stop
+                                |v|^2<2*|x|*a
+                            */
+                            bool stopGuaranteed = newState.Velocity.GetLengthSquared() < (2 * deltaX * this.AccelerationMagnitude);
+                            if (stopGuaranteed)
+                            {
+                                direction = this.CurrentActivity.DefaultState.Direction.Copy();
                             }
                         }
                         else
@@ -1584,7 +1648,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                     }
                 }
                 //check the sequences that need visual attention
-                this.UpdateVisualTriggers();
+                this.EvaluateVisualTriggers();
 
             }
             catch (Exception error)
@@ -1597,40 +1661,23 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         /// <summary>
         /// Updates the visual triggers.
         /// </summary>
-        public void UpdateVisualTriggers()
+        public void EvaluateVisualTriggers()
         {
             this.DetectedVisualTriggers.Clear();
-            foreach (var a in this.OccupancyScenario.UnexpectedTasks)
+            foreach (var unexpectedTask in this.OccupancyScenario.UnexpectedTasks)
             {
-                UV target = a.Value.VisualAwarenessField.TargetVisibilityTest(this.CurrentState, this.VisibilityCosineFactor, this._cellularFloor);
+                UV target = unexpectedTask.Value.VisualAwarenessField.TargetVisibilityTest(this.CurrentState, this.VisibilityCosineFactor, this._cellularFloor);
                 if (target != null)
                 {
-                    if (a.Key<this.TotalWalkTime)
+                    if (unexpectedTask.Key<this.TotalWalkTime)
                     {
-                        this.DetectedVisualTriggers.Add(a.Key, a.Value);
-                        double delay = this.TotalWalkTime - a.Key;
-                        a.Value.TimeToGetVisuallyDetected += delay;
-                        raiseTrailParametersUpdatedEvent(a.Value, target, delay);
+                        this.DetectedVisualTriggers.Add(unexpectedTask.Key, unexpectedTask.Value);
+                        double delay = this.TotalWalkTime - unexpectedTask.Key;
+                        unexpectedTask.Value.TimeToGetVisuallyDetected += delay;
+                        raiseTrailParametersUpdatedEvent(unexpectedTask.Value, target, delay);
                     }
                 }
             }
-
-            //Parallel.ForEach(this.OccupancyScenario.VisualTriggers, (a) => 
-            //{
-            //    Dispatcher.BeginInvoke(DispatcherPriority.Background,
-            //        (SendOrPostCallback)delegate
-            //        {
-            //            if (a.Value.VisualAwarenessField.VisualEventRaised(this.CurrentState, this.VisibilityCosineFactor, this._cellularFloor))
-            //            {
-            //                lock (VisualAgentMandatoryScenario._luckerObject)
-            //                {
-            //                    this.DetectedVisualTriggers.Add(a.Key, a.Value);
-            //                }
-            //            }
-            //        }
-            //        , null);
-
-            //});
             foreach (var item in this.DetectedVisualTriggers)
             {
                 try
@@ -1660,6 +1707,21 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 {
                     MessageBox.Show(e.Report());
                 }
+            }
+            //update current sequence and current activity
+            if (DetectedVisualTriggers.Count != 0 && this.CurrentSequence != null && CurrentSequence.PriorityType != SEQUENCE_PRIORITY_LEVEL.URGENT)
+            {
+                if(this.CurrentSequence.PriorityType == SEQUENCE_PRIORITY_LEVEL.PARTIAL)
+                {
+                    this.OccupancyScenario.PartialSequenceToBeCompleted.Trim(this.CurrentActivityFieldIndex);
+                }
+                else
+                {
+                    this.OccupancyScenario.PartialSequenceToBeCompleted.Assign(this.CurrentSequence, this.CurrentActivityFieldIndex);
+                }
+                this.loadNextSequence();
+                this.AgentEngagementStatus = MandatoryScenarioStatus.WalkingInSequence;
+                this.AgentPhysicalMovementMode = PhysicalMovementMode.Move;
             }
              
         }
@@ -1698,6 +1760,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         {
             //this.WalkTime = 0;
             this._cellularFloor = cellularfloor;
+            this.OccupancyScenario.PartialSequenceToBeCompleted.Reset();
             //this._escapeRouts = escapeRouts;
             this.TimeStoryboard = new Storyboard();
             DoubleAnimation timeAnimator = new DoubleAnimation();

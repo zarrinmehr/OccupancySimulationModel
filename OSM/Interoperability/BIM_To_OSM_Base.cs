@@ -43,6 +43,14 @@ namespace SpatialAnalysis.Interoperability
     /// </summary>
     public abstract class BIM_To_OSM_Base
     {
+        protected Length_Unit_Types unitType;
+        /// <summary>
+        /// Gets the unit of length for OSM 
+        /// </summary>
+        public Length_Unit_Types UnitType
+        {
+            get { return unitType; }
+        }
         /// <summary>
         /// Gets or sets the length of line segments to approximate curves with polygons
         /// </summary>
@@ -162,15 +170,16 @@ namespace SpatialAnalysis.Interoperability
         /// <returns>INTPolygons.</returns>
         public INTPolygons SimplifyINTPolygons(INTPolygons polygons, double value)
         {
+            double simplificationFactor = Math.Pow(10.0, this.PolygonalBooleanPrecision) * UnitConversion.Convert(value, Length_Unit_Types.FEET, UnitType);
             ClipperOffset clipperOffset = new ClipperOffset();
             clipperOffset.AddPaths(polygons, ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
             INTPolygons shrink = new INTPolygons();
-            clipperOffset.Execute(ref shrink, -1 * Math.Pow(10.0, this.PolygonalBooleanPrecision) * value);
+            clipperOffset.Execute(ref shrink, -simplificationFactor);
             //expanding to return the polygons to their original position
             clipperOffset.Clear();
             clipperOffset.AddPaths(shrink, ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
             INTPolygons expand = new INTPolygons();
-            clipperOffset.Execute(ref expand, Math.Pow(10.0, this.PolygonalBooleanPrecision) * value);
+            clipperOffset.Execute(ref expand, simplificationFactor);
             shrink = null;
             clipperOffset = null;
             return expand;
@@ -278,7 +287,8 @@ namespace SpatialAnalysis.Interoperability
             //clipperOffset.AddPaths(this.FootPrintOfAllBarriers, JoinType.jtSquare, EndType.etClosedPolygon);
             clipperOffset.AddPaths(this.FootPrintPolygonsOfFieldWithVoids, JoinType.jtSquare, EndType.etClosedPolygon);
             INTPolygons plygns = new INTPolygons();
-            clipperOffset.Execute(ref plygns, -1*Math.Pow(10.0, this.PolygonalBooleanPrecision) * offsetValue);
+            double uniqueOffsetValue = -Math.Pow(10.0, this.PolygonalBooleanPrecision) * offsetValue;
+            clipperOffset.Execute(ref plygns, uniqueOffsetValue);
             List<BarrierPolygons> brrs = new List<BarrierPolygons>();
             for (int i = 0; i < plygns.Count; i++)
             {
@@ -341,7 +351,7 @@ namespace SpatialAnalysis.Interoperability
             double de = edge.End.DistanceTo(center);
             r = (r > ds) ? r : ds;
             r = (r > de) ? r : de;
-            double R = 1.43f * r; // somthing larger than Math.Sqrt(2f)*r
+            double R = 1.43 * r; // somthing larger than Math.Sqrt(2)*r
             UV os = edge.Start - center;
             os.Unitize();
             UV oe = edge.End - center;
@@ -380,7 +390,8 @@ namespace SpatialAnalysis.Interoperability
         /// <returns>BarrierPolygons.</returns>
         public BarrierPolygons IsovistPolygon(UV vantagePoint, double viewDepth, HashSet<UVLine> edges)
         {
-            INTPolygon circle = createCircle(vantagePoint, viewDepth);
+            /*first and expand and shrink operation is performed to merge the shadowing edges*/
+            double expandShrinkFactor = Math.Pow(10.0, this.PolygonalBooleanPrecision) * UnitConversion.Convert(0.075, Length_Unit_Types.FEET, UnitType);
             //offsetting the excluded area of each edge
             INTPolygons offsetedPolygons = new INTPolygons();
             ClipperOffset clipperOffset = new ClipperOffset();
@@ -388,15 +399,26 @@ namespace SpatialAnalysis.Interoperability
             {
                 clipperOffset.AddPath(this.excludedArea(vantagePoint, viewDepth + 1, edgeItem), ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
                 INTPolygons plygns = new INTPolygons();
-                clipperOffset.Execute(ref plygns, Math.Pow(10.0, this.PolygonalBooleanPrecision) * 0.05);
+                clipperOffset.Execute(ref plygns, expandShrinkFactor);
                 offsetedPolygons.AddRange(plygns);
                 clipperOffset.Clear();
             }
             //Unioning the expanded exclusions
-            INTPolygons results = new INTPolygons();
+            INTPolygons offsetUnioned = new INTPolygons();
             Clipper c = new Clipper();
             c.AddPaths(offsetedPolygons, PolyType.ptSubject, true);
-            c.Execute(ClipType.ctUnion, results, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+            c.Execute(ClipType.ctUnion, offsetUnioned, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+            //shrink the polygons to retain their original size
+            INTPolygons results = new INTPolygons();
+            clipperOffset.Clear();
+            clipperOffset.AddPaths(offsetUnioned, JoinType.jtMiter, EndType.etClosedPolygon);
+            clipperOffset.Execute(ref results, -expandShrinkFactor);
+            clipperOffset.Clear();
+            offsetUnioned.Clear();
+            /*
+            * What ever is a hole in the resulting mereged polygon is the visibility polygon
+            * Now we classify the polygons based on being a hole or not
+            */
             //filtering out the holes that do not include the center
             INTPolygons holesNOT = new INTPolygons();
             INTPolygons holesIncludingCenter = new INTPolygons();
@@ -417,17 +439,14 @@ namespace SpatialAnalysis.Interoperability
             }
             if (holesIncludingCenter.Count == 0)
             {
+                //there is no hole. The shadow polygones should clip the potential field of visibility (i.e. circle) by an subtraction operation
+                INTPolygon circle = createCircle(vantagePoint, viewDepth);
                 //subtraction
                 c.Clear();
                 c.AddPath(circle, PolyType.ptSubject, true);
                 c.AddPaths(holesNOT, PolyType.ptClip, true);
-                INTPolygons isovistPolygonBeforeShrinking = new INTPolygons();
-                c.Execute(ClipType.ctDifference, isovistPolygonBeforeShrinking);
-                //shrinking
                 INTPolygons isovistPolygon = new INTPolygons();
-                clipperOffset.Clear();
-                clipperOffset.AddPaths(isovistPolygonBeforeShrinking, ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
-                clipperOffset.Execute(ref isovistPolygon, -1 * Math.Pow(10.0, this.PolygonalBooleanPrecision) * .05);
+                c.Execute(ClipType.ctDifference, isovistPolygon);
                 //searching for a polygon that includes the center
                 foreach (INTPolygon item in isovistPolygon)
                 {
@@ -441,7 +460,6 @@ namespace SpatialAnalysis.Interoperability
                         circle = null;
                         holesNOT = null;
                         holesIncludingCenter = null;
-                        isovistPolygonBeforeShrinking = null;
                         isovistPolygon = null;
                         return isovist;
                     }
@@ -450,26 +468,20 @@ namespace SpatialAnalysis.Interoperability
             }
             else if (holesIncludingCenter.Count == 1)
             {
-                INTPolygons isovistPolygon = new INTPolygons();
-                INTPolygon hole = holesIncludingCenter[0];
-                hole.Reverse();
-                clipperOffset.Clear();
-                clipperOffset.AddPath(hole, ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
-                clipperOffset.Execute(ref isovistPolygon, -1 * Math.Pow(10.0, this.PolygonalBooleanPrecision) * .05);
+                INTPolygons isovistPolygon = holesIncludingCenter;
                 foreach (INTPolygon item in isovistPolygon)
                 {
                     if (Clipper.PointInPolygon(iCenter, item) == 1)
                     {
+                        item.Reverse();
                         BarrierPolygons isovist = this.ConvertINTPolygonToBarrierPolygon(item);
                         results = null;
                         c = null;
                         clipperOffset = null;
                         offsetedPolygons = null;
-                        circle = null;
                         holesNOT = null;
                         holesIncludingCenter = null;
                         isovistPolygon = null;
-                        hole = null;
                         return isovist;
                     }
                 }

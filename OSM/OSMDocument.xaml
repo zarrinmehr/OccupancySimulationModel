@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
         </Grid.ColumnDefinitions>
-        <ScrollViewer Name="_scrollViewer" Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Background="DarkGray">
+        <ScrollViewer Name="_scrollViewer" Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Background="#ddd9d9">
             <Grid x:Name="_grid" Width="Auto" Height="Auto" RenderTransformOrigin="0.5,0.5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="97*"/>
@@ -173,7 +173,7 @@
                 </MenuItem>
                 <!--for debug purposes this menu can be activated and the code can be trigerred with debug_Click event-->
 
-                <MenuItem Header="Debug" Click="debug_Click" Visibility="Collapsed"></MenuItem>
+                <MenuItem Header="Debug" Click="debug_Click" Visibility="Collapsed" ></MenuItem>
                 <!--<MenuItem Header="About" Click="about_Clicked"></MenuItem>-->
             </Menu>
 

@@ -31,10 +31,11 @@ using MathNet.Numerics.Interpolation;
 using SpatialAnalysis.CellularEnvironment;
 using SpatialAnalysis.Geometry;
 using SpatialAnalysis.Data;
+using SpatialAnalysis.Miscellaneous;
 using SpatialAnalysis.Optimization;
 using SpatialAnalysis.Events;
 using System.IO;
-
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.FieldUtility
 {
@@ -201,7 +202,7 @@ namespace SpatialAnalysis.FieldUtility
         /// or
         /// Failed to set activity engagement duration!
         /// </exception>
-        public static ActivityDestination FromString(List<string> lines, int startIndex, CellularFloor cellularFloor, double tolerance = 0.0000001d)
+        public static ActivityDestination FromString(List<string> lines, int startIndex, Length_Unit_Types unitType, CellularFloor cellularFloor, double tolerance = 0.0000001d)
         {
             string name = lines[startIndex];
             if (string.IsNullOrEmpty(lines[startIndex]) || string.IsNullOrWhiteSpace(lines[startIndex]))
@@ -210,6 +211,11 @@ namespace SpatialAnalysis.FieldUtility
             }
             StateBase state = StateBase.FromStringRepresentation(lines[startIndex + 1]);
             BarrierPolygons barrier = BarrierPolygons.FromStringRepresentation(lines[startIndex + 2]);
+            //unit converion
+            UnitConversion.Transform(state.Location, unitType, cellularFloor.UnitType);
+            UnitConversion.Transform(state.Velocity, unitType, cellularFloor.UnitType);
+            UnitConversion.Transform(barrier.BoundaryPoints, unitType, cellularFloor.UnitType);
+
             var strings = lines[startIndex + 3].Split(',');
             double min = 0, max = 0; 
             if (!double.TryParse(strings[0], out min) || !double.TryParse(strings[1], out max))
@@ -656,120 +662,225 @@ namespace SpatialAnalysis.FieldUtility
             return null;
         }
 
+        public double? GetPotential(UV point)
+        {
+            /*
+                INDEXING MODEL
+                up      up_right
+                origin  right
+            */
+            try
+            {
+                Index index = this._cellularFloor.FindIndex(point);
+                int I = index.I, J = index.J;
+                if (!Data.ContainsKey(this._cellularFloor.Cells[I, J])) return null;
+                double u = point.U - _cellularFloor.Cells[I, J].U;
+                double v = point.V - _cellularFloor.Cells[I, J].V;
+                double origin = Data[_cellularFloor.FindCell(index)];
+
+                J++;
+                bool contains_up = Data.ContainsKey(this._cellularFloor.Cells[I, J]);
+                double up = origin;
+                if (contains_up) up = Data[this._cellularFloor.Cells[I, J]];
+
+                I++; J--;
+                bool contains_right = Data.ContainsKey(this._cellularFloor.Cells[I, J]);
+                double right = origin;
+                if (contains_right) right = Data[this._cellularFloor.Cells[I, J]];
+
+                J++;
+                bool contains_up_right = Data.ContainsKey(this._cellularFloor.Cells[I, J]);
+                double up_right = origin;
+                if (contains_up_right) up_right = Data[this._cellularFloor.Cells[I, J]];
+
+                /*
+                    All Possible cases will be investigated
+                */
+                //none of the corners exist
+                if (!contains_up && !contains_right && !contains_up_right)
+                {
+                    return origin;
+                }
+                //only one of the corners exist
+                {
+                    //ONLY contains_up_right
+                    if (!contains_up && !contains_right && contains_up_right)
+                    {
+                        double distance_to_origin = UV.GetDistanceBetween(point, this._cellularFloor.Cells[index.I, index.J]);
+                        double distance_to_up_tight = UV.GetDistanceBetween(point, this._cellularFloor.Cells[index.I + 1, index.J + 1]);
+                        double total_distance = distance_to_origin + distance_to_up_tight;
+                        double potential = (distance_to_up_tight * origin + distance_to_origin * up_right) / (total_distance);
+                        return potential;
+                    }
+                    //ONLY contains_right
+                    if (!contains_up && contains_right && !contains_up_right)
+                    {
+                        double t = u / this._cellularFloor.CellSize;
+                        double potential = (1 - t) * origin + t * right;
+                        return potential;
+                    }
+                    //ONLY contains_up
+                    if (contains_up && !contains_right && !contains_up_right)
+                    {
+                        double t = v / this._cellularFloor.CellSize;
+                        double potential = (1 - t) * origin + t * up;
+                        return potential;
+                    }
+                }
+
+                /*
+                    only one of the corners does not exist.
+                    The missing corner's potential will be calculated assuming that 
+                    center = up + right = origing + up_right
+                    the result will be a planar quad
+                */
+                {
+                    //EXCEPT contains_up_right
+                    if (contains_up && contains_right && !contains_up_right)
+                    {
+                        up_right = up + right - origin;
+                    }
+                    //EXCEPT contains_right
+                    if (contains_up && !contains_right && contains_up_right)
+                    {
+                        right = origin + up_right - up;
+                    }
+                    //EXCEPT contains_up
+                    if (!contains_up && contains_right && contains_up_right)
+                    {
+                        up = origin + up_right - right;
+                    }
+                }
+                //ALL corners have potentials or predicted potentials
+                double a = u / this._cellularFloor.CellSize;
+                double b = v / this._cellularFloor.CellSize;
+                double value =
+                    origin * (1 - a) * (1 - b) +
+                    up * a * (1 - b) +
+                    up * (1 - a) * b +
+                    up_right * a * b;
+                return value;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Report());
+            }
+            return null;
+        }
+
         #endregion
 
         /// <summary>
-        /// Gets the gradient path.
+        /// Gets a path using the gradient-descend method
         /// </summary>
         /// <param name="p">The point to get the gradient from.</param>
+        /// <param name="distanceFactor">The distance tolerance.</param>
         /// <returns>List&lt;UV&gt;.</returns>
-        public List<UV> GetGradientPath(UV p)
+        public List<UV> GetGradientPath(UV p, double distanceFactor = 0.1d, int maxIterations = 5000)
         {
-            double distanceTolerance = .1d;
-            double toleranceSquared = distanceTolerance * distanceTolerance;
-            UV destination = this.Potentials.First().Key;
-            List<UV> path = new List<UV>();
-            path.Add(p);
-            UV previous = new UV();
-            UV current = p.Copy();
-            int n = 0;
-            UV gradient = this.Differentiate(current);
-            gradient.Unitize();
-            gradient *= distanceTolerance;
-            UV next = current + gradient;
-            double dot = (current - destination).DotProduct(next - destination);
-            bool terminate = true;
-            if (dot <= 0f)
+            //distanceFactor = UnitConversion.Convert(distanceFactor, Length_Unit_Types.FEET, this._cellularFloor.UnitType);
+            //set the termination conditions
+            double distanceTolerance = this._cellularFloor.CellSize * this._cellularFloor.CellSize;
+            //find a minimum potential for the termination of the descenting process
+            double min = 0;
+            if(this.Origins.Count == 1)                 // a neighborhood of size 2 will be selected if only one cell is set as the origin of the potential field
             {
-                terminate = false;
-            }
-            while (terminate)// && d>toleranceSquared)
-            {
-                path.Add(next);
-                previous = current;
-                current = next;
-                gradient = this.Differentiate(current);
-                //gradient.Unitize();
-                gradient *= distanceTolerance;
-                next = current + gradient;
-                dot = (current - previous).DotProduct(next - current);
-                if (dot <= 0f)
+                foreach (Index item in Index.Neighbors)
                 {
-                    double cos = dot / ((current - previous).GetLength() * (next - current).GetLength());
-                    double angle = (Math.Acos(cos) * 180) / Math.PI;
-                    if (angle > 120)
+                    Index nextIndex = this.Origins.First().CellToIndex + item;
+                    foreach (Index index in Index.Neighbors)
                     {
-                        terminate = false;
-                    }
-                }
-                n++;
-                if (n > 50000)
-                {
-                    MessageBox.Show(n.ToString());
-                    break;
-                }
-            }
-            double d = (destination - current).GetLengthSquared();
-            //MessageBox.Show("Iteration: " + n.ToString() + "\ndistance: " + d.ToString() + "\nDot: " + dot.ToString());
-
-            return path;
-        }
-
-        /// <summary>
-        /// Gets the gradient path.
-        /// </summary>
-        /// <param name="p">The point to get the gradient from.</param>
-        /// <param name="distanceTolerance">The distance tolerance.</param>
-        /// <returns>List&lt;UV&gt;.</returns>
-        public List<UV> GetGradientPath(UV p, double distanceTolerance = 0.3d)
-        {
-            double toleranceSquared = distanceTolerance * distanceTolerance;
-            UV destination = this.Potentials.First().Key;
-            List<UV> path = new List<UV>();
-            path.Add(p);
-            UV previous = new UV();
-            UV current = p.Copy();
-            int n = 0;
-            UV gradient = this.Differentiate(current);
-            gradient.Unitize();
-            gradient *= distanceTolerance;
-            UV next = current + gradient;
-            double dot = (current - destination).DotProduct(next - destination);
-            bool terminate = true;
-            if (dot <= 0f)
-            {
-                terminate = false;
-            }
-            while (terminate)// && d>toleranceSquared)
-            {
-                path.Add(next);
-                previous = current;
-                current = next;
-                gradient = this.Differentiate(current);
-                //gradient.Unitize();
-                gradient *= distanceTolerance;
-                next = current + gradient;
-                dot = (current - previous).DotProduct(next - current);
-                if (dot <= 0f)
-                {
-                    double cos = dot / ((current - previous).GetLength() * (next - current).GetLength());
-                    double angle = (Math.Acos(cos) * 180) / Math.PI;
-                    if (angle > 120)
-                    {
-                        terminate = false;
-                    }
-                    if (terminate)
-                    {
-                        if (UV.GetLengthSquared(current, this.DefaultState.Location)<toleranceSquared)
+                        Index neighbor = nextIndex + index;
+                        
+                        if (this.Potentials.ContainsKey(this._cellularFloor.Cells[neighbor.I, neighbor.J]))
                         {
-                            terminate = false;
+                            min = Math.Max(min, this.Potentials[this._cellularFloor.Cells[neighbor.I, neighbor.J]]);
                         }
                     }
                 }
-                n++;
-                if (n > 50000)
+            }
+            else                                    // a neighborhood of size 1 will be chosen to 
+            {
+                foreach (Cell cell in this.Origins)
                 {
-                    MessageBox.Show(n.ToString());
+                    foreach (Index index in Index.Neighbors)
+                    {
+                        Index neighbor = cell.CellToIndex + index;
+                        if (this.Potentials.ContainsKey(this._cellularFloor.Cells[neighbor.I, neighbor.J]))
+                        {
+                            min = Math.Max(min, this.Potentials[this._cellularFloor.Cells[neighbor.I, neighbor.J]]);
+                        }
+                    }
+                }
+            }
+            List<UV> path = new List<UV>();
+            path.Add(p);
+            UV previous = new UV();
+            UV current = p.Copy();
+            int n = 0;
+            UV gradient = this.Differentiate(current);
+            gradient.Unitize();
+            gradient *= distanceFactor;
+            UV next = current + gradient;
+
+            double? current_potential = this.GetPotential(p);
+            double? previous_potential = current_potential;
+            bool terminate = false;
+            if (current_potential == null)
+            {
+                terminate = true;
+            }
+            if (current_potential.Value < min)
+            {
+                terminate = true;
+            }
+            while (!terminate)
+            {
+                path.Add(next);
+                previous = current;
+                current = next;
+                gradient = this.Differentiate(current);
+                gradient.Unitize();
+                gradient *= distanceFactor;
+                next = current + gradient;
+                /*check termination conditions*/
+                // 1- out of floor
+                Index index = this._cellularFloor.FindIndex(next);
+                if(!this.Potentials.ContainsKey(this._cellularFloor.Cells[index.I, index.J]))
+                {
+                    MessageBox.Show("Path Was pushed outside floor!");
+                    break;
+                }
+                current_potential = this.GetPotential(next);
+                if (current_potential == null)
+                {
+                    break;
+                }
+                // 2- increasing potentials
+                /* This condition is numerically unstable and depends on the stepfactor!
+                if (previous_potential.Value < current_potential.Value)
+                {
+                    terminate = true;
+                }
+                previous_potential = current_potential;
+                */
+                // 3- passing minimum threshold potential
+                /*
+                if (current_potential.Value < min)
+                {
+                    terminate = true;
+                }
+                */
+                // 4- passing distance threshold to the default state
+                if (UV.GetLengthSquared(current, this.DefaultState.Location) < distanceTolerance)
+                {
+                    terminate = true;
+                }
+                // 5- iteration off limit
+                n++;
+                if (n > maxIterations)
+                {
+                    MessageBox.Show("Maximum number of iterations in descending was riched\n" + maxIterations.ToString());
                     break;
                 }
             }

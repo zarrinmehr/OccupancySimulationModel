@@ -32,7 +32,7 @@ using SpatialAnalysis.CellularEnvironment;
 using SpatialAnalysis.Geometry;
 using SpatialAnalysis.FieldUtility.Visualization;
 using SpatialAnalysis.FieldUtility;
-
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Data.Visualization
 {
@@ -51,7 +51,7 @@ namespace SpatialAnalysis.Data.Visualization
         private Polyline _polyline { get; set; }
         private List<BarrierPolygons> _barriers { get; set; }
         private List<double> _regionValues { get; set; }
-
+        private double _strok_thickness;
         /// <summary>
         /// Initializes a new instance of the <see cref="ManualAddDataField"/> class.
         /// </summary>
@@ -59,6 +59,7 @@ namespace SpatialAnalysis.Data.Visualization
         {
             this.visualization_Menu = new MenuItem() { Header = "Polygon Method" };
             this.visualization_Menu.Click += visualization_Menu_Click;
+            this._strok_thickness = 0.1d;
         }
 
         private void visualization_Menu_Click(object sender, RoutedEventArgs e)
@@ -165,7 +166,7 @@ namespace SpatialAnalysis.Data.Visualization
             {
                 X1 = p.U,
                 Y1 = p.V,
-                StrokeThickness = .1,
+                StrokeThickness = this._strok_thickness,
                 Stroke = Brushes.Green,
             };
             this.Children.Add(this._line);
@@ -221,7 +222,7 @@ namespace SpatialAnalysis.Data.Visualization
                 Polygon polygon = new Polygon();
                 polygon.Points = this._polyline.Points.CloneCurrentValue();
                 polygon.Stroke = Brushes.Black;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._strok_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.LightBlue.Clone();
                 brush.Opacity=.3;
@@ -398,6 +399,7 @@ namespace SpatialAnalysis.Data.Visualization
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
             this._host._createNewSpatialDataField.Items.Add(this.visualization_Menu);
+            this._strok_thickness = UnitConversion.Convert(0.1d, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType);
         }
         /// <summary>
         /// Clears this instance.

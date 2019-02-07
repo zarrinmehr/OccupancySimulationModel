@@ -28,6 +28,7 @@ using System.Linq;
 using System.Text;
 using SpatialAnalysis.Optimization;
 using System.CodeDom.Compiler;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Data
 {
@@ -97,6 +98,10 @@ namespace SpatialAnalysis.Data
         /// </summary>
         MAN_AngularDeviationCost = 14,
         //MAN_GAUSSIANNEIGHBORHOODSIZE = 15,
+        /// <summary>
+        /// The cost of distance
+        /// </summary>
+        MAN_DistanceCost = 15,
     }
     /// <summary>
     /// Class Parameter.
@@ -191,52 +196,50 @@ namespace SpatialAnalysis.Data
             parameter._canBeDeleted = false;
             return parameter;
         }
-        private static Dictionary<AgentParameters, Parameter> _parameters = new Dictionary<AgentParameters, Parameter>
-        {
-            //{FreeNavigationAgentParameters.OPT_IsovistInternalDepth.ToString(),
-            //    Parameter.CreateReadOnly(FreeNavigationAgentParameters.OPT_IsovistInternalDepth.ToString(), 5.0d, 1.0d,5.0d)},
-            {AgentParameters.OPT_IsovistExternalDepth,
-                Parameter.CreateReadOnly(AgentParameters.OPT_IsovistExternalDepth.ToString(), 20.0d, 5.0d,25.0d)},
-            {AgentParameters.OPT_NumberOfDestinations,
-                Parameter.CreateReadOnly(AgentParameters.OPT_NumberOfDestinations.ToString(), 100.0d,20.0d,200.0d)},
-            {AgentParameters.OPT_AngleDistributionLambdaFactor, 
-                Parameter.CreateReadOnly(AgentParameters.OPT_AngleDistributionLambdaFactor.ToString(),2.5d,0.001d,3.0d)},
-            {AgentParameters.OPT_DesirabilityDistributionLambdaFactor,  
-                Parameter.CreateReadOnly(AgentParameters.OPT_DesirabilityDistributionLambdaFactor.ToString(),1.5d,0.001d,3.0d)},
-            {AgentParameters.OPT_DecisionMakingPeriodLambdaFactor,  
-                Parameter.CreateReadOnly(AgentParameters.OPT_DecisionMakingPeriodLambdaFactor.ToString(), 0.88d,0.05d,2.0d)},
-            {AgentParameters.GEN_VelocityMagnitude, 
-                Parameter.CreateReadOnly(AgentParameters.GEN_VelocityMagnitude.ToString(),3.0d,1.0d,5.0d)},
-            {AgentParameters.GEN_AngularVelocity, 
-                Parameter.CreateReadOnly(AgentParameters.GEN_AngularVelocity.ToString(), Math.PI, 0.1d,6.283185d)},
-            {AgentParameters.GEN_BodySize,  
-                Parameter.CreateReadOnly(AgentParameters.GEN_BodySize.ToString(),1.85d,0.1d,5.0d)},
-            {AgentParameters.GEN_VisibilityAngle,  
-                Parameter.CreateReadOnly(AgentParameters.GEN_VisibilityAngle.ToString(),160.0d, 0.0d,180.0d)},
-            {AgentParameters.GEN_BarrierRepulsionRange,
-                Parameter.CreateReadOnly(AgentParameters.GEN_BarrierRepulsionRange.ToString(), 3.0d,1.0d,5.0d)},
-            {AgentParameters.GEN_MaximumRepulsion,
-                    Parameter.CreateReadOnly(AgentParameters.GEN_MaximumRepulsion.ToString(), 10.0d,1.0d,20.0d)},
-            {AgentParameters.GEN_AccelerationMagnitude,
-                    Parameter.CreateReadOnly(AgentParameters.GEN_AccelerationMagnitude.ToString(), 10.0d,5.0d,15.0d)},
-            {AgentParameters.GEN_BarrierFriction,
-                    Parameter.CreateReadOnly(AgentParameters.GEN_BarrierFriction.ToString(), 0.1d,0.0d,1.0d)},
-            {AgentParameters.GEN_AgentBodyElasticity,
-                    Parameter.CreateReadOnly(AgentParameters.GEN_AgentBodyElasticity.ToString(), 0.2d,0.0d,1.0d)},
-            {AgentParameters.MAN_AngularDeviationCost,
-                    Parameter.CreateReadOnly(AgentParameters.MAN_AngularDeviationCost.ToString(), 3.0d,1.0d,7.0d)},
-            //{AgentParameters.MAN_GAUSSIANNEIGHBORHOODSIZE,
-            //        Parameter.CreateReadOnly(AgentParameters.MAN_AngularDeviationCost.ToString(),7,2,20)},
-        };
-
-        /// <summary>
-        /// Gets the default parameters.
-        /// </summary>
-        /// <value>The default parameters.</value>
-        public static Dictionary<AgentParameters, Parameter> DefaultParameters
-        {
-            get { return Parameter._parameters; }
+        public static void LoadDefaultParameters(Length_Unit_Types unitTypeOrigin,Length_Unit_Types unitTypeExpected) {
+            UnitConversion cntr = new UnitConversion(unitTypeOrigin, unitTypeExpected);
+            DefaultParameters = new Dictionary<AgentParameters, Parameter>
+            {
+                //{FreeNavigationAgentParameters.OPT_IsovistInternalDepth.ToString(),
+                //    Parameter.CreateReadOnly(FreeNavigationAgentParameters.OPT_IsovistInternalDepth.ToString(), 5.0d, 1.0d,5.0d)},
+                {AgentParameters.OPT_IsovistExternalDepth,
+                    Parameter.CreateReadOnly(AgentParameters.OPT_IsovistExternalDepth.ToString(), cntr.Convert(20.0d,6), cntr.Convert(5.0d,6),cntr.Convert(25.0d,6))},
+                {AgentParameters.OPT_NumberOfDestinations,
+                    Parameter.CreateReadOnly(AgentParameters.OPT_NumberOfDestinations.ToString(), 100.0d,20.0d,200.0d)},
+                {AgentParameters.OPT_AngleDistributionLambdaFactor,
+                    Parameter.CreateReadOnly(AgentParameters.OPT_AngleDistributionLambdaFactor.ToString(),2.5d,0.001d,3.0d)},
+                {AgentParameters.OPT_DesirabilityDistributionLambdaFactor,
+                    Parameter.CreateReadOnly(AgentParameters.OPT_DesirabilityDistributionLambdaFactor.ToString(),1.5d,0.001d,3.0d)},
+                {AgentParameters.OPT_DecisionMakingPeriodLambdaFactor,
+                    Parameter.CreateReadOnly(AgentParameters.OPT_DecisionMakingPeriodLambdaFactor.ToString(), 0.88d,0.05d,2.0d)},
+                {AgentParameters.GEN_VelocityMagnitude,
+                    Parameter.CreateReadOnly(AgentParameters.GEN_VelocityMagnitude.ToString(),cntr.Convert(3.8,6),cntr.Convert(2.0d,6),cntr.Convert(5.0d,6))},
+                {AgentParameters.GEN_AngularVelocity,
+                    Parameter.CreateReadOnly(AgentParameters.GEN_AngularVelocity.ToString(), Math.PI, 0.1d,6.283185d)},
+                {AgentParameters.GEN_BodySize,
+                    Parameter.CreateReadOnly(AgentParameters.GEN_BodySize.ToString(),cntr.Convert(1.80d,6),cntr.Convert(1.0d,6),cntr.Convert(2.2d,6))},
+                {AgentParameters.GEN_VisibilityAngle,
+                    Parameter.CreateReadOnly(AgentParameters.GEN_VisibilityAngle.ToString(),160.0d, 0.0d,180.0d)},
+                {AgentParameters.GEN_BarrierRepulsionRange,
+                    Parameter.CreateReadOnly(AgentParameters.GEN_BarrierRepulsionRange.ToString(), cntr.Convert(1.4d,6),cntr.Convert(1.0d,6),cntr.Convert(5.0d,6))},
+                {AgentParameters.GEN_MaximumRepulsion,
+                        Parameter.CreateReadOnly(AgentParameters.GEN_MaximumRepulsion.ToString(), cntr.Convert(15.0d,6),cntr.Convert(1.0d,6),cntr.Convert(20.0d,6))},
+                {AgentParameters.GEN_AccelerationMagnitude,
+                        Parameter.CreateReadOnly(AgentParameters.GEN_AccelerationMagnitude.ToString(), cntr.Convert(15.0d,6),cntr.Convert(5.0d,6),cntr.Convert(20.0d,6))},
+                {AgentParameters.GEN_BarrierFriction,
+                        Parameter.CreateReadOnly(AgentParameters.GEN_BarrierFriction.ToString(), 0.1d,0.0d,1.0d)},
+                {AgentParameters.GEN_AgentBodyElasticity,
+                        Parameter.CreateReadOnly(AgentParameters.GEN_AgentBodyElasticity.ToString(), 0.2d,0.0d,1.0d)},
+                {AgentParameters.MAN_AngularDeviationCost,
+                        Parameter.CreateReadOnly(AgentParameters.MAN_AngularDeviationCost.ToString(), 3.0d,1.0d,7.0d)},
+                {AgentParameters.MAN_DistanceCost,
+                        Parameter.CreateReadOnly(AgentParameters.MAN_DistanceCost.ToString(),cntr.Convert(1.0d,6),cntr.Convert(0.05d,6),cntr.Convert(2.0d,6))},
+                //{AgentParameters.MAN_GAUSSIANNEIGHBORHOODSIZE,
+                //        Parameter.CreateReadOnly(AgentParameters.MAN_AngularDeviationCost.ToString(),7,2,20)},
+            };
         }
+        public static Dictionary<AgentParameters, Parameter> DefaultParameters { get; set; }
+
     }
 }
 

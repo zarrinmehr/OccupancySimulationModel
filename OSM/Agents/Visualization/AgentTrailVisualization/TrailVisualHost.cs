@@ -744,7 +744,7 @@ namespace SpatialAnalysis.Agents.Visualization.AgentTrailVisualization
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
             this._host.Menues.Items.Add(this.visualization_Menu);
-
+            this._thickness = this._host.UnitConvertor.Convert(this._thickness);
 
         }
     }

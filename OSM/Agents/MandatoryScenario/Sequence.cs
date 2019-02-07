@@ -29,15 +29,35 @@ using System.Text;
 using SpatialAnalysis.FieldUtility;
 using SpatialAnalysis.Events;
 using SpatialAnalysis.CellularEnvironment;
-
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Agents.MandatoryScenario
 {
+    public enum SEQUENCE_PRIORITY_LEVEL
+    {
+        REGULAR = 0, //Normal Sequences
+        PARTIAL = 1, //Left over of a normal sequence which was interrupted y an urgent task
+        URGENT  = 2  //Tasks that are urgent and are visually detected 
+    }
+
     /// <summary>
     /// Represents a task as an ordered list of activities 
     /// </summary>
+    /// 
     public class Sequence
     {
+        public virtual SEQUENCE_PRIORITY_LEVEL PriorityType
+        {
+            get
+            {
+                if(this.VisualAwarenessField == null)
+                {
+                    return SEQUENCE_PRIORITY_LEVEL.REGULAR;
+                }
+                return SEQUENCE_PRIORITY_LEVEL.URGENT;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the visual awareness field from which this task can be visually detected. This property is set to null when the task does not require visual detection.
         /// </summary>
@@ -73,12 +93,13 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
         /// </summary>
         /// <value>The activity count.</value>
         public int ActivityCount { get { return this.ActivityNames.Count; } }
-        private string _name;
+        protected string _name;
         /// <summary>
         /// Gets the name.
         /// </summary>
         /// <value>The name.</value>
         public string Name  { get { return _name; } }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Sequence"/> class.
         /// </summary>
@@ -90,6 +111,16 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
             this.ActivityNames = new List<string>(activityNames);
             this._name = name;
             this.ActivationLambdaFactor = lambdaFactor;
+            this.TimeToGetVisuallyDetected = 0;
+        }
+        /// <summary>
+        /// This empty constructor is used only for PartialSequence class
+        /// </summary>
+        protected Sequence()
+        {
+            this.ActivityNames = new List<string>();
+            this._name = string.Empty;
+            this.ActivationLambdaFactor = 0;
             this.TimeToGetVisuallyDetected = 0;
         }
         /// <summary>
@@ -131,6 +162,15 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
             this.VisualAwarenessField = visualAwarenessEvent;
         }
 
+        public virtual string GetNextActivityName(int index)
+        {
+            if (index < this.ActivityNames.Count)
+            {
+                return this.ActivityNames[index];
+            }
+            throw new ArgumentException(string.Format("Index {0} was out of range of numer of activities in sequence {1}", index.ToString(), this.Name));
+        }
+
         /// <summary>
         /// Gets the string representation of this task.
         /// </summary>
@@ -169,7 +209,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
         /// or
         /// The sequence does not include any activities!
         /// </exception>
-        public static Sequence FromStringRepresentation(List<string> lines, CellularFloor cellularFloor, double tolerance = 0.0000001d )
+        public static Sequence FromStringRepresentation(List<string> lines, Length_Unit_Types unitType, CellularFloor cellularFloor, double tolerance = 0.0000001d )
         {
             if (string.IsNullOrWhiteSpace(lines[0]) || string.IsNullOrEmpty(lines[0]))
             {
@@ -193,10 +233,10 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
             {
                 throw new ArgumentException("The sequence does not include any activities!");
             }
-            Sequence sequence = new Sequence(purged, lines[0], lambda);
+            Sequence sequence = new Sequence(purged, lines[0].Trim(' '), lambda);
             if (lines.Count>3)
             {
-                var visualEvent = VisibilityTarget.FromString(lines, 3, cellularFloor, tolerance);
+                var visualEvent = VisibilityTarget.FromString(lines, 3, unitType, cellularFloor, tolerance);
                 sequence.AssignVisualEvent(visualEvent);
             }
             return sequence;
@@ -204,9 +244,49 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
 
     }
 
-    
+    public class PartialSequence: Sequence
+    {
+        public override SEQUENCE_PRIORITY_LEVEL PriorityType { get { return SEQUENCE_PRIORITY_LEVEL.PARTIAL; } }
+        public Sequence OriginalSequence { get; set; }
+        public PartialSequence(): base()
+        {
+            this._name = "Partial ";
+            this.OriginalSequence = null;
+        }
 
+        public void Reset()
+        {
+            this.ActivityNames.Clear();
+            this.OriginalSequence = null;
+            this._name = "Partial ";
+        }
 
+        public void Assign(Sequence sequence, int activityIndex)
+        {
+            if(sequence.PriorityType == SEQUENCE_PRIORITY_LEVEL.PARTIAL)
+            {
+                if (PartialSequence.ReferenceEquals(this, sequence))
+                {
+                    throw new ArgumentException("the same instance mapped o itself!!!");
+                }
+                throw new ArgumentException("Partial to partial found!!!");
+
+            }
+            if (activityIndex < sequence.ActivityNames.Count)
+            {
+                this.ActivityNames = sequence.ActivityNames.GetRange(activityIndex, sequence.ActivityNames.Count - activityIndex);
+                this.OriginalSequence = sequence;
+                this._name = "Partial " + sequence.Name;
+            }
+        }
+        public void Trim(int activityIndex)
+        {
+            this.ActivityNames = this.ActivityNames.GetRange(activityIndex, this.ActivityNames.Count - activityIndex);
+        }
+
+        public bool IsEmpty { get { return this.ActivityNames.Count == 0; } }
+
+    }
 
 }
 

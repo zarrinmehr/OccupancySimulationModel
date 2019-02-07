@@ -40,6 +40,7 @@ using SpatialAnalysis.Visualization;
 using SpatialAnalysis.Events;
 using SpatialAnalysis.IsovistUtility;
 using SpatialAnalysis.Miscellaneous;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
 {
@@ -105,7 +106,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 for (int i = 1; i < sequence.ActivityNames.Count; i++)
                 {
                     var origin = this._host.AllActivities[sequence.ActivityNames[i - 1]].DefaultState.Location;
-                    var path = this._host.AllActivities[sequence.ActivityNames[i]].GetGradientPath(origin, stepSize);
+                    var path = this._host.AllActivities[sequence.ActivityNames[i]].GetGradientPath(origin, stepSize,10000);
                     paths.AddRange(path);
                 }
                 PathGeometry pg = new PathGeometry();
@@ -345,6 +346,8 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         {
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
+            this.Thickness = this._host.UnitConvertor.Convert(0.20d);
+            this._pen.Thickness = this.Thickness;
         }
         private void drawSequenceActivities(Sequence sequence)
         {

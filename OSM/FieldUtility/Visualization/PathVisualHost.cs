@@ -50,10 +50,14 @@ namespace SpatialAnalysis.FieldUtility.Visualization
         private List<System.Windows.Media.Geometry> geoms { get; set; }
         private MenuItem visualizationMenu { get; set; }
         private MenuItem draw_menu { get; set; }
+        private MenuItem set_iterations_menu { get; set; }
+        private MenuItem set_gradient_stepSize_menu { get; set; }
         private MenuItem hide_Show_Menu { get; set; }
         private MenuItem boarderThickness_Menu { get; set; }
         private MenuItem boarderBrush_Menu { get; set; }
         private MenuItem clear_Menu { get; set; }
+        private double maximum_gradient_stepSize;
+        private int maximum_gradient_descent_iterations;
         // Create a collection of child visual objects.
         private VisualCollection _children { get; set; }
 
@@ -62,18 +66,25 @@ namespace SpatialAnalysis.FieldUtility.Visualization
         /// </summary>
         public PathVisualHost()
         {
+            this.maximum_gradient_stepSize = 0.1d;
+            this.maximum_gradient_descent_iterations = 10000;
             this.pathThickness = 1;
             this.pathBrush = Brushes.Black;
             this.geoms = new List<System.Windows.Media.Geometry>();
             _children = new VisualCollection(this);
 
             this.visualizationMenu = new MenuItem() { Header = "Gradient Path" };
+            
             this.draw_menu = new MenuItem() { Header = "Draw Path" };
+            this.set_iterations_menu = new MenuItem { Header = "Maximum Descent Iterations" };
+            this.set_gradient_stepSize_menu = new MenuItem { Header = "Maximum Gradient Step-Size" };
             this.boarderBrush_Menu = new MenuItem() { Header = "Path Brush" };
             this.boarderThickness_Menu = new MenuItem() { Header = "Path Thickness" };
             this.hide_Show_Menu = new MenuItem() { Header = "Hide" };
             this.clear_Menu = new MenuItem() { Header = "Clear" };
             this.visualizationMenu.Items.Add(this.draw_menu);
+            this.visualizationMenu.Items.Add(this.set_gradient_stepSize_menu);
+            this.visualizationMenu.Items.Add(this.set_iterations_menu);
             this.visualizationMenu.Items.Add(this.boarderThickness_Menu);
             this.visualizationMenu.Items.Add(this.boarderBrush_Menu);
             this.visualizationMenu.Items.Add(this.hide_Show_Menu);
@@ -83,6 +94,46 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             this.boarderBrush_Menu.Click += boarderBrush_Menu_Click;
             this.clear_Menu.Click += clear_Menu_Click;
             this.draw_menu.Click += new RoutedEventHandler(findGradientPath_Click);
+            this.set_iterations_menu.Click += Set_iterations_menu_Click;
+            this.set_gradient_stepSize_menu.Click += Set_stepFactor_menu_Click;
+        }
+
+        private void Set_stepFactor_menu_Click(object sender, RoutedEventArgs e)
+        {
+
+            GetNumber getNumber = new GetNumber("Gradient Step Size Factor",
+                "Gradients will be multiplied with this factor to descent.", this.maximum_gradient_stepSize);
+            getNumber.Owner = this._host;
+            getNumber.ShowInTaskbar = false;
+            getNumber.ShowDialog();
+            double number = getNumber.NumberValue;
+            if (number < 0.01) { MessageBox.Show("The new factor should be larger than 0.01"); }
+            else if(number>this._host.cellularFloor.CellSize) { MessageBox.Show("The new factor should be smaller than cell size: " + this._host.cellularFloor.CellSize.ToString("0.0000")); }
+            else
+            {
+                if (number != this.maximum_gradient_stepSize)
+                {
+                    this.maximum_gradient_stepSize = number;
+                }
+            }
+        }
+
+        private void Set_iterations_menu_Click(object sender, RoutedEventArgs e)
+        {
+            GetNumber getNumber = new GetNumber("Set Maximum Descent Iterations",
+                "Descending process will terminate after this number of iterations.", this.maximum_gradient_descent_iterations);
+            getNumber.Owner = this._host;
+            getNumber.ShowInTaskbar = false;
+            getNumber.ShowDialog();
+            int number = (int)getNumber.NumberValue;
+            if (number < 100) { MessageBox.Show("Iterations should be larger than 100"); }
+            else
+            {
+                if(number != this.maximum_gradient_descent_iterations)
+                {
+                    this.maximum_gradient_descent_iterations = number;
+                }
+            }
         }
 
         void clear_Menu_Click(object sender, RoutedEventArgs e)
@@ -104,6 +155,8 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             this.boarderBrush_Menu.Click -= boarderBrush_Menu_Click;
             this.clear_Menu.Click -= clear_Menu_Click;
             this.draw_menu.Click -= findGradientPath_Click;
+            this.set_iterations_menu.Click -= Set_iterations_menu_Click;
+            this.set_gradient_stepSize_menu.Click -= Set_stepFactor_menu_Click;
             this.pathBrush = null;
             this.visualizationMenu = null;
             this.draw_menu = null;
@@ -119,7 +172,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             colorPicker.Owner = this._host;
             colorPicker.ShowDialog();
             this.pathBrush = colorPicker._Brush;
-            this.reDraw();
+            //this.reDraw();                        /*Do not change the color of the previous pathes*/
             colorPicker = null;
         }
 
@@ -129,7 +182,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             gn.Owner = this._host;
             gn.ShowDialog();
             this.pathThickness = gn.NumberValue;
-            this.reDraw();
+            this.reDraw();                          /*Do not change the thickness of the previous pathes*/
             gn = null;
         }
 
@@ -197,6 +250,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
 
         private void reDraw()
         {
+            if (this.geoms == null || this.geoms.Count == 0) return;
             double scale = this.getScaleFactor();
             Pen pen = new Pen(this.pathBrush, this.pathThickness / scale);
             _children.Clear();
@@ -220,6 +274,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
             this._host._activities.Items.Add(this.visualizationMenu);
+            this.maximum_gradient_stepSize = this._host.UnitConvertor.Convert(0.1);
         }
         #region find gradient path
         private void findGradientPath_Click(object sender, RoutedEventArgs e)
@@ -270,7 +325,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             }
             try
             {
-                var path = activeField.GetGradientPath(p);
+                var path = activeField.GetGradientPath(p,this.maximum_gradient_stepSize,this.maximum_gradient_descent_iterations);
                 this.draw(path);
             }
             catch (Exception error)

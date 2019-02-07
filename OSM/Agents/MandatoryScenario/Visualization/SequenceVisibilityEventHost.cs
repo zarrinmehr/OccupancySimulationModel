@@ -53,10 +53,13 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         private OSMDocument _host { get; set; }
         private VisualEventSettings _settings { get; set; }
         public VisibilityTarget VisualEvent { get; set; }
+        private double _stroke_thickness;
         /// <summary>
         /// Initializes a new instance of the <see cref="SequenceVisibilityEventHost"/> class.
         /// </summary>
-        public SequenceVisibilityEventHost() { }
+        public SequenceVisibilityEventHost() {
+            this._stroke_thickness = 0.1d;
+        }
 
         /// <summary>
         /// Sets the visual events.
@@ -260,7 +263,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             {
                 X1 = p.U,
                 Y1 = p.V,
-                StrokeThickness = .1,
+                StrokeThickness = this._stroke_thickness,
                 Stroke = System.Windows.Media.Brushes.DarkRed,
             };
             this.Children.Add(this._line);
@@ -282,7 +285,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 Polygon polygon = new Polygon();
                 polygon.Points = this._polyline.Points.CloneCurrentValue();
                 polygon.Stroke = Brushes.DarkRed;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._stroke_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.DarkRed.Clone();
                 brush.Opacity = .3;
@@ -399,7 +402,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 var lines = cell.ToUVLines(this._host.cellularFloor.CellSize);
                 Polygon polygon = new Polygon();
                 polygon.Stroke = Brushes.DarkRed;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._stroke_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.DarkRed.Clone();
                 brush.Opacity = .3;
@@ -426,6 +429,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         {
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
+            this._stroke_thickness = this._host.UnitConvertor.Convert(this._stroke_thickness);
         }
 
     }

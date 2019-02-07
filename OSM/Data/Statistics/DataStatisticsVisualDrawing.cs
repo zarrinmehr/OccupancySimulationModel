@@ -43,6 +43,7 @@ namespace SpatialAnalysis.Data.Statistics
         private MatrixTransform _geometryTransform { get; set; }
         private Brush _trendlineBrush { get; set; }
         private Brush _pointsBrush { get; set; }
+        //this thickness does not need unit conversion
         private double _thickness { get; set; }
         private VisualCollection _children;
         /// <summary>

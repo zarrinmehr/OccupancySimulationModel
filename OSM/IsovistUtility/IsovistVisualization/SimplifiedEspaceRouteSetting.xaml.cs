@@ -63,6 +63,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             this.AngleIntercept.Text = this._host.MaximumNumberOfDestinations.ToString();
         }
 
+
         void _setCosts_Click(object sender, RoutedEventArgs e)
         {
             var costSetter = new SpatialDataControlPanel(this._host, IncludedDataTypes.SpatialData);

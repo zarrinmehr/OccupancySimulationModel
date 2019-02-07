@@ -41,6 +41,7 @@ using SpatialAnalysis.FieldUtility;
 using SpatialAnalysis.Visualization;
 using System.Windows.Media.Imaging;
 using SpatialAnalysis.Miscellaneous;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.FieldUtility.Visualization
 {
@@ -81,6 +82,8 @@ namespace SpatialAnalysis.FieldUtility.Visualization
         private HashSet<Cell> _destinations { get; set; }
         //private double _angularDeviationWeight = 1.0d;
         private StateBase _stateBase { get; set; }
+
+        private double _stroke_thickness;
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateActivityVisualHost"/> class.
         /// </summary>
@@ -90,6 +93,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             this.visualization_Menu.Click += visualization_Menu_Click;
             this._editeActivity_Menu = new MenuItem() { Header = "Edit, Save, Load Activities" };
             this._editeActivity_Menu.Click += _editeActivity_Menu_Click;
+            this._stroke_thickness = 0.1d;
         }
 
         void _editeActivity_Menu_Click(object sender, RoutedEventArgs e)
@@ -166,7 +170,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             {
                 X1 = this._stateBase.Location.U,
                 Y1 = this._stateBase.Location.V,
-                StrokeThickness = .1,
+                StrokeThickness = this._stroke_thickness,
                 Stroke = System.Windows.Media.Brushes.Green,
             };
             this.Children.Add(this._directionline);
@@ -221,7 +225,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
                 var lines = cell.ToUVLines(this._host.cellularFloor.CellSize);
                 Polygon polygon = new Polygon();
                 polygon.Stroke = Brushes.Black;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._stroke_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.LightBlue.Clone();
                 brush.Opacity = .3;
@@ -283,7 +287,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             {
                 X1 = p.U,
                 Y1 = p.V,
-                StrokeThickness = .1,
+                StrokeThickness = this._stroke_thickness,
                 Stroke = System.Windows.Media.Brushes.Green,
             };
             this.Children.Add(this._line);
@@ -305,7 +309,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
                 Polygon polygon = new Polygon();
                 polygon.Points = this._polyline.Points.CloneCurrentValue();
                 polygon.Stroke = Brushes.Black;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._stroke_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.LightBlue.Clone();
                 brush.Opacity = .3;
@@ -616,6 +620,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
         public void SetHost(OSMDocument host)
         {
             this._host = host;
+            this._stroke_thickness = UnitConversion.Convert(0.1, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType);
             this.RenderTransform = this._host.RenderTransformation;
             this._host._activities.Items.Insert(0,this._editeActivity_Menu);
             this._host._activities.Items.Insert(0, this.visualization_Menu);

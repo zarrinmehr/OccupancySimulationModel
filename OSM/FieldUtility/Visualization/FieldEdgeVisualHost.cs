@@ -64,7 +64,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
         public FieldEdgeVisualHost()
         {
             this._children = new VisualCollection(this);
-            this._brush = Brushes.LightSalmon.Clone();
+            this._brush = Brushes.LightGreen.Clone();
             this._brush.Opacity = 0.50d;
         }
         /// <summary>

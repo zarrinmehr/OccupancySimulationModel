@@ -30,6 +30,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Windows.Controls;
 using Autodesk.Revit.UI;
+using SpatialAnalysis.Interoperability;
 using SpatialAnalysis.Miscellaneous;
 
 namespace OSM_Revit.REVIT_INTEROPERABILITY
@@ -54,6 +55,8 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
 
         }
         #endregion
+        private Length_Unit_Types unitType;
+        public Length_Unit_Types LengthUnitType { get { return unitType; } }
         /// <summary>
         /// The door Ids
         /// </summary>
@@ -75,6 +78,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         /// </summary>
         public double MinimumHeight;
         private List<ViewPlan> floorPlanNames;
+        public bool MetricSystem { get; private set; }
         private UIDocument uidoc;
         /// <summary>
         /// Initializes a new instance of the <see cref="OSM_ENV_Setting"/> class.
@@ -91,7 +95,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             floorPlanNames = new List<ViewPlan>();
             foreach (ViewPlan item in floorViewCollector)
             {
-                if (item.ViewType == ViewType.FloorPlan && item.IsTemplate == false && item.ViewName != "Site")
+                if (item.ViewType == ViewType.FloorPlan && item.IsTemplate == false && item.Name != "Site")
                 {
                     FilteredElementCollector floorCollector = new FilteredElementCollector(document, item.Id).OfClass(typeof(Floor));
                     bool hasFloor = false;
@@ -118,6 +122,77 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             this.DoorIds = new HashSet<ElementId>();
             this.uidoc = new UIDocument(document);
             this.KeyDown += new System.Windows.Input.KeyEventHandler(FloorSetting_KeyDown);
+
+            //set units
+            UnitOfLength.Items.Add(Length_Unit_Types.FEET);
+            UnitOfLength.Items.Add(Length_Unit_Types.INCHES);
+            UnitOfLength.Items.Add(Length_Unit_Types.METERS);
+            UnitOfLength.Items.Add(Length_Unit_Types.DECIMETERS);
+            UnitOfLength.Items.Add(Length_Unit_Types.CENTIMETERS);
+            UnitOfLength.Items.Add(Length_Unit_Types.MILLIMETERS);
+            //get unit from Revit document
+            FormatOptions format = document.GetUnits().GetFormatOptions(UnitType.UT_Length);
+            DisplayUnitType lengthUnitType = format.DisplayUnits;
+            bool formatParsed = false;
+            switch (lengthUnitType)
+            {
+                case DisplayUnitType.DUT_METERS:
+                    unitType = Length_Unit_Types.METERS;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_CENTIMETERS:
+                    unitType = Length_Unit_Types.CENTIMETERS;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_DECIMETERS:
+                    unitType = Length_Unit_Types.DECIMETERS;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_MILLIMETERS:
+                    unitType = Length_Unit_Types.MILLIMETERS;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_DECIMAL_FEET:
+                    unitType = Length_Unit_Types.FEET;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES:
+                    unitType = Length_Unit_Types.FEET;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_FRACTIONAL_INCHES:
+                    unitType = Length_Unit_Types.INCHES;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_DECIMAL_INCHES:
+                    unitType = Length_Unit_Types.INCHES;
+                    formatParsed = true;
+                    break;
+                case DisplayUnitType.DUT_METERS_CENTIMETERS:
+                    unitType = Length_Unit_Types.METERS;
+                    formatParsed = true;
+                    break;
+                default:
+                    break;
+            }
+            if (!formatParsed)
+            {
+                MessageBox.Show("Failed to parse length unit system: " + lengthUnitType.ToString()+"\n"+
+                    "The default choice is 'Feet'.\n"+
+                    "Select a unit type from the available options."
+                    , "Length Unit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                unitType = Length_Unit_Types.FEET;
+                UnitOfLength.SelectedItem = unitType;
+            }
+            else
+            {
+                UnitOfLength.IsEditable = false;
+                UnitOfLength.IsHitTestVisible = false;
+                UnitOfLength.Focusable = false;
+                UnitOfLength.SelectedItem = unitType;
+                updateTextBoxUnits(Length_Unit_Types.FEET, unitType);
+            }
+            UnitOfLength.SelectionChanged += UnitOfLength_SelectionChanged;
         }
 
         void FloorSetting_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -172,14 +247,17 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 {
                     PlanViewRange viewRange = this.FloorPlan.GetViewRange();
                     ElementId topClipPlane = viewRange.GetLevelId(PlanViewPlane.TopClipPlane);
-                    if (viewRange.GetOffset(PlanViewPlane.TopClipPlane)<this.MinimumHeight)
+                    double revitMinimumHeight = UnitConversion.Convert(this.MinimumHeight, this.unitType, Length_Unit_Types.FEET);
+
+
+                    if (viewRange.GetOffset(PlanViewPlane.TopClipPlane)< revitMinimumHeight)
                     {
-                        viewRange.SetOffset(PlanViewPlane.CutPlane, this.MinimumHeight);
-                        viewRange.SetOffset(PlanViewPlane.TopClipPlane, this.MinimumHeight);
+                        viewRange.SetOffset(PlanViewPlane.CutPlane, revitMinimumHeight);
+                        viewRange.SetOffset(PlanViewPlane.TopClipPlane, revitMinimumHeight);
                     }
                     else
                     {
-                        viewRange.SetOffset(PlanViewPlane.CutPlane, this.MinimumHeight);
+                        viewRange.SetOffset(PlanViewPlane.CutPlane, revitMinimumHeight);
                     }
                     this.FloorPlan.SetViewRange(viewRange);
                 }
@@ -231,6 +309,30 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             else
             {
                 this.FloorPlan = null;
+            }
+        }
+
+        private void UnitOfLength_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Length_Unit_Types lut = (Length_Unit_Types)UnitOfLength.SelectedItem;
+            updateTextBoxUnits(unitType, lut);
+            unitType = lut;
+        }
+        
+        void updateTextBoxUnits(Length_Unit_Types original,Length_Unit_Types expected)
+        {
+            double number = 0.0;
+            if(double.TryParse(ObstacleSetting.Text,out number))
+            {
+                ObstacleSetting.Text = UnitConversion.Convert(number, original, expected).ToString("0.000000");
+            }
+            if (double.TryParse(CurveApproximationLength_.Text, out number))
+            {
+                CurveApproximationLength_.Text = UnitConversion.Convert(number, original, expected).ToString("0.000000");
+            }
+            if (double.TryParse(MinimumCurveLength_.Text, out number))
+            {
+                MinimumCurveLength_.Text = UnitConversion.Convert(number, original, expected).ToString("0.000000");
             }
         }
     }

@@ -38,6 +38,12 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
     /// <seealso cref="SpatialAnalysis.ExternalConnection.I_OSM_To_BIM" />
     public class OSM_To_Revit : I_OSM_To_BIM
     {
+        private UnitConversion unitConversion;
+        public OSM_To_Revit(Length_Unit_Types OSM_unit)
+        {
+            //revit uses double values to represent feet imperial unit
+            this.unitConversion = new UnitConversion(OSM_unit, Length_Unit_Types.FEET);
+        }
         /// <summary>
         /// Visualizes the open boundary.
         /// </summary>
@@ -46,6 +52,15 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         [STAThread]
         public void VisualizeOpenBoundary(List<SpatialAnalysis.Geometry.UV> points, double elevation)
         {
+            //create a deep copy of the list
+            var copy = new List<SpatialAnalysis.Geometry.UV>();
+            foreach (var item in points)
+            {
+                copy.Add(item.Copy());
+            }
+            //transform units
+            unitConversion.Transform(copy);
+            //draw in revit
             using (Transaction t = new Transaction(OSM_FOR_REVIT.RevitDocument, "Draw Boundary"))
             {
                 t.Start();
@@ -54,12 +69,12 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 t.SetFailureHandlingOptions(failOpt);
                 Plane p = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, elevation));
                 SketchPlane skp = SketchPlane.Create(OSM_FOR_REVIT.RevitDocument, p);
-                for (int i = 0; i < points.Count - 1; i++)
+                for (int i = 0; i < copy.Count - 1; i++)
                 {
                     try
                     {
-                        XYZ p1 = new XYZ(points[i].U, points[i].V, elevation);
-                        XYZ p2 = new XYZ(points[i + 1].U, points[i + 1].V, elevation);
+                        XYZ p1 = new XYZ(copy[i].U, copy[i].V, elevation);
+                        XYZ p2 = new XYZ(copy[i + 1].U, copy[i + 1].V, elevation);
                         Line l = Line.CreateBound(p1, p2);
                         OSM_FOR_REVIT.RevitDocument.Create.NewModelCurve(l, skp);
                     }
@@ -77,6 +92,17 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         [STAThread]
         public void VisualizePolygon(SpatialAnalysis.Geometry.UV[] points, double elevation)
         {
+            //create a deep copy of the list
+            var copy = new SpatialAnalysis.Geometry.UV[points.Length];
+            int pointCount = 0;
+            foreach (var item in points)
+            {
+                copy[pointCount] = new SpatialAnalysis.Geometry.UV(item);
+                pointCount++;
+            }
+            //transform units
+            unitConversion.Transform(copy);
+            //draw in revit
             using (Transaction t = new Transaction(OSM_FOR_REVIT.RevitDocument, "Draw Boundary"))
             {
                 t.Start();
@@ -85,13 +111,13 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 t.SetFailureHandlingOptions(failOpt);
                 Plane p = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, elevation));
                 SketchPlane skp = SketchPlane.Create(OSM_FOR_REVIT.RevitDocument, p);
-                for (int i = 0; i < points.Length; i++)
+                for (int i = 0; i < copy.Length; i++)
                 {
                     try
                     {
-                        XYZ p1 = new XYZ(points[i].U, points[i].V, elevation);
-                        int j = (i == points.Length - 1) ? 0 : i + 1;
-                        XYZ p2 = new XYZ(points[j].U, points[j].V, elevation);
+                        XYZ p1 = new XYZ(copy[i].U, copy[i].V, elevation);
+                        int j = (i == copy.Length - 1) ? 0 : i + 1;
+                        XYZ p2 = new XYZ(copy[j].U, copy[j].V, elevation);
                         Line l = Line.CreateBound(p1, p2);
                         OSM_FOR_REVIT.RevitDocument.Create.NewModelCurve(l, skp);
                     }
@@ -109,6 +135,10 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         [STAThread]
         public void VisualizeLine(UVLine line, double elevation)
         {
+            SpatialAnalysis.Geometry.UV start = line.Start.Copy();
+            SpatialAnalysis.Geometry.UV end = line.End.Copy();
+            unitConversion.Transform(start);
+            unitConversion.Transform(end);
             using (Transaction t = new Transaction(OSM_FOR_REVIT.RevitDocument, "Draw Barriers"))
             {
                 t.Start();
@@ -119,8 +149,8 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 SketchPlane skp = SketchPlane.Create(OSM_FOR_REVIT.RevitDocument, p);
                 try
                 {
-                    XYZ p1 = new XYZ(line.Start.U, line.Start.V, elevation);
-                    XYZ p2 = new XYZ(line.End.U, line.End.V, elevation);
+                    XYZ p1 = new XYZ(start.U, start.V, elevation);
+                    XYZ p2 = new XYZ(end.U, end.V, elevation);
                     Line l = Line.CreateBound(p1, p2);
                     OSM_FOR_REVIT.RevitDocument.Create.NewModelCurve(l, skp);
                 }
@@ -139,10 +169,14 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         [STAThread]
         public void VisualizePoint(SpatialAnalysis.Geometry.UV pnt, double size, double elevation)
         {
-            XYZ p1 = new XYZ(pnt.U - size / 2, pnt.V - size / 2, elevation);
-            XYZ p2 = new XYZ(pnt.U + size / 2, pnt.V + size / 2, elevation);
-            XYZ q1 = new XYZ(pnt.U + size / 2, pnt.V - size / 2, elevation);
-            XYZ q2 = new XYZ(pnt.U - size / 2, pnt.V + size / 2, elevation);
+            //unit conversion
+            SpatialAnalysis.Geometry.UV p = pnt.Copy();
+            unitConversion.Transform(p);
+            //revit drawing
+            XYZ p1 = new XYZ(p.U - size / 2, p.V - size / 2, elevation);
+            XYZ p2 = new XYZ(p.U + size / 2, p.V + size / 2, elevation);
+            XYZ q1 = new XYZ(p.U + size / 2, p.V - size / 2, elevation);
+            XYZ q2 = new XYZ(p.U - size / 2, p.V + size / 2, elevation);
             using (Transaction t = new Transaction(OSM_FOR_REVIT.RevitDocument, "Show Point"))
             {
                 t.Start();
@@ -167,6 +201,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         [STAThread]
         public void VisualizeLines(ICollection<UVLine> lines, double elevation)
         {
+            
             using (Transaction t = new Transaction(OSM_FOR_REVIT.RevitDocument, "Draw lines"))
             {
                 t.Start();
@@ -177,10 +212,16 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 SketchPlane skp = SketchPlane.Create(OSM_FOR_REVIT.RevitDocument, p);
                 foreach (UVLine item in lines)
                 {
+                    //unit conversion
+                    SpatialAnalysis.Geometry.UV start = item.Start.Copy();
+                    unitConversion.Transform(start);
+                    SpatialAnalysis.Geometry.UV end = item.End.Copy();
+                    unitConversion.Transform(end);
+                    //revit drawing part
                     try
                     {
-                        XYZ p1 = new XYZ(item.Start.U, item.Start.V, elevation);
-                        XYZ p2 = new XYZ(item.End.U, item.End.V, elevation);
+                        XYZ p1 = new XYZ(start.U, start.V, elevation);
+                        XYZ p2 = new XYZ(end.U, end.V, elevation);
                         Line l = Line.CreateBound(p1, p2);
                         OSM_FOR_REVIT.RevitDocument.Create.NewModelCurve(l, skp);
                     }
@@ -200,7 +241,9 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         {
             UIDocument uidoc = new Autodesk.Revit.UI.UIDocument(OSM_FOR_REVIT.RevitDocument);
             XYZ xyz = uidoc.Selection.PickPoint(message);
-            return new SpatialAnalysis.Geometry.UV(xyz.X, xyz.Y);
+            var revitUV = new SpatialAnalysis.Geometry.UV(xyz.X, xyz.Y);
+            UnitConversion.Transform(revitUV, Length_Unit_Types.FEET, unitConversion.FromUnit);
+            return revitUV;
         }
     }
 

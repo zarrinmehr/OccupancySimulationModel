@@ -34,6 +34,7 @@ using SpatialAnalysis.Agents;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Threading;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Events
 {
@@ -178,12 +179,13 @@ namespace SpatialAnalysis.Events
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <param name="tolerance">The tolerance.</param>
         /// <returns>VisibilityEvaluationEvent.</returns>
-        public static VisibilityTarget FromString(List<String> lines, int start, CellularFloor cellularFloor, double tolerance = 0.0000001d)
+        public static VisibilityTarget FromString(List<String> lines, int start, Length_Unit_Types unitType, CellularFloor cellularFloor, double tolerance = 0.0000001d)
         {
             List<SpatialAnalysis.Geometry.BarrierPolygons> barriers = new List<Geometry.BarrierPolygons>();
             for (int i = start; i < lines.Count; i++)
             {
                 var barrier = SpatialAnalysis.Geometry.BarrierPolygons.FromStringRepresentation(lines[i]);
+                UnitConversion.Transform(barrier.BoundaryPoints, unitType, cellularFloor.UnitType);
                 barriers.Add(barrier);
             }
             return new VisibilityTarget(barriers, cellularFloor, tolerance);

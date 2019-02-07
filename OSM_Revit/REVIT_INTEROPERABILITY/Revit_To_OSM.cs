@@ -49,6 +49,8 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
     /// <seealso cref="SpatialAnalysis.ExternalConnection.BIM_ReaderBase" /> 
     public class Revit_To_OSM : BIM_To_OSM_Base
     {
+        private double revitVisibilityHeight;
+        private UnitConversion unitConversion;
         private Options _optionsNoView { get; set; }
         private Options _optionsWithView { get; set; }
         private Document document { get; set; }
@@ -94,9 +96,11 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         /// <param name="curveApproximationLength">Length of the curve approximation.</param>
         /// <param name="minimumLengthOfLine">The minimum length of line.</param>
         /// <param name="doorsToInclude">The doors to include.</param>
-        public Revit_To_OSM(Document doc, ViewPlan floorPlan, double obstacleHeight, double curveApproximationLength, double minimumLengthOfLine, HashSet<ElementId> doorsToInclude)
+        public Revit_To_OSM(Document doc, ViewPlan floorPlan, double obstacleHeight, double curveApproximationLength, double minimumLengthOfLine, HashSet<ElementId> doorsToInclude, Length_Unit_Types lengthUnitType)
         {
             this.document = doc;
+            this.unitType = lengthUnitType;
+            this.unitConversion = new UnitConversion(Length_Unit_Types.FEET, this.UnitType);
             this.FloorPlanView = floorPlan;
             this.DoorsToInclude = doorsToInclude;
             this._optionsWithView = this.document.Application.Create.NewGeometryOptions();
@@ -107,7 +111,9 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             this._optionsNoView.ComputeReferences = true;
             this._optionsNoView.IncludeNonVisibleObjects = false;
             this.VisibilityObstacleHeight = obstacleHeight;
-            this.PlanElevation = this.FloorPlanView.GenLevel.Elevation;
+            this.revitVisibilityHeight = UnitConversion.Convert(obstacleHeight, this.UnitType, Length_Unit_Types.FEET);
+            this.PlanElevation = unitConversion.Convert(this.FloorPlanView.GenLevel.Elevation);
+             
             this.PlanName = this.FloorPlanView.Name;
             this.CurveApproximationLength = curveApproximationLength;
             this.MinimumLengthOfLine = minimumLengthOfLine;
@@ -117,6 +123,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             this.setTerritory();
             this._optionsNoView.Dispose();
             this._optionsWithView.Dispose();
+
         }
 
 
@@ -436,7 +443,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                                 pointOnMesh = face.Triangulate().get_Triangle(0).get_Vertex(1);
                                 norm = face.ComputeNormal(face.Project(pointOnMesh).UVPoint);
                             }
-                            if (norm.IsAlmostEqualTo(XYZ.BasisZ) && Math.Abs(pointOnMesh.Z - this.FloorPlanView.GenLevel.Elevation - this.VisibilityObstacleHeight) < .01)//I am also checking the hight of face
+                            if (norm.IsAlmostEqualTo(XYZ.BasisZ) && Math.Abs(pointOnMesh.Z - this.FloorPlanView.GenLevel.Elevation - this.revitVisibilityHeight) < .01)//I am also checking the hight of face
                             {
                                 topFaces.Add(face);
                             }
@@ -490,6 +497,8 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                         {
                             points.AddRange(EdgePoints(edgeArray.get_Item(i), face));
                         }
+                        //unit transformation
+                        unitConversion.Transform(points);
                         allPoints.Add(points);
                         points = null;
                     }
@@ -532,7 +541,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         //finding the shadows of all of the furniture on the ground when they block view
         private List<Face> getVisualFurnituresBlocksShadows(List<Element> elements)
         {
-            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.VisibilityObstacleHeight;
+            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.revitVisibilityHeight;
             List<Face> faces = new List<Face>();
             using (Plane p = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, this.FloorPlanView.GenLevel.Elevation - 10)))
             {
@@ -581,7 +590,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         //finding the shadows of all of the furniture on the ground
         private List<Face> getAllFurnituresShadows(List<Element> elements)
         {
-            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.VisibilityObstacleHeight;
+            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.revitVisibilityHeight;
             List<Face> faces = new List<Face>();
             using (Plane p =  Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, this.FloorPlanView.GenLevel.Elevation - 10)))
             {
@@ -675,7 +684,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         //finding the shadows of all of the furniture on the ground
         private List<Face> getCurtainSystemPhysicalShadows()
         {
-            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.VisibilityObstacleHeight;
+            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.revitVisibilityHeight;
             List<Element> collection = new List<Element>();
             using (FilteredElementCollector curtainWallPanels = 
                 new FilteredElementCollector(document, this.FloorPlanView.Id).OfCategory(BuiltInCategory.OST_CurtainWallPanels))
@@ -736,7 +745,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         //finding the shadows of all of the furniture on the ground
         private List<Face> curtainSystemVisualShadows()
         {
-            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.VisibilityObstacleHeight;
+            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.revitVisibilityHeight;
             List<Element> collection = new List<Element>();
             using (FilteredElementCollector curtainWallMullions =
                 new FilteredElementCollector(document, this.FloorPlanView.Id).OfCategory(BuiltInCategory.OST_CurtainWallMullions))
@@ -778,7 +787,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         //Getting the footprint of a list of faces
         private List<Face> getStairsPhysicalShadows()
         {
-            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.VisibilityObstacleHeight;
+            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.revitVisibilityHeight;
             FilteredElementCollector collector = new FilteredElementCollector(this.document, this.FloorPlanView.Id).OfCategory(BuiltInCategory.OST_Stairs);
             List<Element> elems = new List<Element>();
             foreach (Element item in collector)
@@ -865,7 +874,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         }
         private List<Face> getStairsVisualBlocks()
         {
-            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.VisibilityObstacleHeight;
+            double visibleHeight = this.FloorPlanView.GenLevel.Elevation + this.revitVisibilityHeight;
             FilteredElementCollector collector = new FilteredElementCollector(this.document, this.FloorPlanView.Id).OfCategory(BuiltInCategory.OST_Stairs);
             List<Element> elems = new List<Element>();
             foreach (Element item in collector)
@@ -905,6 +914,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
         //gets the footprints of polygons and removes the holes
         private INTPolygons getFootPrintWithOutHoles(List<List<SpatialAnalysis.Geometry.UV>> UVPolygons)
         {
+            double expandShrinkFactor = Math.Pow(10.0, this.PolygonalBooleanPrecision) * UnitConversion.Convert(0.05, Length_Unit_Types.FEET, UnitType);
             //expanding polygons to resolve tangant edges
             INTPolygons offsetedPolygons = new INTPolygons();
             ClipperOffset clipperOffset = new ClipperOffset();
@@ -916,7 +926,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                     ply = this.ConvertUVListToINTPolygon(list);
                     clipperOffset.AddPath(ply, ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
                     INTPolygons plygns = new INTPolygons();
-                    clipperOffset.Execute(ref plygns, Math.Pow(10.0, this.PolygonalBooleanPrecision) * 0.05);
+                    clipperOffset.Execute(ref plygns, expandShrinkFactor);
                     offsetedPolygons.AddRange(plygns);
                     clipperOffset.Clear();
                 }
@@ -932,7 +942,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             //shrinking the polygons
             INTPolygons solution = new INTPolygons();
             clipperOffset.AddPaths(results, ClipperLib.JoinType.jtMiter, EndType.etClosedPolygon);
-            clipperOffset.Execute(ref solution, -1 * Math.Pow(10.0, this.PolygonalBooleanPrecision) * .05);
+            clipperOffset.Execute(ref solution, -expandShrinkFactor);
             results = null;
             c = null;
             offsetedPolygons = null;
@@ -983,15 +993,18 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             }
             return result;
         }
-        public override List<object> GetSlicedMeshGeometries(SpatialAnalysis.Geometry.UV min, SpatialAnalysis.Geometry.UV Max, double offset)
+        public override List<object> GetSlicedMeshGeometries(SpatialAnalysis.Geometry.UV min, SpatialAnalysis.Geometry.UV max, double offset)
         {
+            offset = UnitConversion.Convert(offset, UnitType, Length_Unit_Types.FEET);
             List<object> _geometryModel3Ds = new List<object>();
             Transform transform = Transform.Identity;
-            var diagnal = Max - min;
-            Size3D size = new Size3D(diagnal.U + 2*offset, diagnal.V + 2*offset, this.VisibilityObstacleHeight);
-            Point3D location = new Point3D(min.U - offset, min.V - offset, this.PlanElevation);
+            var MaxMin = new SpatialAnalysis.Geometry.UV[2] { max.Copy(), min.Copy() };
+            UnitConversion.Transform(MaxMin, unitType, Length_Unit_Types.FEET);
+            var diagnal = MaxMin[0] - MaxMin[1];
+            Size3D size = new Size3D(diagnal.U + 2*offset, diagnal.V + 2*offset, this.revitVisibilityHeight);
+            Point3D location = new Point3D(MaxMin[1].U - offset, MaxMin[1].V - offset, this.FloorPlanView.GenLevel.Elevation);
             Rect3D rec3d_Teritory = new Rect3D(location, size);
-            transform.Origin = new XYZ(0, 0, this.PlanElevation);
+            transform.Origin = new XYZ(0, 0, this.FloorPlanView.GenLevel.Elevation);
             var inverseTransform = transform.Inverse;
             List<Element> elementsWithViewCut = new List<Element>();
             List<Element> elementsWithoutViewCut = new List<Element>();
@@ -1160,10 +1173,15 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
 
             using (Options options = this.document.Application.Create.NewGeometryOptions())
             {
+                //unit scaling
+                double unitScale = UnitConversion.ConvertScale(Length_Unit_Types.FEET, this.UnitType);
+                ScaleTransform3D transform3d = new ScaleTransform3D(unitScale, unitScale, unitScale);
                 #region for familyInstances
                 options.ComputeReferences = true;
                 options.IncludeNonVisibleObjects = false;
                 ExtractGeometryModel3D geoms = new ExtractGeometryModel3D(this.document, options, elementsWithoutViewCut, inverseTransform, rec3d_Teritory);
+                //unit scaling
+                foreach (var item in geoms.WPFGeometries) item.Transform = transform3d;
                 _geometryModel3Ds.AddRange(geoms.WPFGeometries);
                 geoms.Clean();
                 geoms = null;
@@ -1171,6 +1189,7 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 #region not for familyInstances
                 options.View = this.FloorPlanView;
                 geoms = new ExtractGeometryModel3D(this.document,options, elementsWithViewCut, inverseTransform, rec3d_Teritory);
+                foreach (var item in geoms.WPFGeometries) item.Transform = transform3d;
                 _geometryModel3Ds.AddRange(geoms.WPFGeometries);
                 geoms.ShowParsingReport();
                 geoms.Clean();
@@ -1186,15 +1205,18 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             elementsWithoutViewCut = null;
             return _geometryModel3Ds;
         }
-        public override List<object> ParseBIM(SpatialAnalysis.Geometry.UV min, SpatialAnalysis.Geometry.UV Max, double offset)
+        public override List<object> ParseBIM(SpatialAnalysis.Geometry.UV min, SpatialAnalysis.Geometry.UV max, double offset)
         {
+            offset = UnitConversion.Convert(offset, UnitType, Length_Unit_Types.FEET);
             List<object> _geometryModel3Ds = new List<object>();
             Transform transform = Transform.Identity;
-            var diagnal = Max - min;
-            Size3D size = new Size3D(diagnal.U + 2 * offset, diagnal.V + 2 * offset, this.VisibilityObstacleHeight + 500);
-            Point3D location = new Point3D(min.U - offset, min.V - offset, this.PlanElevation);
+            var MaxMin = new SpatialAnalysis.Geometry.UV[2] { max.Copy(), min.Copy() };
+            UnitConversion.Transform(MaxMin, unitType, Length_Unit_Types.FEET);
+            var diagnal = MaxMin[0] - MaxMin[1];
+            Size3D size = new Size3D(diagnal.U + 2 * offset, diagnal.V + 2 * offset, this.revitVisibilityHeight + 500);
+            Point3D location = new Point3D(MaxMin[1].U - offset, MaxMin[1].V - offset, this.FloorPlanView.GenLevel.Elevation);
             Rect3D rec3d_Teritory = new Rect3D(location, size);
-            transform.Origin = new XYZ(0, 0, this.PlanElevation);
+            transform.Origin = new XYZ(0, 0, this.FloorPlanView.GenLevel.Elevation);
             var inverseTransform = transform.Inverse;
             List<Element> elements = new List<Element>();
             #region floors
@@ -1366,6 +1388,10 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
                 options.ComputeReferences = true;
                 options.IncludeNonVisibleObjects = false;
                 ExtractGeometryModel3D geoms = new ExtractGeometryModel3D(this.document, options, elements, inverseTransform, rec3d_Teritory);
+                //unit scaling
+                double unitScale = UnitConversion.ConvertScale(Length_Unit_Types.FEET, this.UnitType);
+                ScaleTransform3D transform3d = new ScaleTransform3D(unitScale, unitScale, unitScale);
+                foreach (var item in geoms.WPFGeometries) item.Transform = transform3d;
                 _geometryModel3Ds.AddRange(geoms.WPFGeometries);
                 geoms.Clean();
                 geoms = null;

@@ -241,11 +241,35 @@ namespace SpatialAnalysis.Data
         private static double FieldStaticCostMethod(double x)
         {
             double val = 0.0d;
+            double r = Parameter.DefaultParameters[AgentParameters.GEN_BarrierRepulsionRange].Value;
+            if (x <= r)
+            {
+                double m = Parameter.DefaultParameters[AgentParameters.GEN_MaximumRepulsion].Value;
+                double a = 2 * m / (r * r);
+
+                if (x < r / 2)
+                {
+                    val = -a * x * x + m;
+                }
+                else {
+                    val = a * (x - r) * (x - r);
+                } 
+            }
+            
+            /*
+            //using body size was a mistake that took me a long to to figure out
             if (x <= Parameter.DefaultParameters[AgentParameters.GEN_BodySize].Value)
             {
                 double a = 1.0d - Math.Sqrt(x / Parameter.DefaultParameters[AgentParameters.GEN_BodySize].Value);
                 val = a * a * Parameter.DefaultParameters[AgentParameters.GEN_MaximumRepulsion].Value;
             }
+            */
+//            if (x <= Parameter.DefaultParameters[AgentParameters.GEN_BarrierRepulsionRange].Value)
+//            {
+//                double a = 1.0d - Math.Sqrt(x / Parameter.DefaultParameters[AgentParameters.GEN_BarrierRepulsionRange].Value);
+//                val = a * a * Parameter.DefaultParameters[AgentParameters.GEN_MaximumRepulsion].Value;
+//            }
+
             return val;
         }
         /// <summary>

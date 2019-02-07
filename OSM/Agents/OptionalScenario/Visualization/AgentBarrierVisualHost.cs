@@ -180,11 +180,11 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
             try
             {
                 this._children.Clear();
-                double scale = this.RenderTransform.Value.M11 * this.RenderTransform.Value.M11 +
-                    this.RenderTransform.Value.M12 * this.RenderTransform.Value.M12;
-                scale = Math.Sqrt(scale);
-                double t = this.boarderThickness / scale;
-                Pen _pen = new Pen(this.boarderBrush, t);
+                //double scale = this.RenderTransform.Value.M11 * this.RenderTransform.Value.M11 +
+                //    this.RenderTransform.Value.M12 * this.RenderTransform.Value.M12;
+                //scale = Math.Sqrt(scale);
+                //double t = this.boarderThickness / scale;
+                Pen _pen = new Pen(this.boarderBrush, this.boarderThickness);
                 DrawingVisual drawingVisual = new DrawingVisual();
                 using (DrawingContext drawingContext = drawingVisual.RenderOpen())
                 {
@@ -232,7 +232,7 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
             this._host.ViewUtil.Items.Add(this.visualizationMenu);
             this.setGeometry(this._host.cellularFloor.BarrierBuffers);
             this.boarderBrush = new SolidColorBrush(Colors.Gold) { Opacity = .8 };
-            this.boarderThickness = .8;
+            this.boarderThickness = this._host.UnitConvertor.Convert(0.25d);
             this.draw();
         }
         public void ReDraw()

@@ -36,6 +36,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using SpatialAnalysis.FieldUtility;
 using SpatialAnalysis.Miscellaneous;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
 {
@@ -107,6 +108,9 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             {
                 return;
             }
+            bool unitAssigned = false;
+            Length_Unit_Types unitType = Length_Unit_Types.FEET;
+            string unitString = "UNIT:";
             List<string> lines = new List<string>();
             using (System.IO.StreamReader sr = new System.IO.StreamReader(fileAddress))
             {
@@ -115,9 +119,44 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 {
                     if (!(string.IsNullOrEmpty(line) || string.IsNullOrWhiteSpace(line)))
                     {
+                        line = line.Trim(' ');
                         if (line[0] != '#')
                         {
-                            lines.Add(line);
+                            if (line.Length > unitString.Length && line.Substring(0,unitString.Length).ToUpper() == unitString.ToUpper())
+                            {
+                                string unitName = line.Substring(unitString.Length, line.Length - unitString.Length).ToUpper().Trim(' ');
+                                switch (unitName)
+                                {
+                                    case "METERS":
+                                        unitAssigned = true;
+                                        unitType = Length_Unit_Types.METERS;
+                                        break;
+                                    case "DECIMETERS":
+                                        unitAssigned = true;
+                                        unitType = Length_Unit_Types.DECIMETERS;
+                                        break;
+                                    case "CENTIMETERS":
+                                        unitAssigned = true;
+                                        unitType = Length_Unit_Types.CENTIMETERS;
+                                        break;
+                                    case "MILLIMETERS":
+                                        unitAssigned = true;
+                                        unitType = Length_Unit_Types.MILLIMETERS;
+                                        break;
+                                    case "FEET":
+                                        unitAssigned = true;
+                                        unitType = Length_Unit_Types.FEET;
+                                        break;
+                                    case "INCHES":
+                                        unitAssigned = true;
+                                        unitType = Length_Unit_Types.METERS;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                lines.Add(line);
+                            }
                         }
                     }
                 }
@@ -125,6 +164,12 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             if (lines.Count == 0)
             {
                 MessageBox.Show("The file includes no input",
+                    "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            if (!unitAssigned)
+            {
+                MessageBox.Show("The did not include information for 'Unit of Length'",
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
@@ -154,7 +199,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             {
                 try
                 {
-                    var sequence = Sequence.FromStringRepresentation(item, this._host.cellularFloor, 0.0000001d);
+                    var sequence = Sequence.FromStringRepresentation(item, unitType, this._host.cellularFloor, 0.0000001d);
                     bool add = true;
                     foreach (var activityName in sequence.ActivityNames)
                     {
@@ -210,9 +255,16 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             }
             using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fileAddress))
             {
+                sw.WriteLine("# Comment lines in this file should start with '#' character");
+                sw.WriteLine(string.Empty);
+                string unitString = "UNIT: ";
+                sw.WriteLine("# Project Unit type");
+                sw.WriteLine(unitString + this._host.BIM_To_OSM.UnitType.ToString());
+                sw.WriteLine(string.Empty);
                 foreach (var item in this._host.AgentMandatoryScenario.Sequences)
                 {
                     sw.WriteLine(item.GetStringRepresentation());
+                    sw.WriteLine(string.Empty);
                 }
                 sw.Close();
             }

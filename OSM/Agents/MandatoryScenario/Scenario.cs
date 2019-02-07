@@ -37,6 +37,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
     /// </summary>
     public class Scenario
     {
+        public PartialSequence PartialSequenceToBeCompleted { get; set; }
         private Random _random { get; set; }
         private string _message;
         /// <summary>
@@ -74,6 +75,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
             this.ExpectedTasks = new SortedDictionary<double, Sequence>();
             this.UnexpectedTasks = new Dictionary<double, Sequence>();
             this._random = new Random(DateTime.Now.Millisecond);
+            this.PartialSequenceToBeCompleted = new PartialSequence();
         }
         /// <summary>
         /// Determines whether this scenario is ready for performance.
@@ -81,6 +83,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
         /// <returns><c>true</c> if the scenario is ready for performance; otherwise, <c>false</c>.</returns>
         public bool IsReadyForPerformance()
         {
+            this.PartialSequenceToBeCompleted.Reset();
             if (this.MainStations.Count == 0)
             {
                 this._message = "No Destination Set!";
@@ -158,7 +161,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
         /// <param name="activities">The activities.</param>
         /// <param name="hours">The hours.</param>
         /// <param name="startTime">The start time.</param>
-        public void LoadQueues(Dictionary<string, Activity> activities, double hours, double startTime = 0.0d)
+        public void LoadQueues(Dictionary<string, Activity> activities, double startTime = 0.0d)
         {
             //separating the two type of sequences
             List<Sequence> mainSequences = new List<Sequence>();

@@ -163,6 +163,11 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
         void animation_Menu_Click(object sender, RoutedEventArgs e)
         {
             this._settings = new RealTimeFreeNavigationControler();
+            {
+                double t_ = double.Parse(this._settings._strokeThicknessMax.Text);
+                this._settings._strokeThicknessMax.Text = this._host.UnitConvertor.Convert(t_).ToString("0.000");
+                this._settings._strokeThickness.Value *= this._host.UnitConvertor.Convert(1.0d, 4);
+            }
             //set events
             this._settings._addAgent.Click += _addAgent_Click;
             this._settings.Closing += _settings_Closing;

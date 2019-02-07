@@ -59,7 +59,7 @@
                         <StackPanel Orientation="Horizontal" Height="{StaticResource height}" >
                             <TextBlock Text="Step Size" TextWrapping="Wrap" Margin="35,0,10,0"
                                VerticalAlignment="Center" ></TextBlock>
-                            <TextBox Text="0.7" Name="_stepSize" Margin="5,0,10,0" Width="60" Height="23"
+                            <TextBox Text="0.4" Name="_stepSize" Margin="5,0,10,0" Width="60" Height="23"
                                      IsEnabled="{Binding IsChecked, Converter={StaticResource BooleanToBooleanConverter}, ElementName=_straightlines}"></TextBox>
                         </StackPanel>
                     </StackPanel>

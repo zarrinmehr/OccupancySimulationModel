@@ -68,6 +68,8 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             this._existingSequences.DisplayMemberPath = "Name";
             this.Loaded +=VisualizeSequence_Loaded;
             this._close.Click += _close_Click;
+            double step = Math.Min(this._host.UnitConvertor.Convert(0.1d), this._host.cellularFloor.CellSize / 4);
+            this._stepSize.Text = step.ToString("0.000");
         }
 
         void _close_Click(object sender, RoutedEventArgs e)
@@ -93,15 +95,15 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 {
                     try
                     {
-                        double step = 0.7d;
+                        double step = this._host.cellularFloor.CellSize / 4.0;
                         if (!double.TryParse(this._stepSize.Text, out step))
                         {
-                            MessageBox.Show("StepSize should be valid number larger than 0.7!");
+                            MessageBox.Show("StepSize should be valid number larger than zero and smaller than cell size: " + this._host.cellularFloor.CellSize.ToString("0.000"));
                             return;
                         }
                         if (step<.07)
                         {
-                            MessageBox.Show("StepSize should be valid number larger than 0.7!");
+                            MessageBox.Show("StepSize should be valid number larger than zero and smaller than cell size: " + this._host.cellularFloor.CellSize.ToString("0.000"));
                             return;
                         }
                         this._host.activityAreaVisualHost.DrawSequenceWithForceTrajectory(sequence, this._colorCode.IsChecked.Value, step);

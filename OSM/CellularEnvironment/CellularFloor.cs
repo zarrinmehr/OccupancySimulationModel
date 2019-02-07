@@ -40,6 +40,7 @@ namespace SpatialAnalysis.CellularEnvironment
     /// </summary>
     public class CellularFloor : CellularFloorBaseGeometry
     {
+        public Length_Unit_Types UnitType { get; private set; }
         private static object _lock = new object();
         /// <summary>
         /// The data fields that loaded to the floor. Should not be accessed directly.
@@ -61,6 +62,7 @@ namespace SpatialAnalysis.CellularEnvironment
         public CellularFloor(double desiredCellSize, BIM_To_OSM_Base barrierEnvironment, UV pointOnWalkableArea)
         :base(desiredCellSize, barrierEnvironment, pointOnWalkableArea) 
         {
+            this.UnitType = barrierEnvironment.UnitType;
             this.AllSpatialDataFields = new Dictionary<string, SpatialDataField>();
 
             #region loading distances
@@ -616,19 +618,24 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <returns></returns>
         public Dictionary<Cell, double> GetStaticCost()
         {
+            /*Get the cost of  the spatial data*/
+            double minimumSpatialValue = 1.0d;
             List<SpatialDataField> includedData = new List<SpatialDataField>();
             foreach (Function function in this.AllSpatialDataFields.Values)
             {
                 SpatialDataField dataField = function as SpatialDataField;
                 if (dataField != null)
                 {
-                    if (dataField.IncludeInActivityGeneration)
+                    if (dataField.IncludeInActivityGeneration /*&&
+                        dataField.Name != CellularFloor.DistanceFromEdgesOfField &&
+                        dataField.Name != CellularFloor.DistanceFromPhysicalBarriers &&
+                        dataField.Name != CellularFloor.DistanceFromVisualBarriers*/)
                     {
                         includedData.Add(dataField);
                     }
                 }
             }
-            Dictionary<Cell, double> costs = new Dictionary<Cell, double>();
+            var staticCost = new Dictionary<Cell, double>();
             double min = double.PositiveInfinity;
             foreach (Cell cell in this.Cells)
             {
@@ -647,27 +654,58 @@ namespace SpatialAnalysis.CellularEnvironment
                         }
                         min = Math.Min(min, cost);
                     }
-                    costs.Add(cell, cost);
+                    staticCost.Add(cell, cost);
                 }
             }
             if (double.IsInfinity(min))
             {
-                foreach (Cell item in costs.Keys.ToArray())
+                foreach (Cell item in staticCost.Keys.ToArray())
                 {
-                    costs[item] = 0.0d;
+                    staticCost[item] = minimumSpatialValue;
                 }
             }
             else
             {
-                foreach (Cell item in costs.Keys.ToArray())
+                foreach (Cell item in staticCost.Keys.ToArray())
                 {
-                    costs[item] -= min;
+                    staticCost[item] -= (min - minimumSpatialValue);
                 }
             }
-
             includedData.Clear();
+            //apply barrierCostFactor
+            /*
+            var distanceFromEdgesOfField = this.AllSpatialDataFields[CellularFloor.DistanceFromEdgesOfField];
+            if (distanceFromEdgesOfField.IncludeInActivityGeneration) includedData.Add(distanceFromEdgesOfField);
+
+            var distanceFromPhysicalBarriers = this.AllSpatialDataFields[CellularFloor.DistanceFromPhysicalBarriers];
+            if (distanceFromPhysicalBarriers.IncludeInActivityGeneration) includedData.Add(distanceFromPhysicalBarriers);
+
+            var distanceFromVisualBarriers = this.AllSpatialDataFields[CellularFloor.DistanceFromVisualBarriers];
+            if (distanceFromVisualBarriers.IncludeInActivityGeneration) includedData.Add(distanceFromVisualBarriers);
+
+            if (includedData.Count != 0)
+            {
+                foreach (Cell cell in staticCost.Keys.ToArray())
+                {
+                    double costFactor = 1;
+                    foreach (SpatialDataField dataField in includedData)
+                    {
+                        if (dataField.Data.ContainsKey(cell))
+                        {
+                            costFactor += dataField.GetCost(dataField.Data[cell]);
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Data field does not include barrier cost value for the given cell");
+                        }
+                    }
+                    staticCost[cell] *= costFactor;
+                }
+            }
+            includedData.Clear();
+            */
             includedData = null;
-            return costs;
+            return staticCost;
         }
     }
 

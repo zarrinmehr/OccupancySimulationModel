@@ -42,6 +42,7 @@ using SpatialAnalysis.Agents.Visualization.AgentModel;
 using System.Windows.Data;
 using SpatialAnalysis.Data.Visualization;
 using SpatialAnalysis.Miscellaneous;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Events
 {
@@ -73,6 +74,7 @@ namespace SpatialAnalysis.Events
         private MenuItem _setEvents { get; set; }
         private MenuItem _eventMenu { get; set; }
         private MenuItem _generateData { get; set; }
+        private double _stroke_thickness;
         /// <summary>
         /// Initializes a new instance of the <see cref="VisualEventVisualHost"/> class.
         /// </summary>
@@ -94,6 +96,7 @@ namespace SpatialAnalysis.Events
 
             this._generateData = new MenuItem { Header = "Visibility Method" };
             this._generateData.Click += _generateData_Click;
+            this._stroke_thickness = 0.1d;
         }
 
         private void _reportVisibilityDetails_Click(object sender, RoutedEventArgs e)
@@ -586,7 +589,7 @@ namespace SpatialAnalysis.Events
             {
                 X1 = p.U,
                 Y1 = p.V,
-                StrokeThickness = .1,
+                StrokeThickness = this._stroke_thickness,
                 Stroke = System.Windows.Media.Brushes.Green,
             };
             this.Children.Add(this._line);
@@ -608,7 +611,7 @@ namespace SpatialAnalysis.Events
                 Polygon polygon = new Polygon();
                 polygon.Points = this._polyline.Points.CloneCurrentValue();
                 polygon.Stroke = Brushes.Black;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._stroke_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.LightBlue.Clone();
                 brush.Opacity = .3;
@@ -725,7 +728,7 @@ namespace SpatialAnalysis.Events
                 var lines = cell.ToUVLines(this._host.cellularFloor.CellSize);
                 Polygon polygon = new Polygon();
                 polygon.Stroke = Brushes.Black;
-                polygon.StrokeThickness = .1;
+                polygon.StrokeThickness = this._stroke_thickness;
                 polygon.StrokeMiterLimit = 0;
                 Brush brush = Brushes.LightBlue.Clone();
                 brush.Opacity = .3;
@@ -751,6 +754,7 @@ namespace SpatialAnalysis.Events
         {
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
+            this._stroke_thickness = UnitConversion.Convert(0.1d, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType);
             this._host.Menues.Items.Insert(5, this._eventMenu);
             this._host._createNewSpatialDataField.Items.Add(this._generateData);
 

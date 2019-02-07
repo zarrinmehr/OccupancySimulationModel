@@ -99,6 +99,7 @@ namespace SpatialAnalysis.CellularEnvironment
 
         public override int GetHashCode()
         {
+            //return this._id;
             return base.GetHashCode();
         }
         public override bool Equals(object obj)
@@ -107,6 +108,7 @@ namespace SpatialAnalysis.CellularEnvironment
             if (cell != null)
             {
                 //return this.U == cell.U && this.V == cell.V;
+                //return this._id == cell._id;
                 return this.CellToIndex.I == cell.CellToIndex.I && this.CellToIndex.J == cell.CellToIndex.J;
             }
             return false;

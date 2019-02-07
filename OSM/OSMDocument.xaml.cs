@@ -74,6 +74,11 @@ namespace SpatialAnalysis
         #endregion
 
         /// <summary>
+        /// A utility class for the conversion of length unit type
+        /// </summary>
+        public UnitConversion UnitConvertor { get; set; }
+
+        /// <summary>
         /// Gets or sets the field generator.
         /// </summary>
         /// <value>The field generator.</value>
@@ -210,7 +215,7 @@ namespace SpatialAnalysis
         /// </summary>
         /// <value>The isovist depth.</value>
         public double IsovistDepth { get; set; }
-        private double _desiredCellSize = 0.4d;
+        private double _desiredCellSize = 0.30d;
         private double _barrierBufferValue { get; set; }
         /// <summary>
         /// The barrier type used to capture isovists
@@ -442,7 +447,8 @@ namespace SpatialAnalysis
             this._OSM_to_BIM = _BIM_Visualizer;
             // adding the environment
             this._BIM_To_OSM = BarrierEnvironment;
-
+            this.UnitConvertor = new UnitConversion(Length_Unit_Types.FEET, this.BIM_To_OSM.UnitType);
+            this._desiredCellSize = this.UnitConvertor.Convert(_desiredCellSize,4);
             this.DepthOfView.IsEnabled = false;
             this.FloorScene.Background = Brushes.Transparent;
             
@@ -455,7 +461,7 @@ namespace SpatialAnalysis
             this.Parameters = new Dictionary<string, Parameter>();
             this.IsovistDepth = Math.Min(BIM_To_OSM.FloorMaxBound.U - BIM_To_OSM.FloorMinBound.U, BIM_To_OSM.FloorMaxBound.V - BIM_To_OSM.FloorMinBound.V);
             this.Loaded += mainDocument_Loaded;
-
+            Parameter.LoadDefaultParameters(Length_Unit_Types.FEET, this._BIM_To_OSM.UnitType);
             foreach (var item in Parameter.DefaultParameters)
             {
                 this.AddParameter(item.Value);
@@ -771,7 +777,8 @@ namespace SpatialAnalysis
         private void SetGridSize()
         {
             this.Menues.IsEnabled = false;
-            GetNumber getnumber = new GetNumber("Enter your desired cell size", "The desired cell size will determine the resolution of the isovists.", _desiredCellSize);
+            GetNumber getnumber = new GetNumber("Enter your desired cell size", "The desired cell size will determine the resolution of the isovists.",
+                this._desiredCellSize);
             getnumber.Owner = this;
             getnumber.ShowDialog(); 
             this._desiredCellSize = getnumber.NumberValue;
@@ -844,7 +851,7 @@ namespace SpatialAnalysis
                 this.GetData.IsEnabled = true;
                 this.DataManagement.IsEnabled = true;
                 this.GraphStartCell = this.cellularFloor.FindCell(p);
-                this._barrierBufferValue = this.cellularFloor.cellDiagonalDistance + .01;
+                this._barrierBufferValue = Parameter.DefaultParameters[AgentParameters.GEN_BodySize].Value / 2;
                 this.DataManagement.IsEnabled = true;
                 this._activities.IsEnabled = true;
                 MenuItem about = new MenuItem
@@ -864,8 +871,8 @@ namespace SpatialAnalysis
             sb.AppendLine(string.Format("Grid Height: {0}", this.cellularFloor.GridHeight.ToString()));
             sb.AppendLine(string.Format("Number of cells: {0}", (this.cellularFloor.GridHeight*this.cellularFloor.GridWidth).ToString()));
             sb.AppendLine(string.Format("Number of cells on walkable field: {0}", this.cellularFloor.NumberOfCellsInField.ToString()));
-            sb.AppendLine(string.Format("Cell size: {0}", this.cellularFloor.CellSize.ToString()));
-            sb.AppendLine(string.Format("Cell area: {0}", (this.cellularFloor.CellSize * this.cellularFloor.CellSize).ToString()));
+            sb.AppendLine(string.Format("Cell size: {0} {1}", this.cellularFloor.CellSize.ToString("0.0000"), this.BIM_To_OSM.UnitType.ToString().ToLower()));
+            sb.AppendLine(string.Format("Cell area: {0} {1} squared", (this.cellularFloor.CellSize * this.cellularFloor.CellSize).ToString("0.0000"),this.BIM_To_OSM.UnitType.ToString().ToLower()));
             MessageBox.Show(sb.ToString(), "Grid Information");
             sb.Clear();
             sb = null;
@@ -1468,6 +1475,7 @@ namespace SpatialAnalysis
             filter.ShowDialog();
             filter = null;
         }
+
         #endregion
 
         #region Debug Zone
@@ -1478,38 +1486,11 @@ namespace SpatialAnalysis
                 MessageBox.Show("The cellular floor should be loaded first");
                 return;
             }
-            this.Menues.IsEnabled = false;
-            this.MouseBtn.MouseDown += mouseBtn_MouseDown;
-            this.FloorScene.MouseLeftButtonDown += floorScene_MouseMove;
+            string name = "StaticCost" + cellularFloor.AllSpatialDataFields.Count.ToString();
+            SpatialDataField data = new SpatialDataField(name, cellularFloor.GetStaticCost());
+            this.cellularFloor.AddSpatialDataField(data);
         }
 
-        private void floorScene_MouseMove(object sender, MouseEventArgs e)
-        {
-            try
-            {
-                var p_ = Mouse.GetPosition(this.FloorScene);
-                Point p = this.InverseRenderTransform.Transform(p_);
-                var colision = CollisionAnalyzer.GetCollidingEdge(new UV(p.X, p.Y), this.cellularFloor, BarrierType.Field);
-                if (colision != null)
-                {
-                    colision.Barrrier.Visualize(OSM_to_BIM, 0.0);
-                    (new UVLine(new UV(p.X, p.Y), colision.ClosestPointOnBarrier)).Visualize(OSM_to_BIM, 0.0);  
-
-                }
-            }
-            catch (Exception)
-            {
-            }
-
-
-        }
-
-        private void mouseBtn_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            this.FloorScene.MouseMove -= floorScene_MouseMove;
-            this.MouseBtn.MouseDown -= mouseBtn_MouseDown;
-            this.Menues.IsEnabled = true;
-        }
 
         private void debug_Click_old(object sender, RoutedEventArgs e)
         {
@@ -1577,10 +1558,6 @@ namespace SpatialAnalysis
                 "Minimum Distance from the barriers", this._barrierBufferValue);
             offsetValue.Owner = this;
             offsetValue.ShowDialog();
-            if (this._barrierBufferValue == offsetValue.NumberValue)
-            {
-                return;
-            }
             this._barrierBufferValue = offsetValue.NumberValue;
             offsetValue = null;
             this._cellularFloor.LoadAllBarriersOffseted(this.BIM_To_OSM, this._barrierBufferValue);
@@ -1637,7 +1614,7 @@ namespace SpatialAnalysis
                 return;
             }
             DebugReporter reporter = new DebugReporter();
-            this.AgentMandatoryScenario.LoadQueues(this.AllActivities, 3.0d, 0.0d);
+            this.AgentMandatoryScenario.LoadQueues(this.AllActivities, 0.0d);
             foreach (var item in this.AgentMandatoryScenario.ExpectedTasks)
             {
                 reporter.AddReport(item.ToString());

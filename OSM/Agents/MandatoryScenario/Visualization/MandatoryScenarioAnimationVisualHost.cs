@@ -38,7 +38,7 @@ using System.Windows.Media.Media3D;
 using SpatialAnalysis.Data;
 using SpatialAnalysis.Events;
 using SpatialAnalysis.Visualization;
-
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
 {
@@ -160,7 +160,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 return;
             }
             this._walkingTrailDataComputer.Close();
-            this._host.AgentMandatoryScenario.LoadQueues(this._host.AllActivities, duration, 0.0d);
+            this._host.AgentMandatoryScenario.LoadQueues(this._host.AllActivities, 0.0d);
             bool notification = this._walkingTrailDataComputer._notify.IsChecked.Value;
             var simulator = new MandatoryScenarioSimulation(this._host, h, duration);
             Thread simulationThread = new Thread(
@@ -178,6 +178,12 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
                 return;
             }
             this._settings = new RealTimeMandatoryNavigationControler();
+            //set the agent thickness
+            {
+                double t_ = double.Parse(this._settings._strokeThicknessMax.Text);
+                this._settings._strokeThicknessMax.Text = UnitConversion.Convert(t_, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType).ToString("0.0000");
+                this._settings._strokeThickness.Value *= UnitConversion.Convert(1.0, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType);
+            }
             //set events
             this._settings._addAgent.Click += _addAgent_Click;
             this._settings.Closing += _settings_Closing;
@@ -208,8 +214,8 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             this.agent = new VisualAgentMandatoryScenario
             {
                 StrokeThickness = this._settings._strokeThickness.Value,
-                Stroke = VisualAgentMandatoryScenario.OutsideRange,
-                Fill = VisualAgentMandatoryScenario.OutsideRange,
+                Stroke = VisualAgentMandatoryScenario.UrgentSequence,
+                Fill = VisualAgentMandatoryScenario.UrgentSequence,
                 VelocityMagnitude = this._settings._velocity.Value,
                 ShowVisibilityCone = this._settings._showVisibiityAngle.IsChecked.Value,
                 ShowSafetyBuffer = this._settings._showSafetyBuffer.IsChecked.Value,

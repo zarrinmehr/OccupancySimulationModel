@@ -380,6 +380,10 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             {
                 this.AllParameters.Add(this._host.Parameters[AgentParameters.MAN_AngularDeviationCost.ToString()]);
             }
+            if (this._distanceCost.IsChecked.Value)
+            {
+                this.AllParameters.Add(this._host.Parameters[AgentParameters.MAN_DistanceCost.ToString()]);
+            }
             foreach (var item in this._host.Parameters)
             {
                 foreach (var function in item.Value.LinkedFunctions)

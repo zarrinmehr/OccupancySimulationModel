@@ -326,7 +326,7 @@ namespace SpatialAnalysis.Visualization
                     break;
                 case SceneType.Field:
                     this.setGeometry(this._host.BIM_To_OSM.FieldBarriers);
-                    this.fillBrush = new SolidColorBrush(Colors.SlateGray) { Opacity = 1.0 };
+                    this.fillBrush = new SolidColorBrush(Color.FromRgb(170,161,156)) { Opacity = 1.0 };
                     this.boarderThickness = .01;
                     break;
                 default:

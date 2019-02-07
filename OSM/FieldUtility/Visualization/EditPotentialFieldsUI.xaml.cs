@@ -39,6 +39,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using SpatialAnalysis.Miscellaneous;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.FieldUtility.Visualization
 {
@@ -96,8 +97,12 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             else
             {
                 return;
-            }          
+            }
+            string unitString = "UNIT:";
+            bool unitAssigned = false;
+            Length_Unit_Types lengthUnitTypes = Length_Unit_Types.FEET;
             List<string> lines = new List<string>();
+
             using (System.IO.StreamReader sr = new System.IO.StreamReader(fileAddress))
             {
                 string line = string.Empty;
@@ -105,13 +110,62 @@ namespace SpatialAnalysis.FieldUtility.Visualization
                 {
                     if (!(string.IsNullOrEmpty(line) || string.IsNullOrWhiteSpace(line)))
                     {
-                        lines.Add(line);
+                        line = line.TrimStart(' ');
+                        if (line[0] != '#')//remove comments
+                        {
+                            if (line.Length > unitString.Length && line.Substring(0, unitString.Length).ToUpper() == unitString.ToUpper())
+                            {
+                                string unitName = line.Substring(unitString.Length, line.Length - unitString.Length).ToUpper().Trim(' ');
+                                switch (unitName)
+                                {
+                                    case "METERS":
+                                        unitAssigned = true;
+                                        lengthUnitTypes = Length_Unit_Types.METERS;
+                                        break;
+                                    case "DECIMETERS":
+                                        unitAssigned = true;
+                                        lengthUnitTypes = Length_Unit_Types.DECIMETERS;
+                                        break;
+                                    case "CENTIMETERS":
+                                        unitAssigned = true;
+                                        lengthUnitTypes = Length_Unit_Types.CENTIMETERS;
+                                        break;
+                                    case "MILLIMETERS":
+                                        unitAssigned = true;
+                                        lengthUnitTypes = Length_Unit_Types.MILLIMETERS;
+                                        break;
+                                    case "FEET":
+                                        unitAssigned = true;
+                                        lengthUnitTypes = Length_Unit_Types.FEET;
+                                        break;
+                                    case "INCHES":
+                                        unitAssigned = true;
+                                        lengthUnitTypes = Length_Unit_Types.METERS;
+                                        break;
+                                    default:
+                                        MessageBox.Show("Failed to parse unit information",
+                                            "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                        return;
+                                }
+                            }
+                            else
+                            {
+                                lines.Add(line);
+                            }
+                        }
                     }
                 }
             }
             if (lines.Count == 0)
             {
                 MessageBox.Show("The file includes no input",
+                    "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            //find the project unit type
+            if (!unitAssigned)
+            {
+                MessageBox.Show("The did not include information for 'Unit of Length'",
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
@@ -157,7 +211,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             {
                 try
                 {
-                    ActivityDestination destination = ActivityDestination.FromString(lines, i * 4, this._host.cellularFloor);
+                    ActivityDestination destination = ActivityDestination.FromString(lines, i * 4, lengthUnitTypes, this._host.cellularFloor);
                     if (this._host.AllActivities.ContainsKey(destination.Name))
                     {
                         MessageBox.Show("An activity with the same name exists!", "", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -437,10 +491,16 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             }
             using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fileAddress))
             {
+                sw.WriteLine("# Comment lines in this file should start with '#' character");
+                sw.WriteLine(string.Empty);
+                sw.WriteLine("# Project Unit type");
+                sw.WriteLine("UNIT: " + this._host.BIM_To_OSM.UnitType.ToString());
+                sw.WriteLine(string.Empty);
                 foreach (var item in this._availableFields.SelectedItems)
                 {
                     Activity activity = (Activity)item;
                     sw.WriteLine(activity.GetStringRepresentation());
+                    sw.WriteLine(string.Empty);
                 }
                 sw.Close();
             }

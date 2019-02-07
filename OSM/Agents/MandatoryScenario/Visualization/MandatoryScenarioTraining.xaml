@@ -192,7 +192,7 @@
                     </StackPanel>
                     <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
                         <CheckBox Name="_repulsionChangeRate" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
-                        <TextBlock Text="Repulsion Change Rate" VerticalAlignment="Center" Margin="7,0,0,0" 
+                        <TextBlock Text="Maximum Repulsion Rate" VerticalAlignment="Center" Margin="7,0,0,0" 
                                            Foreground="{Binding ElementName=_repulsionChangeRate, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
                                            FontWeight="{Binding ElementName=_repulsionChangeRate, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
                     </StackPanel>
@@ -207,6 +207,13 @@
                         <TextBlock Text="Angular Deviation Cost" VerticalAlignment="Center" Margin="7,0,0,0" 
                                            Foreground="{Binding ElementName=_angularDeviationCost, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
                                            FontWeight="{Binding ElementName=_angularDeviationCost, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
+                    </StackPanel>
+                    <TextBlock Text="Distance Setting" FontWeight="DemiBold"/>
+                    <StackPanel Height="{StaticResource rowHeight}" Orientation="Horizontal" Margin="{StaticResource ResourceKey=parameterIndention}">
+                        <CheckBox Name="_distanceCost" VerticalAlignment="Center" IsChecked="False" ></CheckBox>
+                        <TextBlock Text="Distance Cost" VerticalAlignment="Center" Margin="7,0,0,0" 
+                                           Foreground="{Binding ElementName=_distanceCost, Path=IsChecked, Converter={StaticResource BoolToColorConverter}}"
+                                           FontWeight="{Binding ElementName=_distanceCost, Path=IsChecked, Converter={StaticResource BoolToFontWeightConverter}}"></TextBlock>
                     </StackPanel>
                 </ListBox>
             </GroupBox>

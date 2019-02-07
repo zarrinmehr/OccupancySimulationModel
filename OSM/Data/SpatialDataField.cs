@@ -144,6 +144,21 @@ namespace SpatialAnalysis.Data
                     this._min = val;
                 }
             }
+            if (this.HasBuiltInRepulsion)
+            {
+                string r = AgentParameters.GEN_BarrierRepulsionRange.ToString();
+                string m = AgentParameters.GEN_MaximumRepulsion.ToString();
+                string a = "(2*" + m + "/" + r + "^2)";
+                string condition1 = "X<" + r +"/2";
+                string condition2 = "X<" + r;
+                string case1 = "-" + a + "*X^2 + " + m;
+                string case2 = a + "*(X-" + r + ")^2";
+                string inside = "if(" + condition1 + "," + case1 + "," + case2 + ")";
+                //this.TextFormula = "if("+condition2+","+inside+",0)";                 This nested if is very complicated as an example
+                this.TextFormula = "if(" + condition2 + "," + m + ",0)";
+
+
+            }
 
         }
         /// <summary>

@@ -241,6 +241,8 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
                 default:
                     break;
             }
+            this._children.Clear();
+
             var timer = new System.Diagnostics.Stopwatch();
             try
             {

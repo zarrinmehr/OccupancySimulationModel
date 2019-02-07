@@ -39,15 +39,28 @@ namespace SpatialAnalysis.Miscellaneous
         /// <returns>System.String.</returns>
         static public string Report(this Exception exception)
         {
-            string report = string.Empty;
+            string report = "Message:\t\t" + exception.Message + "\n"; ;
 #if DEBUG
             StackTrace st = new StackTrace(exception, true);
-            StackFrame frame = st.GetFrame(0);
-            string fileName = frame.GetFileName();
-            string methodName = frame.GetMethod().Name;
-            int line = frame.GetFileLineNumber();
-            report = string.Format("Message:\t\t{0} \nFile Name:\t{1} \nMethod Name:\t{2} \nLine Number:\t{3}",
-               exception.Message, fileName, methodName, line.ToString());
+            int i = 0;
+            bool frameFound = false;
+            while (i<st.FrameCount)
+            {
+                StackFrame frame = st.GetFrame(i);
+                if (string.IsNullOrEmpty(frame.GetFileName()) || string.IsNullOrWhiteSpace(frame.GetFileName())) i++;
+                else
+                {
+                    string fileName = frame.GetFileName();
+                    string methodName = frame.GetMethod().Name;
+                    int line = frame.GetFileLineNumber();
+                    report += string.Format("Frame {0}:\nFile Name:\t{1} \nMethod Name:\t{2} \nLine Number:\t{3}",
+                       i.ToString(), fileName, methodName, line.ToString());
+                    frameFound = true;
+                    break;
+                }
+            }
+            if (!frameFound)
+                report += "A stack-frame with useful information was not found!\n";
 #else
             report = exception.Message;
 #endif

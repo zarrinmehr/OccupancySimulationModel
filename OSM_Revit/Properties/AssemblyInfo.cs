@@ -32,11 +32,11 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("OSM_Revit")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Developed by Saied Zarrinmehr")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Saied Zarrinmehr")]
 [assembly: AssemblyProduct("OSM_Revit")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Copyright ©  Saied Zarrinmehr")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -326,7 +326,7 @@ namespace SpatialAnalysis.Events
                         MessageBox.Show(this._host.AgentMandatoryScenario.Message, "Incomplete Scenario", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
-                    this._host.AgentMandatoryScenario.LoadQueues(this._host.AllActivities, duration, 0.0);
+                    this._host.AgentMandatoryScenario.LoadQueues(this._host.AllActivities, 0.0);
                     var simulator_MAN = new SpatialAnalysis.Agents.MandatoryScenario.MandatoryScenarioSimulation(this._host, timeStep, duration);
                     //register report progress event
                     simulator_MAN.ReportProgress += this.updateProgressBar;

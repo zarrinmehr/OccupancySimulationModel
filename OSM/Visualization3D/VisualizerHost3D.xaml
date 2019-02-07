@@ -13,7 +13,7 @@
             <ColumnDefinition Width="180"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Viewport3D Name="Visualizer3D" Grid.Row="1" Grid.Column="1" >
+        <Viewport3D Name="Visualizer3D" Grid.Row="1" Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality">
             <Viewport3D.Camera>
                 <!--<PerspectiveCamera x:Name="camera" Position="-15,20,15" LookDirection="20,-15,-10" UpDirection="0,0,1"></PerspectiveCamera>-->
                 <PerspectiveCamera x:Name="camera" Position="15,20,15" LookDirection="-20,-15,-10" UpDirection="0,0,1"></PerspectiveCamera>
@@ -46,26 +46,23 @@
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
             <Menu Name="Menues" Background="Gray">
-                <MenuItem Header="Fix Camera Horizen" Click="CameraHorizon_Click"></MenuItem>
-                <MenuItem Header="Data Visualization">
-                    <MenuItem Name="applyColor" Header="Set Color">
-                        <MenuItem Name="setBrush_menu" IsChecked="True" Header="Set Solid Brush" Click="setSurfaceBrush_Click"></MenuItem>
-                        <MenuItem Name="setDataColor_menu" Header="Color-Code Data" Click="setDataColor_Click"></MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="Set Geometry">
-                        <MenuItem Name="geometryType_Menu" Header="Geometry Type">
-                            <MenuItem Name="showGrid_menu" Header="Show Grid" Click="showGrid_Click"></MenuItem>
-                            <MenuItem Name="showContuors_menu" Header="Show Contours" Click="showContours_menu_Click"></MenuItem>
-                            <MenuItem Name="noGeometry_menu" Header="Clear Geometry" IsChecked="True" Click="noGeometryMenu_Click"></MenuItem>
-                        </MenuItem>
-                        <MenuItem Name="geomThickness_menu" Header="Thickness" IsEnabled="False" Click="geomThickness_Click"></MenuItem>
-                        <MenuItem Name="geomBbrush_menu" Header="Brush" IsEnabled="False" Click="goembrush_Click"></MenuItem>
-                        <MenuItem Name="geomTextureRes_menu" Header="Texture Resolution" IsEnabled="False" Click="geomTextureRes_Click"></MenuItem>
-                    </MenuItem>
-
-                    
+                <MenuItem Header="Fix Camera's Horizen" Click="CameraHorizon_Click"></MenuItem>
+                <MenuItem Name="applyColor" Header="Data Color Code">
+                    <MenuItem Name="setBrush_menu" IsChecked="True" Header="Set Solid Brush" Click="setSurfaceBrush_Click"></MenuItem>
+                    <MenuItem Name="setDataColor_menu" Header="Color-Code Data" Click="setDataColor_Click"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Import 3D Model" >
+                <MenuItem Header="Data Texture Geometry">
+                    <MenuItem Name="geometryType_Menu" Header="Geometry Type">
+                        <MenuItem Name="showGrid_menu" Header="Show Grid" Click="showGrid_Click"></MenuItem>
+                        <MenuItem Name="showContuors_menu" Header="Show Contours" Click="showContours_menu_Click"></MenuItem>
+                        <MenuItem Name="noGeometry_menu" Header="Clear Geometry" IsChecked="True" Click="noGeometryMenu_Click"></MenuItem>
+                    </MenuItem>
+                    <MenuItem Name="geomThickness_menu" Header="Thickness" IsEnabled="False" Click="geomThickness_Click"></MenuItem>
+                    <MenuItem Name="geomBbrush_menu" Header="Brush" IsEnabled="False" Click="goembrush_Click"></MenuItem>
+                    <MenuItem Name="geomTextureRes_menu" Header="Texture Resolution" IsEnabled="False" Click="geomTextureRes_Click"></MenuItem>
+                </MenuItem>
+                
+                <MenuItem Header="Import Building Model" >
                     <MenuItem Header="Import Model Geometry" Name="importModel" Click="importModel_Click"></MenuItem>
                     <MenuItem Header="Set Model Brush" IsEnabled="False" Name="setModelGeometryBrush" Click="setModelGeometryBrush_Click"></MenuItem>
                 </MenuItem>

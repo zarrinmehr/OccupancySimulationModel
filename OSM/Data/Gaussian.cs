@@ -28,6 +28,7 @@ using SpatialAnalysis.CellularEnvironment;
 using SpatialAnalysis.Events;
 using System.Threading.Tasks;
 using SpatialAnalysis.FieldUtility;
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Data
 {
@@ -76,7 +77,9 @@ namespace SpatialAnalysis.Data
             this.Tolerance = tolerance;
             double x = (this.Range + 1) * this._cellularFloor.CellSize;
             this._rangeLengthSquared = x * x;
-            this._sigma = MathNet.Numerics.RootFinding.RobustNewtonRaphson.FindRoot(this.gaussianPDF, differentialOfGaussianPDF, 0.001d, 5.0d);
+            double lowerBound = UnitConversion.Convert(0.001d, Length_Unit_Types.FEET, this._cellularFloor.UnitType);
+            double upperBound = UnitConversion.Convert(5.0d, Length_Unit_Types.FEET, this._cellularFloor.UnitType);
+            this._sigma = MathNet.Numerics.RootFinding.RobustNewtonRaphson.FindRoot(this.gaussianPDF, differentialOfGaussianPDF, lowerBound, upperBound);
             //MessageBox.Show("Sigma: " + this.Sigma.ToString() + "\nValue: " + this.gaussianPDF(this.Sigma).ToString());
             this.Filter = IsovistClippedGaussian.GaussianFilter(this.Range + 1, this._cellularFloor.CellSize, this.Sigma);
             this.RayIndices = IsovistClippedGaussian.LoadRayIndices(this.Range, this._cellularFloor, this.Tolerance);

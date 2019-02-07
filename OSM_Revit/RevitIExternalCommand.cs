@@ -118,8 +118,8 @@ namespace OSM_Revit
                 floorSetting.ShowDialog();
 
                 BIM_To_OSM_Base revit_to_osm = new Revit_To_OSM(RevitDocument, floorSetting.FloorPlan,
-                    floorSetting.MinimumHeight, floorSetting.CurveApproximationLength, floorSetting.MinimumCurveLength, floorSetting.DoorIds);
-                I_OSM_To_BIM osm_to_Revit = new OSM_To_Revit();
+                    floorSetting.MinimumHeight, floorSetting.CurveApproximationLength, floorSetting.MinimumCurveLength, floorSetting.DoorIds, floorSetting.LengthUnitType);
+                I_OSM_To_BIM osm_to_Revit = new OSM_To_Revit(floorSetting.LengthUnitType);
 
                 OSMDocument mainDocument = new OSMDocument(revit_to_osm, osm_to_Revit);
                 mainDocument.ShowDialog();

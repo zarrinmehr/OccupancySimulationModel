@@ -40,7 +40,7 @@ using SpatialAnalysis.Visualization;
 using SpatialAnalysis.CellularEnvironment;
 using SpatialAnalysis.Geometry;
 using SpatialAnalysis.Data;
-
+using SpatialAnalysis.Interoperability;
 
 namespace SpatialAnalysis.Visualization3D
 {
@@ -97,8 +97,8 @@ namespace SpatialAnalysis.Visualization3D
             InitializeComponent();
             this._host = host;
             this._materialBound = new Rect(0, 0,
-                this._host.cellularFloor.TopRight.U - this._host.cellularFloor.Origin.U,
-                this._host.cellularFloor.TopRight.V - this._host.cellularFloor.Origin.V);
+                                    this._host.cellularFloor.TopRight.U - this._host.cellularFloor.Origin.U,
+                                    this._host.cellularFloor.TopRight.V - this._host.cellularFloor.Origin.V);
             Matrix matrix = Matrix.Identity;
             matrix.Translate(-this._host.cellularFloor.Origin.U, -this._host.cellularFloor.Origin.V);
             matrix.Scale(1, -1);
@@ -108,12 +108,12 @@ namespace SpatialAnalysis.Visualization3D
             this._clrMode = ColorMode.Solid;
             this._geomType = GeometryType.None;
             this.geomBrush = Brushes.Black.Clone();
-            this.geomThickness = .1;
+            this.geomThickness = UnitConversion.Convert(0.1, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType, 5);
             this.surfaceBrush = Brushes.Tomato.Clone();
             this.geometryBrush = Brushes.AliceBlue.Clone();
             this.geometryBrush.Opacity = .4;
             this.geometryMaterial = new DiffuseMaterial(this.geometryBrush);
-            this.textureDPI = 1000;
+            this.textureDPI = UnitConversion.Convert(1000, this._host.BIM_To_OSM.UnitType, Length_Unit_Types.FEET, 5);
             this._dataOpacity = 1.0d;
             #region load ground
             double defaultHeight = -.1;
@@ -163,7 +163,7 @@ namespace SpatialAnalysis.Visualization3D
             //this.previousCameraPos = this.camera.Position;
             this.MouseRightButtonDown += new MouseButtonEventHandler(navigationTrigger);
 
-
+            this._translateTransform3D = new TranslateTransform3D(new Vector3D(0.0d, 0.0d, UnitConversion.Convert(0.005d, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType)));
         }
 
         protected override void OnClosed(EventArgs e) //releasing memory 
@@ -292,7 +292,7 @@ namespace SpatialAnalysis.Visualization3D
                 StrokeThickness = 1,
                 Stroke = Brushes.DarkSeaGreen
             };
-            if (!(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.Right))) //triger pan
+            if (!(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))) //triger pan
             {
                 this.MouseMove += new MouseEventHandler(panUpdate);
                 this.MouseRightButtonUp += new MouseButtonEventHandler(panTerminate);
@@ -334,7 +334,7 @@ namespace SpatialAnalysis.Visualization3D
             Vector3D translationOn2DScene = new Vector3D(p.X - this.navigationVectorStart.X, p.Y - this.navigationVectorStart.Y, 0);
             Vector3D direction = this.navigationMat.Transform(translationOn2DScene);
             direction = direction - Vector3D.DotProduct(this.camera.LookDirection, direction) * this.camera.LookDirection;
-            direction = .1 * direction;
+            direction = UnitConversion.Convert(0.1,Length_Unit_Types.FEET,_host.BIM_To_OSM.UnitType) * direction;
             this.camera.Position = Point3D.Add(this.initialCameraPosition, direction);
         }
         #endregion
@@ -363,6 +363,7 @@ namespace SpatialAnalysis.Visualization3D
             Vector3D translationOn2DScene = new Vector3D(p.X - this.navigationVectorStart.X, p.Y - this.navigationVectorStart.Y, 0);
             Vector3D direction = this.navigationMat.Transform(translationOn2DScene);
             direction = direction - Vector3D.DotProduct(this.initialCameraLookDirection, direction) * this.initialCameraLookDirection;
+            direction *= UnitConversion.Convert(1.0d, Length_Unit_Types.FEET, this._host.BIM_To_OSM.UnitType);
             if (direction.Length != 0)
             {
                 Point3D pn1 = Vector3D.Add(direction, this.initialCameraPosition);
@@ -390,9 +391,10 @@ namespace SpatialAnalysis.Visualization3D
         //zoom
         private void MainWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            double factor = UnitConversion.Convert(0.1, Length_Unit_Types.FEET, _host.BIM_To_OSM.UnitType);
             var direction = this.camera.LookDirection;
             direction.Normalize();
-            this.camera.Position = Vector3D.Add(direction * .1 * e.Delta, this.camera.Position);
+            this.camera.Position = Vector3D.Add(direction * factor * e.Delta, this.camera.Position);
         }
         // fix perspective
         private void CameraHorizon_Click(object sender, RoutedEventArgs e)
@@ -544,7 +546,7 @@ namespace SpatialAnalysis.Visualization3D
                 MessageBox.Show(error.Message);
             }
         }
-        private TranslateTransform3D _translateTransform3D = new TranslateTransform3D(new Vector3D(0.0d, 0.0d, 0.002d));
+        private TranslateTransform3D _translateTransform3D;
         private Transform3DGroup _transform3DGroup = new Transform3DGroup();
         private void ZScaler_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -914,8 +916,21 @@ namespace SpatialAnalysis.Visualization3D
                 max = Math.Max(max, item);
             }
             UV diagonal = this._host.cellularFloor.TopRight-this._host.cellularFloor.Origin;
-            int h = (int)diagonal.V;
-            int w = (int)diagonal.U;
+            /*Seting the size of the image*/
+            double size_ = 1600* this.textureDPI / UnitConversion.Convert(1000, this._host.BIM_To_OSM.UnitType, Length_Unit_Types.FEET, 5);
+            //assuming diagonal.U <= diagonal.V
+            double height_ = size_;
+            double width_ = size_ * diagonal.U / diagonal.V;
+            if (diagonal.U > diagonal.V)
+            {
+                width_ = size_;
+                height_ = size_ * diagonal.V / diagonal.U;
+            }
+            //image scale to real world scale
+            double scale = width_ / diagonal.U;
+            //set the image size
+            int h = (int)height_;
+            int w = (int)width_;
             WriteableBitmap bmp = BitmapFactory.New(w , h);
             
             using (bmp.GetBitmapContext())
@@ -926,13 +941,25 @@ namespace SpatialAnalysis.Visualization3D
                     Point p1_ = this._materialTransformation.Transform(new Point(item.Key.U,item.Key.V));
                     Point p2_ = this._materialTransformation.Transform(new Point(item.Key.U + this._host.cellularFloor.CellSize, item.Key.V + this._host.cellularFloor.CellSize));
                     var color = this._host.ColorCode.GetColor((item.Value - min) / (max - min));
-                    bmp.FillRectangle((int)p1_.X, (int)p1_.Y, (int)p2_.X, (int)p2_.Y, color);
+                    color.A = (byte)(255 * this._dataOpacity);
+                    bmp.FillRectangle((int)(p1_.X*scale), (int)(p1_.Y*scale), (int)(p2_.X*scale), (int)(p2_.Y*scale), color);
                 }
             }
             return bmp;
-            //return bmp.Resize(2 * w, 2 * h, WriteableBitmapExtensions.Interpolation.Bilinear);
+            /*
+            //apply Gaussian Smoothing
+            int[,] kernel = new int[5, 5]
+            {
+                {1,4,7,4,1 },
+                {4,16,26,16,4 },
+                {7,26,41,26,7 },
+                {4,16,26,16,4 },
+                {1,4,7,4,1 }
+            };
+            return bmp.Convolute(kernel);
+            */
         }
-        
+
 
         #endregion
 
@@ -946,7 +973,7 @@ namespace SpatialAnalysis.Visualization3D
                 {
                     this.AllModels.Children.Remove(this.groundModel);
                     GetNumber getNumber = new GetNumber("Field Offset Value",
-                        "Enter a number to expand the territory of the walkable field to include more model geometries", 1);
+                        "Enter a number to expand the territory of the walkable field to include more model geometries", UnitConversion.Convert(1, Length_Unit_Types.FEET,this._host.BIM_To_OSM.UnitType,6));
                     getNumber.Owner = this;
                     getNumber.ShowDialog();
                     double offset = getNumber.NumberValue;

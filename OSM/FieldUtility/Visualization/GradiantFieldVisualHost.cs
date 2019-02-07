@@ -92,7 +92,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             this.thickness_Menu.Click += new RoutedEventHandler(thickness_Menu_Click);
             this.Visualization_Menu.Items.Add(this.thickness_Menu);
 
-            GradientActivityVisualHost.ScalingFactor = 0.0025;
+            GradientActivityVisualHost.ScalingFactor = 0.025;
             this.scale_Menu = new MenuItem() { Header = "Magnitude Scale for Visualization" };
             this.scale_Menu.Click += new RoutedEventHandler(scale_Menu_Click);
             this.Visualization_Menu.Items.Add(this.scale_Menu);
@@ -200,6 +200,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
             this._host = host;
             this.RenderTransform = this._host.RenderTransformation;
             this._host._activities.Items.Add(this.Visualization_Menu);
+            //Thickness = this._host.UnitConvertor.Convert(Thickness, 4);
             //this._host._activities.Items.Insert(this._host._activities.Items.Count - 1, this.Visualization_Menu);
         }
         private void draw()

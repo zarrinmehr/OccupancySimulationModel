@@ -38,6 +38,8 @@ using SpatialAnalysis.Data.Visualization;
 using SpatialAnalysis.Agents;
 using SpatialAnalysis.Agents.OptionalScenario;
 using SpatialAnalysis.Miscellaneous;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
 {
@@ -46,6 +48,20 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
     /// </summary>
     public partial class AgentRouteParameterSetting : Window
     {
+        #region Hiding the close button
+        private const int GWL_STYLE = -16;
+        private const int WS_SYSMENU = 0x80000;
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        //Hiding the close button
+        private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_SYSMENU);
+        }
+        #endregion
         private OSMDocument _host { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="AgentRouteParameterSetting"/> class.
@@ -59,6 +75,13 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             this.AngleIntercept.Text = this._host.MaximumNumberOfDestinations.ToString();
             this._done.Click += _done_Click1;
             this._setCosts.Click += _setCosts_Click;
+            this._cancelWindow.Click += _cancelWindow_Click;
+            this.Loaded += Window_Loaded;
+        }
+
+        private void _cancelWindow_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
 
         void _setCosts_Click(object sender, RoutedEventArgs e)
@@ -158,6 +181,8 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             }
             this.progressState.Visibility = System.Windows.Visibility.Visible;
             this.progressBar.Maximum = allAgentScapeRoutes.Count;
+            this.IsEnabled = false;
+            this._cancelWindow.Visibility = Visibility.Collapsed;
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
             /*
@@ -167,7 +192,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
                     this._host.MaximumNumberOfDestinations, this._host.cellularFloor, staticCost, filter, 0.0000001d);
             }
              */
-
+            
             Parallel.ForEach(allAgentScapeRoutes, (a) =>
             {
                 //step 1
@@ -198,6 +223,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             
             var t = timer.Elapsed.TotalMilliseconds;
             timer.Stop();
+            this.IsEnabled = true;
             #endregion
 
             int nulls = 0;
