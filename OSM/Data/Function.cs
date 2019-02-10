@@ -113,7 +113,9 @@ namespace SpatialAnalysis.Data
         /// <param name="name">The name of the function.</param>
         public Function(string name)
         {
-            this._name = name;
+            //trim the unwanted chars from the input name
+            char[] charsToTrim = { ' ', '\'' };
+            this._name = name.Trim(charsToTrim);
             this.IncludeInActivityGeneration = false;
             _hasBuiltInRepulsion = false ;
             this.SetRawValue();
@@ -126,7 +128,8 @@ namespace SpatialAnalysis.Data
         /// <param name="includeInActivityGeneration">if set to <c>true</c> the function is included in activity generation.</param>
         public Function(string name, bool hasDefaultRepulsion, bool includeInActivityGeneration)
         {
-            this._name = name;
+            char[] charsToTrim = { ' ', '\'' };
+            this._name = name.Trim(charsToTrim);
             this.IncludeInActivityGeneration = includeInActivityGeneration;
             this._hasBuiltInRepulsion = hasDefaultRepulsion;
             this.SetBuiltInRepulsion();

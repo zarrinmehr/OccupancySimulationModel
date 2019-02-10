@@ -109,7 +109,9 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
         public Sequence(IEnumerable<string> activityNames, string name, double lambdaFactor)
         {
             this.ActivityNames = new List<string>(activityNames);
-            this._name = name;
+            //trim the unwanted chars from the input name
+            char[] charsToTrim = { ' ', '\'' };
+            this._name = name.Trim(charsToTrim);
             this.ActivationLambdaFactor = lambdaFactor;
             this.TimeToGetVisuallyDetected = 0;
         }

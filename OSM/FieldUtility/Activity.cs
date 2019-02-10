@@ -132,7 +132,9 @@ namespace SpatialAnalysis.FieldUtility
         {
             this.DefaultState = defaultState;
             this._destinationArea = destinationArea;
-            this.EngagedActivityName = name;
+            //trim the unwanted chars from the input name
+            char[] charsToTrim = {' ', '\''};
+            this.EngagedActivityName = name.Trim(charsToTrim); 
             this.Origins = origins;
         }
         /// <summary>

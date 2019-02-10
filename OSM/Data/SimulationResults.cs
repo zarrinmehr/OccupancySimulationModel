@@ -99,7 +99,9 @@ namespace SpatialAnalysis.Data
         {
             this._simulationDuration = simulationDuration;
             this._timeStep = timeStep;
-            this._name = name;
+            //trim the unwanted chars from the input name
+            char[] charsToTrim = { ' ', '\'' };
+            this._name = name.Trim(charsToTrim);
             this._type = DataType.SimulationResult;
             this._data = values;
             this._min = double.PositiveInfinity;

@@ -245,7 +245,9 @@ namespace SpatialAnalysis.Events
                 this._min = Math.Min(this._min, item);
                 this._max = Math.Max(this._max, item);
             }
-            this._name = name;
+            //trim the unwanted chars from the input name
+            char[] charsToTrim = { ' ', '\'' };
+            this._name = name.Trim(charsToTrim);
             this._duration = duration;
             this._likelihood = likelihood;
             this._timeSamplingRate = timeSamplingRate;
