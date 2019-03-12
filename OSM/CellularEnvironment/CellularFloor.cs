@@ -49,6 +49,14 @@ namespace SpatialAnalysis.CellularEnvironment
         internal static string DistanceFromEdgesOfField = "Distance from Edges of Walkable Field";
         internal static string DistanceFromPhysicalBarriers = "Distance from Physical Barriers";
         internal static string DistanceFromVisualBarriers = "Distance from Visual Barriers";
+        public int NumberOfBarrierBufferEdges
+        {
+            get
+            {
+                if (BarrierBufferEdges == null) return 0;
+                return BarrierBufferEdges.Length;
+            }
+        }
         /// <summary>
         /// An empty constructor of the CellularFloor for internal use only.
         /// </summary>
@@ -446,6 +454,7 @@ namespace SpatialAnalysis.CellularEnvironment
                     cell.BarrierBufferEdgeIndices.Clear();
                 }
                 cell.BarrierBufferOverlapState = OverlapState.Outside;
+                cell.ContainsBufferEdgeEndPoints = false;
             }
             // loading the lines into the cells
             for (int i = 0; i < this.BarrierBufferEdges.Length; i++)
@@ -457,6 +466,15 @@ namespace SpatialAnalysis.CellularEnvironment
                     {
                         this.Cells[item.I, item.J].BarrierBufferEdgeIndices.Add(i);
                     }
+                }
+                if (intersectingCellIndices.Length != 0 && this.ContainsCell(intersectingCellIndices[0]))
+                {
+                    this.FindCell(intersectingCellIndices[0]).ContainsBufferEdgeEndPoints = true;
+                }
+                int last = intersectingCellIndices.Length - 1;
+                if (intersectingCellIndices.Length != 1 && this.ContainsCell(intersectingCellIndices[last]))
+                {
+                    this.FindCell(intersectingCellIndices[last]).ContainsBufferEdgeEndPoints = true;
                 }
             }
             // setting the overlapping states of the cells that overlap
@@ -706,6 +724,34 @@ namespace SpatialAnalysis.CellularEnvironment
             */
             includedData = null;
             return staticCost;
+        }
+
+        public override void GetCellBarrierEndPoint(Index cellIndex, List<UV> updatedEndPoints, BarrierType barrierType)
+        {
+            if (barrierType != BarrierType.BarrierBuffer)
+            {
+                base.GetCellBarrierEndPoint(cellIndex, updatedEndPoints, barrierType);
+            }
+            else
+            {
+                updatedEndPoints.Clear();
+                if (!ContainsCell(cellIndex)) return;
+                if (this.BarrierBufferEdges == null ||
+                    this.BarrierBufferEdges.Length == 0) return;
+                Cell cell = this.Cells[cellIndex.I, cellIndex.J];
+                foreach (var edgeIndex in cell.BarrierBufferEdgeIndices)
+                {
+                    UVLine edge = this.BarrierBufferEdges[edgeIndex];
+                    if (cell.ContainsPoint(edge.Start, this.CellSize))
+                    {
+                        updatedEndPoints.Add(edge.Start);
+                    }
+                    if (cell.ContainsPoint(edge.End, this.CellSize))
+                    {
+                        updatedEndPoints.Add(edge.End);
+                    }
+                }
+            }
         }
     }
 

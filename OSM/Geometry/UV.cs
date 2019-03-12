@@ -537,6 +537,6 @@ namespace SpatialAnalysis.Geometry
             return new UV(this.U, this.V);
         }
     }
-    
+
 }
 

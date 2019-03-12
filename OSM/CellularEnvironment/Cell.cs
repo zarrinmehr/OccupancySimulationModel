@@ -81,6 +81,22 @@ namespace SpatialAnalysis.CellularEnvironment
         /// </summary>
         public Index CellToIndex { get { return _cellIndex; } }
         /// <summary>
+        /// true if the cell contains an end point for a visual barrier edge
+        /// </summary>
+        public bool ContainsVisualEdgeEndPoints { get; set; }
+        /// <summary>
+        /// true if the cell contains an end point for a physical barrier edge
+        /// </summary>
+        public bool ContainsPhysicalEdgeEndPoints { get; set; }
+        /// <summary>
+        /// true if the cell contains an end point for a field barrier edge
+        /// </summary>
+        public bool ContainsFieldEdgeEndPoints { get; set; }
+        /// <summary>
+        /// true if the cell contains an end point for a barrier buffer edge
+        /// </summary>
+        public bool ContainsBufferEdgeEndPoints { get; set; }
+        /// <summary>
         /// The constructor of the cell
         /// </summary>
         /// <param name="origin">Cell origin</param>
@@ -94,6 +110,8 @@ namespace SpatialAnalysis.CellularEnvironment
             this.PhysicalBarrierEdgeIndices = new HashSet<int>();
             this.FieldBarrierEdgeIndices = new HashSet<int>();
             this._cellIndex = new Index(i, j);
+            this.ContainsBufferEdgeEndPoints = this.ContainsFieldEdgeEndPoints =
+                this.ContainsVisualEdgeEndPoints = this.ContainsPhysicalEdgeEndPoints = false;
         }
 
 
@@ -171,6 +189,13 @@ namespace SpatialAnalysis.CellularEnvironment
             lines.Add(new UVLine(x3, this));
             x1 = null; x2 = null; x3 = null;
             return lines;
+        }
+
+        public bool ContainsPoint(UV pnt, double cellSize)
+        {
+            bool widthIncluded = this.U <= pnt.U && pnt.U < (this.U + cellSize);
+            bool heightIncluded = this.V <= pnt.V && pnt.V < (this.V + cellSize);
+            return widthIncluded && heightIncluded;
         }
     }
 }

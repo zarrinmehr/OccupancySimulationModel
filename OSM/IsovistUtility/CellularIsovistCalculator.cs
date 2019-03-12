@@ -45,24 +45,44 @@ namespace SpatialAnalysis.IsovistUtility
         /// <summary>
         /// All of the escape routes will be returned
         /// </summary>
-        All=0,
+        All = 0,
         /// <summary>
         /// The escape routes will be simplified with respect to angle and their weighting factors
         /// </summary>
-        WeightedAndSimplified=1,
+        WeightedAndSimplified = 1,
+    }
+    /// <summary>
+    /// Defines the cell states in the generation of the isovist
+    /// </summary>
+    public enum CELL_STATE
+    {
+        /// <summary>
+        /// Not processed yet
+        /// </summary>
+        UNKNOWN = 0,
+        /// <summary>
+        /// Visible Cell
+        /// </summary>
+        VISIBLE = 1,
+        /// <summary>
+        /// Cell on the edge which can propagate in the field of visibility
+        /// </summary>
+        EDGE = 2,
+        /// <summary>
+        /// Cell that intersect with rays
+        /// </summary>
+        RAY_EXCLUDED = 3
     }
     /// <summary>
     /// This class includes methods for calculating cellular isovists, cells on the borders of the isovists, calculating scape routs and their simplifications. 
     /// </summary>
     public class CellularIsovistCalculator
     {
-        private Index[] _edge {get;set;}
-        private HashSet<Index> _temp_edge {get;set;}
-        private bool[,] _rayExcludedIndices {get;set;}
-        private bool[,] _area {get;set;}
-        private HashSet<UV> _edgeEndPoints {get;set;}
-        private HashSet<int> _edgeIndices {get;set;}
-        private CellularFloor _cellularFloor {get; set;}
+        private List<UV> _encounteredPoints;
+        private List<Index> _edge { get; set; }
+        private List<Index> _temp_edge { get; set; }
+        private CELL_STATE[,] _cell_states { get; set; }
+        private CellularFloor _cellularFloor { get; set; }
         private UV _vantagePoint { get; set; }
         private double _tolerance { get; set; }
         private BarrierType _barrierType { get; set; }
@@ -75,14 +95,13 @@ namespace SpatialAnalysis.IsovistUtility
         /// <param name="typeOfBarrier">The type of barrier.</param>
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <param name="Tolerance">The tolerance.</param>
-        internal CellularIsovistCalculator(UV isovistVantagePoint, BarrierType typeOfBarrier, 
+        internal CellularIsovistCalculator(UV isovistVantagePoint, BarrierType typeOfBarrier,
             CellularFloor cellularFloor, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            this._temp_edge = new HashSet<Index>();
-            this._rayExcludedIndices = new bool[cellularFloor.GridWidth, cellularFloor.GridHeight];
-            this._area = new bool[cellularFloor.GridWidth, cellularFloor.GridHeight];
-            this. _edgeEndPoints = new HashSet<UV>();
-            this. _edgeIndices = new HashSet<int>();
+            this._encounteredPoints = new List<UV>();
+            this._edge = new List<Index>();
+            this._temp_edge = new List<Index>();
+            this._cell_states = new CELL_STATE[cellularFloor.GridWidth, cellularFloor.GridHeight];
             this._cellularFloor = cellularFloor;
             this._vantagePoint = isovistVantagePoint;
             this._tolerance = Tolerance;
@@ -92,25 +111,45 @@ namespace SpatialAnalysis.IsovistUtility
         private CellularIsovistCalculator(Cell cell, BarrierType typeOfBarrier,
             CellularFloor cellularFloor, double Tolerance = 0.0000001)
         {
-            this._temp_edge = new HashSet<Index>();
-            this._rayExcludedIndices = new bool[cellularFloor.GridWidth, cellularFloor.GridHeight];
-            this._area = new bool[cellularFloor.GridWidth, cellularFloor.GridHeight];
-            this._edgeEndPoints = new HashSet<UV>();
-            this._edgeIndices = new HashSet<int>();
+            this._encounteredPoints = new List<UV>();
+            this._edge = new List<Index>();
+            this._temp_edge = new List<Index>();
+            this._cell_states = new CELL_STATE[cellularFloor.GridWidth, cellularFloor.GridHeight];
             this._cellularFloor = cellularFloor;
             this._vantagePoint = cell + new UV(cellularFloor.CellSize / 2, cellularFloor.CellSize / 2);
             this._tolerance = Tolerance;
             this._barrierType = typeOfBarrier;
             this._vantageIndex = cellularFloor.FindIndex(this._vantagePoint);
         }
-        
+
+        private bool addToTempEdge(Index index)
+        {
+            if (this._cell_states[index.I, index.J] != CELL_STATE.EDGE)
+            {
+                this._temp_edge.Add(index);
+                this._cell_states[index.I, index.J] = CELL_STATE.EDGE;
+                return true;
+            }
+            return false;
+        }
+
+        private void swapEdges()
+        {
+            this._edge.Clear();
+            foreach (var index in this._temp_edge)
+            {
+                //chances are that a cell on the visibility edge gets ray excluded
+                if (this._cell_states[index.I, index.J] != CELL_STATE.RAY_EXCLUDED)
+                {
+                    this._cell_states[index.I, index.J] = CELL_STATE.VISIBLE;
+                    this._edge.Add(index);
+                }
+            }
+            this._temp_edge.Clear();
+        }
+
         private void addPointToExclude(UV endPoint)
         {
-            if (this._edgeEndPoints.Contains(endPoint))
-            {
-                return;
-            }
-            this._edgeEndPoints.Add(endPoint);
             UV direction = endPoint - this._vantagePoint;
             Ray ray = new Ray(endPoint, direction, this._cellularFloor.Origin, this._cellularFloor.CellSize, this._tolerance);
             Index baseIndex = this._cellularFloor.FindIndex(endPoint);
@@ -146,7 +185,7 @@ namespace SpatialAnalysis.IsovistUtility
                                     nextIndex = null;
                                     break;
                                 case OverlapState.Outside:
-                                    this._rayExcludedIndices[nextIndex.I,nextIndex.J]=true;;
+                                    this._cell_states[nextIndex.I, nextIndex.J] = CELL_STATE.RAY_EXCLUDED; ;
                                     break;
                                 default:
                                     break;
@@ -173,7 +212,7 @@ namespace SpatialAnalysis.IsovistUtility
                                     nextIndex = null;
                                     break;
                                 case OverlapState.Outside:
-                                    this._rayExcludedIndices[nextIndex.I,nextIndex.J]=true;
+                                    this._cell_states[nextIndex.I, nextIndex.J] = CELL_STATE.RAY_EXCLUDED;
                                     break;
                                 default:
                                     break;
@@ -197,7 +236,7 @@ namespace SpatialAnalysis.IsovistUtility
                                     }
                                     break;
                                 case OverlapState.Inside:
-                                    this._rayExcludedIndices[nextIndex.I,nextIndex.J]=true;
+                                    this._cell_states[nextIndex.I, nextIndex.J] = CELL_STATE.RAY_EXCLUDED;
                                     break;
                                 case OverlapState.Outside:
                                     nextIndex = null;
@@ -227,7 +266,7 @@ namespace SpatialAnalysis.IsovistUtility
                                     nextIndex = null;
                                     break;
                                 case OverlapState.Outside:
-                                    this._rayExcludedIndices[nextIndex.I,nextIndex.J]=true;
+                                    this._cell_states[nextIndex.I, nextIndex.J] = CELL_STATE.RAY_EXCLUDED;
                                     break;
                                 default:
                                     break;
@@ -260,7 +299,7 @@ namespace SpatialAnalysis.IsovistUtility
                 switch (this._barrierType)
                 {
                     case BarrierType.Visual:
-                        foreach (int id in this._cellularFloor.Cells[nextIndex.I,nextIndex.J].VisualBarrierEdgeIndices)
+                        foreach (int id in this._cellularFloor.Cells[nextIndex.I, nextIndex.J].VisualBarrierEdgeIndices)
                         {
                             UVLine edge = this._cellularFloor.VisualBarrierEdges[id];
                             startPointIndex = this._cellularFloor.FindIndex(edge.Start);
@@ -346,38 +385,14 @@ namespace SpatialAnalysis.IsovistUtility
                 //}
             }
         }
-        private void addLineToExclude(int edgeindex)
-        {
-            switch (this._barrierType)
-            {
-                case BarrierType.Visual:
-                    this.addPointToExclude(this._cellularFloor.VisualBarrierEdges[edgeindex].Start);
-                    this.addPointToExclude(this._cellularFloor.VisualBarrierEdges[edgeindex].End);
-                    break;
-                case BarrierType.Physical:
-                    this.addPointToExclude(this._cellularFloor.PhysicalBarrierEdges[edgeindex].Start);
-                    this.addPointToExclude(this._cellularFloor.PhysicalBarrierEdges[edgeindex].End);
-                    break;
-                case BarrierType.Field:
-                    this.addPointToExclude(this._cellularFloor.FieldBarrierEdges[edgeindex].Start);
-                    this.addPointToExclude(this._cellularFloor.FieldBarrierEdges[edgeindex].End);
-                    break;
-                case BarrierType.BarrierBuffer:
-                    this.addPointToExclude(this._cellularFloor.BarrierBufferEdges[edgeindex].Start);
-                    this.addPointToExclude(this._cellularFloor.BarrierBufferEdges[edgeindex].End);
-                    break;
-                default:
-                    break;
-            }
 
-        }
         /// <summary>
         /// This function tests to see if a new index (possible) juxtapposed to an existing visible index 
         /// should be added to the visible indices or not.
         /// </summary>
         private void addNextIndex(Index possible, double depthSquared)
         {
-            if (!this._area[possible.I,possible.J] && !this._rayExcludedIndices[possible.I,possible.J])
+            if (this._cell_states[possible.I, possible.J] == CELL_STATE.UNKNOWN)
             {
                 double distance = UV.GetLengthSquared(this._cellularFloor.Cells[possible.I, possible.J], this._vantagePoint);
                 if (distance < depthSquared)
@@ -387,69 +402,69 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.Visual:
                             if (this._cellularFloor.Cells[possible.I, possible.J].VisualOverlapState == OverlapState.Overlap)
                             {
-                                foreach (int edgeindex in this._cellularFloor.Cells[possible.I, possible.J].VisualBarrierEdgeIndices)
+                                if(this._cellularFloor.Cells[possible.I, possible.J].ContainsVisualEdgeEndPoints)
                                 {
-                                    if (!this._edgeIndices.Contains(edgeindex))
+                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.Visual);
+                                    foreach (var pt in this._encounteredPoints)
                                     {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
+                                        addPointToExclude(pt);
                                     }
                                 }
                             }
                             if (this._cellularFloor.Cells[possible.I, possible.J].VisualOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(possible);
+                                this.addToTempEdge(possible);
                             }
                             break;
                         case BarrierType.Physical:
                             if (this._cellularFloor.Cells[possible.I, possible.J].PhysicalOverlapState == OverlapState.Overlap)
                             {
-                                foreach (int edgeindex in this._cellularFloor.Cells[possible.I, possible.J].PhysicalBarrierEdgeIndices)
+                                if (this._cellularFloor.Cells[possible.I, possible.J].ContainsPhysicalEdgeEndPoints)
                                 {
-                                    if (!this._edgeIndices.Contains(edgeindex))
+                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.Physical);
+                                    foreach (var pt in this._encounteredPoints)
                                     {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
+                                        addPointToExclude(pt);
                                     }
                                 }
                             }
                             if (this._cellularFloor.Cells[possible.I, possible.J].PhysicalOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(possible);
+                                this.addToTempEdge(possible);
                             }
                             break;
                         case BarrierType.Field:
                             if (this._cellularFloor.Cells[possible.I, possible.J].FieldOverlapState == OverlapState.Overlap)
                             {
-                                foreach (int edgeindex in this._cellularFloor.Cells[possible.I, possible.J].FieldBarrierEdgeIndices)
+                                if (this._cellularFloor.Cells[possible.I, possible.J].ContainsFieldEdgeEndPoints)
                                 {
-                                    if (!this._edgeIndices.Contains(edgeindex))
+                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.Field);
+                                    foreach (var pt in this._encounteredPoints)
                                     {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
+                                        addPointToExclude(pt);
                                     }
                                 }
                             }
                             if (this._cellularFloor.Cells[possible.I, possible.J].FieldOverlapState == OverlapState.Inside)
                             {
-                                this._temp_edge.Add(possible);
+                                this.addToTempEdge(possible);
                             }
                             break;
                         case BarrierType.BarrierBuffer:
                             if (this._cellularFloor.Cells[possible.I, possible.J].BarrierBufferOverlapState == OverlapState.Overlap)
                             {
-                                foreach (int edgeindex in this._cellularFloor.Cells[possible.I, possible.J].BarrierBufferEdgeIndices)
+                                if (this._cellularFloor.Cells[possible.I, possible.J].ContainsBufferEdgeEndPoints)
                                 {
-                                    if (!this._edgeIndices.Contains(edgeindex))
+                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.BarrierBuffer);
+                                    foreach (var pt in this._encounteredPoints)
                                     {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
+                                        addPointToExclude(pt);
                                     }
                                 }
                             }
                             if (this._cellularFloor.Cells[possible.I, possible.J].BarrierBufferOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(possible);
+                                this.addToTempEdge(possible);
                             }
                             break;
                         default:
@@ -514,69 +529,25 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.Visual:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].VisualOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].VisualBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.Physical:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].PhysicalOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].PhysicalBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.Field:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].FieldOverlapState == OverlapState.Inside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].FieldBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.BarrierBuffer:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].BarrierBufferOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].BarrierBufferEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         default:
@@ -584,14 +555,13 @@ namespace SpatialAnalysis.IsovistUtility
                     }
                 }
             }
-            this._area[this._vantageIndex.I,this._vantageIndex.J]=true;
+            this._cell_states[this._vantageIndex.I, this._vantageIndex.J] = CELL_STATE.VISIBLE;
             foreach (var item in this._temp_edge)
             {
-                this._area[item.I, item.J] = true;
+                this._cell_states[item.I, item.J] = CELL_STATE.VISIBLE;
             }
-            this._edge=this._temp_edge.ToArray();
-            this._temp_edge.Clear();
-            while (this._edge.Length != 0)
+            this.swapEdges();
+            while (this._edge.Count != 0)
             {
                 foreach (Index item in _edge)
                 {
@@ -678,21 +648,14 @@ namespace SpatialAnalysis.IsovistUtility
                         }
                     }
                 }
-                //this.edge.Clear();
-                //this.edge.UnionWith(this.temp_edge);
-                this._edge = this._temp_edge.ToArray();
-                foreach (var item in this._temp_edge)
-                {
-                    this._area[item.I, item.J] = true;
-                }
-                this._temp_edge.Clear();
+                this.swapEdges();
             }
             HashSet<int> cells = new HashSet<int>();
             for (int i = 0; i < this._cellularFloor.GridWidth; i++)
             {
                 for (int j = 0; j < this._cellularFloor.GridHeight; j++)
                 {
-                    if (this._area[i,j])
+                    if (this._cell_states[i, j] == CELL_STATE.VISIBLE)
                     {
                         cells.Add(this._cellularFloor.Cells[i, j].ID);
                     }
@@ -749,69 +712,25 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.Visual:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].VisualOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].VisualBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.Physical:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].PhysicalOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].PhysicalBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.Field:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].FieldOverlapState == OverlapState.Inside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].FieldBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.BarrierBuffer:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].BarrierBufferOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].BarrierBufferEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         default:
@@ -819,14 +738,9 @@ namespace SpatialAnalysis.IsovistUtility
                     }
                 }
             }
-            this._area[this._vantageIndex.I, this._vantageIndex.J] = true;
-            foreach (var item in this._temp_edge)
-            {
-                this._area[item.I, item.J] = true;
-            }
-            this._edge = this._temp_edge.ToArray();
-            this._temp_edge.Clear();
-            while (_edge.Length != 0)
+            this._cell_states[this._vantageIndex.I, this._vantageIndex.J] = CELL_STATE.VISIBLE;
+            this.swapEdges();
+            while (_edge.Count != 0)
             {
                 foreach (Index item in _edge)
                 {
@@ -913,29 +827,22 @@ namespace SpatialAnalysis.IsovistUtility
                         }
                     }
                 }
-                //this.edge.Clear();
-                //this.edge.UnionWith(this.temp_edge);
-                this._edge = this._temp_edge.ToArray();
-                foreach (var item in this._edge)
-                {
-                    this._area[item.I, item.J] = true;
-                }
-                this._temp_edge.Clear();
+                this.swapEdges();
             }
             HashSet<Cell> Overlap = new HashSet<Cell>();
             for (int i = 0; i < this._cellularFloor.GridWidth; i++)
             {
                 for (int j = 0; j < this._cellularFloor.GridHeight; j++)
                 {
-                    if (this._rayExcludedIndices[i,j])
+                    if (this._cell_states[i, j] == CELL_STATE.RAY_EXCLUDED)
                     {
                         foreach (Index neighbor in Index.Neighbors)
                         {
                             int i_ = neighbor.I + i;
                             int j_ = neighbor.J + j;
-                            if (this._cellularFloor.ContainsCell(i_,j_))
+                            if (this._cellularFloor.ContainsCell(i_, j_))
                             {
-                                if (this._area[i_, j_])
+                                if (this._cell_states[i_, j_] == CELL_STATE.VISIBLE)
                                 {
                                     Overlap.Add(this._cellularFloor.Cells[i_, j_]);
                                 }
@@ -994,69 +901,25 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.Visual:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].VisualOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].VisualBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.Physical:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].PhysicalOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].PhysicalBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.Field:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].FieldOverlapState == OverlapState.Inside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].FieldBarrierEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         case BarrierType.BarrierBuffer:
                             if (this._cellularFloor.Cells[neighbor.I, neighbor.J].BarrierBufferOverlapState == OverlapState.Outside)
                             {
-                                this._temp_edge.Add(neighbor);
-                            }
-                            else
-                            {
-                                foreach (int edgeindex in this._cellularFloor.Cells[neighbor.I, neighbor.J].BarrierBufferEdgeIndices)
-                                {
-                                    if (!this._edgeIndices.Contains(edgeindex))
-                                    {
-                                        this._edgeIndices.Add(edgeindex);
-                                        this.addLineToExclude(edgeindex);
-                                    }
-                                }
+                                this.addToTempEdge(neighbor);
                             }
                             break;
                         default:
@@ -1064,14 +927,13 @@ namespace SpatialAnalysis.IsovistUtility
                     }
                 }
             }
-            this._area[this._vantageIndex.I, this._vantageIndex.J] = true;
+            this._cell_states[this._vantageIndex.I, this._vantageIndex.J] = CELL_STATE.VISIBLE;
             foreach (var item in this._temp_edge)
             {
-                this._area[item.I, item.J] = true;
+                this._cell_states[item.I, item.J] = CELL_STATE.VISIBLE;
             }
-            this._edge = this._temp_edge.ToArray();
-            this._temp_edge.Clear();
-            while (this._edge.Length != 0)
+            this.swapEdges();
+            while (this._edge.Count != 0)
             {
                 foreach (Index item in _edge)
                 {
@@ -1158,14 +1020,7 @@ namespace SpatialAnalysis.IsovistUtility
                         }
                     }
                 }
-                //this.edge.Clear();
-                //this.edge.UnionWith(this.temp_edge);
-                this._edge = this._temp_edge.ToArray();
-                foreach (var item in this._temp_edge)
-                {
-                    this._area[item.I, item.J] = true;
-                }
-                this._temp_edge.Clear();
+                this.swapEdges();
             }
         }
         /// <summary>
@@ -1177,7 +1032,7 @@ namespace SpatialAnalysis.IsovistUtility
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <param name="Tolerance">The tolerance.</param>
         /// <returns>Isovist.</returns>
-        public static Isovist GetIsovist(UV isovistVantagePoint, double depth, BarrierType typeOfBarrier, 
+        public static Isovist GetIsovist(UV isovistVantagePoint, double depth, BarrierType typeOfBarrier,
             CellularFloor cellularFloor, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
             CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, Tolerance);
@@ -1187,14 +1042,9 @@ namespace SpatialAnalysis.IsovistUtility
             isovistCalculator._vantageIndex = null;
             isovistCalculator._temp_edge.Clear();
             isovistCalculator._temp_edge = null;
-            isovistCalculator._rayExcludedIndices = null;
-            isovistCalculator._edgeEndPoints.Clear();
-            isovistCalculator._edgeEndPoints = null;
-            //isovistCalculator.edge.Clear();
+            isovistCalculator._cell_states = null;
+            isovistCalculator._edge.Clear();
             isovistCalculator._edge = null;
-            isovistCalculator._area = null;
-            isovistCalculator._edgeIndices.Clear();
-            isovistCalculator._edgeIndices = null;
             isovistCalculator = null;
             return isovist;
         }
@@ -1210,12 +1060,12 @@ namespace SpatialAnalysis.IsovistUtility
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <param name="Tolerance">The tolerance.</param>
         /// <returns>IsovistEscapeRoutes.</returns>
-        public static IsovistEscapeRoutes GetAllEscapeRoute(UV isovistVantagePoint, double depth, 
+        public static IsovistEscapeRoutes GetAllEscapeRoute(UV isovistVantagePoint, double depth,
             BarrierType typeOfBarrier, CellularFloor cellularFloor, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
             CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, Tolerance);
             var cells = isovistCalculator.getEscapeRoute(depth);
-            List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._area, typeOfBarrier);
+            List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._cell_states, typeOfBarrier);
             cells.UnionWith(OtherCells);
             IsovistEscapeRoutes isovistEscapeRoutes = new IsovistEscapeRoutes(cells.ToArray(),
                 cellularFloor.Cells[isovistCalculator._vantageIndex.I, isovistCalculator._vantageIndex.J]);
@@ -1226,19 +1076,14 @@ namespace SpatialAnalysis.IsovistUtility
             isovistCalculator._vantageIndex = null;
             isovistCalculator._temp_edge.Clear();
             isovistCalculator._temp_edge = null;
-            isovistCalculator._rayExcludedIndices = null;
-            isovistCalculator._edgeEndPoints.Clear();
-            isovistCalculator._edgeEndPoints = null;
-            //isovistCalculator.edge.Clear();
+            isovistCalculator._cell_states = null;
+            isovistCalculator._edge.Clear();
             isovistCalculator._edge = null;
-            isovistCalculator._area = null;
-            isovistCalculator._edgeIndices.Clear();
-            isovistCalculator._edgeIndices = null;
             isovistCalculator = null;
             return isovistEscapeRoutes;
         }
-        private static bool isIsovistEscapeRoute(int i, int j, CellularFloor cellularFloor, 
-            bool[,] collection, BarrierType barriertype)
+        private static bool isIsovistEscapeRoute(int i, int j, CellularFloor cellularFloor,
+            CELL_STATE[,] collection, BarrierType barriertype)
         {
             bool isEscapeRoute = false;
             bool allneighborsInside = true;
@@ -1248,7 +1093,7 @@ namespace SpatialAnalysis.IsovistUtility
                 int neighbor_J = item.J + j;
                 if (cellularFloor.ContainsCell(neighbor_I, neighbor_J))
                 {
-                    if (!collection[neighbor_I, neighbor_J])
+                    if (collection[neighbor_I, neighbor_J] != CELL_STATE.VISIBLE)
                     {
                         isEscapeRoute = true;
                     }
@@ -1295,17 +1140,17 @@ namespace SpatialAnalysis.IsovistUtility
         /// <param name="barriertype">The barriertype.</param>
         /// <param name="tolerance">The tolerance.</param>
         /// <returns>List&lt;Cell&gt;.</returns>
-        public static List<Cell> ExtractIsovistEscapeRoute(CellularFloor cellularFloor, 
-            bool[,] collection, BarrierType barriertype, double tolerance = OSMDocument.AbsoluteTolerance)
+        public static List<Cell> ExtractIsovistEscapeRoute(CellularFloor cellularFloor,
+            CELL_STATE[,] collection, BarrierType barriertype, double tolerance = OSMDocument.AbsoluteTolerance)
         {
             var edge = new List<Cell>();
             for (int i = 0; i < cellularFloor.GridWidth; i++)
             {
                 for (int j = 0; j < cellularFloor.GridHeight; j++)
                 {
-                    if (collection[i,j])
+                    if (collection[i, j] == CELL_STATE.VISIBLE)
                     {
-                        if (CellularIsovistCalculator.isIsovistEscapeRoute(i,j, cellularFloor, collection, barriertype))
+                        if (CellularIsovistCalculator.isIsovistEscapeRoute(i, j, cellularFloor, collection, barriertype))
                         {
                             edge.Add(cellularFloor.Cells[i, j]);
                         }
@@ -1333,9 +1178,9 @@ namespace SpatialAnalysis.IsovistUtility
         {
             CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, Tolerance);
             var cells = isovistCalculator.getEscapeRoute(depth);
-            List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._area, typeOfBarrier);
+            List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._cell_states, typeOfBarrier);
             cells.UnionWith(OtherCells);
-            
+
             IsovistEscapeRoutes weightedAndSimplifiedEscapeRoutes = new IsovistEscapeRoutes(cells.ToArray(),
                 cellularFloor.FindCell(isovistVantagePoint), angleIntercept, staticCost);
             cells.Clear();
@@ -1345,17 +1190,12 @@ namespace SpatialAnalysis.IsovistUtility
             isovistCalculator._vantageIndex = null;
             isovistCalculator._temp_edge.Clear();
             isovistCalculator._temp_edge = null;
-            isovistCalculator._rayExcludedIndices = null;
-            isovistCalculator._edgeEndPoints.Clear();
-            isovistCalculator._edgeEndPoints = null;
-            //isovistCalculator.edge.Clear();
+            isovistCalculator._cell_states = null;
+            isovistCalculator._edge.Clear();
             isovistCalculator._edge = null;
-            isovistCalculator._area = null;
-            isovistCalculator._edgeIndices.Clear();
-            isovistCalculator._edgeIndices = null;
             isovistCalculator = null;
             return weightedAndSimplifiedEscapeRoutes;
-        } 
+        }
         #endregion
         #region AgentEscapeRoutes
         // step 3
@@ -1369,14 +1209,14 @@ namespace SpatialAnalysis.IsovistUtility
         /// <param name="staticCost">The static cost used as weighting factors.</param>
         /// <param name="Tolerance">The tolerance.</param>
         /// <returns>AgentEscapeRoutes.</returns>
-        public static AgentEscapeRoutes GetAgentEscapeRoutes(Cell vantageCell, 
+        public static AgentEscapeRoutes GetAgentEscapeRoutes(Cell vantageCell,
             double isovistDepth, int desiredNumber,
             CellularFloor cellularFloor, Dictionary<Cell, double> staticCost, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
             CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(vantageCell, BarrierType.BarrierBuffer, cellularFloor, Tolerance);
             var cells = isovistCalculator.getEscapeRoute(isovistDepth);
-            
-            List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._area, BarrierType.BarrierBuffer);
+
+            List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._cell_states, BarrierType.BarrierBuffer);
             cells.UnionWith(OtherCells);
             if (cells.Count == 0)
             {
@@ -1386,14 +1226,9 @@ namespace SpatialAnalysis.IsovistUtility
                 isovistCalculator._vantageIndex = null;
                 isovistCalculator._temp_edge.Clear();
                 isovistCalculator._temp_edge = null;
-                isovistCalculator._rayExcludedIndices = null;
-                isovistCalculator._edgeEndPoints.Clear();
-                isovistCalculator._edgeEndPoints = null;
-                //isovistCalculator.edge.Clear();
+                isovistCalculator._cell_states = null;
+                isovistCalculator._edge.Clear();
                 isovistCalculator._edge = null;
-                isovistCalculator._area = null;
-                isovistCalculator._edgeIndices.Clear();
-                isovistCalculator._edgeIndices = null;
                 isovistCalculator = null;
                 return null;
             }
@@ -1407,17 +1242,12 @@ namespace SpatialAnalysis.IsovistUtility
             isovistCalculator._vantageIndex = null;
             isovistCalculator._temp_edge.Clear();
             isovistCalculator._temp_edge = null;
-            isovistCalculator._rayExcludedIndices = null;
-            isovistCalculator._edgeEndPoints.Clear();
-            isovistCalculator._edgeEndPoints = null;
-            //isovistCalculator.edge.Clear();
+            isovistCalculator._cell_states = null;
+            isovistCalculator._edge.Clear();
             isovistCalculator._edge = null;
-            isovistCalculator._area = null;
-            isovistCalculator._edgeIndices.Clear();
-            isovistCalculator._edgeIndices = null;
             isovistCalculator = null;
             return agentScapeRoutes;
-        } 
+        }
         #endregion
 
     }

@@ -561,8 +561,7 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy /E /Y "$(SolutionDir)OSM_Revit\$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"
-xcopy /E /Y "$(ProjectDir)$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"</PostBuildEvent>
+    <PostBuildEvent>xcopy /E /Y "$(ProjectDir)$(OutDir)*.dll" "C:\ProgramData\Autodesk\Revit\Addins\2019\OSM"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

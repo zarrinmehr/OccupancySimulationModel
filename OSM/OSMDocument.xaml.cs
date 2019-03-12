@@ -1615,6 +1615,7 @@ namespace SpatialAnalysis
             }
             DebugReporter reporter = new DebugReporter();
             this.AgentMandatoryScenario.LoadQueues(this.AllActivities, 0.0d);
+            this.AgentMandatoryScenario.AdjustFirstExpectedTaksActivation(4);
             foreach (var item in this.AgentMandatoryScenario.ExpectedTasks)
             {
                 reporter.AddReport(item.ToString());

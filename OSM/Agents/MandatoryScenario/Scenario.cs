@@ -128,7 +128,8 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
         /// </summary>
         /// <param name="sequence">The sequence.</param>
         /// <param name="startTime">The start time.</param>
-        public void ReActivate(Sequence sequence, double startTime)
+        /// <param name="randomizeExpectedSequence">If true the expected sequences will be randomized with a uniform distribution.</param>
+        public void ReActivate(Sequence sequence, double startTime, bool randomizeExpectedSequence = false)
         {
             var nextActivationTime = startTime + Exponential.Sample(this._random, 1.0 / sequence.ActivationLambdaFactor);
             if (sequence.HasVisualAwarenessField)
@@ -144,6 +145,10 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
             }
             else
             {
+                if(randomizeExpectedSequence)
+                {
+                    nextActivationTime = startTime + this._random.NextDouble() * sequence.ActivationLambdaFactor;
+                }
                 if (this.ExpectedTasks.ContainsKey(nextActivationTime))
                 {
                     while (this.UnexpectedTasks.ContainsKey(nextActivationTime))
@@ -180,7 +185,6 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
                 //resetting the time visual detection waiting time for all sequences
                 item.TimeToGetVisuallyDetected = 0.0;
             }
-           
 
             //clearing the sequences
             this.ExpectedTasks.Clear();
@@ -188,8 +192,33 @@ namespace SpatialAnalysis.Agents.MandatoryScenario
 
             foreach (var item in this.Sequences)
             {
-                ReActivate(item, startTime);
+                ReActivate(item, startTime,true);
             }
+        }
+        /// <summary>
+        /// Sets the first task in the queue of expected tasks to be triggered at a specific time
+        /// This function is called in visualization mode to reduce the waiting time to see the movement of the agnate
+        /// It has no effect in a simulation result when the simulation duration is reasonably long
+        /// </summary>
+        /// <param name="firstTaskActivation">The time when the fist expected task in the queue will be activated</param>
+        public void AdjustFirstExpectedTaksActivation(double firstTaskActivation = 3)
+        {
+            if (this.ExpectedTasks.Count == 0) return;
+            double actionTime = this.ExpectedTasks.First().Key;
+            double adjustment = firstTaskActivation - actionTime;
+            KeyValuePair<double, Sequence>[] tempCopy = new KeyValuePair<double, Sequence>[this.ExpectedTasks.Count];
+            int i = 0;
+            foreach (KeyValuePair<double, Sequence> item in this.ExpectedTasks)
+            {
+                tempCopy[i] = new KeyValuePair<double, Sequence>(item.Key + adjustment, item.Value);
+                i++;
+            }
+            this.ExpectedTasks.Clear();
+            foreach (var item in tempCopy)
+            {
+                this.ExpectedTasks.Add(item.Key, item.Value);
+            }
+            tempCopy = null;
         }
     }
 }
