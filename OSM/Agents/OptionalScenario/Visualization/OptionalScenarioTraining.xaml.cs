@@ -227,7 +227,26 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
             {
                 this.valueSmallerThanZero("Maximum Temperature");
                 return;
-            } 
+            }
+            #endregion
+
+            #region validation of training subset
+            //double trainingRatio = 0;
+            //if (!double.TryParse(this._ratioOfTrainingSubset.Text, out trainingRatio))
+            //{
+            //    MessageBox.Show("Invalied 'Ratio of Training Subset'", "Invalid Input",
+            //        MessageBoxButton.OK, MessageBoxImage.Error);
+            //    return;
+            //}
+            //else
+            //{
+            //    if (trainingRatio <= 0 || trainingRatio > 1.0)
+            //    {
+            //        MessageBox.Show("'Ratio of Training Subset' must be larger than zero and smaller than or equal to 1",
+            //            "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+            //        return;
+            //    }
+            //}
             #endregion
 
             #region Validate duration and timeStep parameters

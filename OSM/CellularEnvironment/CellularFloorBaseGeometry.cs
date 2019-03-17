@@ -25,13 +25,9 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using SpatialAnalysis.Interoperability;
-using SpatialAnalysis.IsovistUtility;
 using System.Windows;
-using System.IO;
 using SpatialAnalysis.Geometry;
-using SpatialAnalysis.Data;
 
 namespace SpatialAnalysis.CellularEnvironment
 {
@@ -115,15 +111,15 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <summary>
         /// Field polygons
         /// </summary>
-        public BarrierPolygons[] FieldBarriers { get; set; }
+        public BarrierPolygon[] FieldBarriers { get; set; }
         /// <summary>
         /// Visual obstacle polygons
         /// </summary>
-        public BarrierPolygons[] VisualBarriers { get; set; }
+        public BarrierPolygon[] VisualBarriers { get; set; }
         /// <summary>
         /// Physical obstacle polygons
         /// </summary>
-        public BarrierPolygons[] PhysicalBarriers { get; set; }
+        public BarrierPolygon[] PhysicalBarriers { get; set; }
         /// <summary>
         /// The length of the cell diagonal
         /// </summary>
@@ -157,6 +153,8 @@ namespace SpatialAnalysis.CellularEnvironment
         public CellularFloorBaseGeometry(double desiredCellSize, BIM_To_OSM_Base barrierEnvironment, UV pointOnWalkableArea)
         {
             this.CellSize = desiredCellSize;
+            //upgrade UV to EdgeEndPoint that has ID
+
             this.VisualBarriers = barrierEnvironment.VisualBarriers;
             this.PhysicalBarriers = barrierEnvironment.PhysicalBarriers;
             this.FieldBarriers = barrierEnvironment.FieldBarriers;
@@ -168,7 +166,7 @@ namespace SpatialAnalysis.CellularEnvironment
             #region creating the edges of the visual barriers and loading their addresses
             this.VisualBarrierEdgeAddress = new Dictionary<int, EdgeGlobalAddress>();
             int numberOfVisualBarrier = 0;
-            foreach (BarrierPolygons item in this.VisualBarriers)
+            foreach (BarrierPolygon item in this.VisualBarriers)
             {
                 numberOfVisualBarrier += item.BoundaryPoints.Length;
             }
@@ -192,7 +190,7 @@ namespace SpatialAnalysis.CellularEnvironment
             #region creating the edges of the physical barriers and loading their addresses
             this.PhysicalBarrierEdgeAddress = new Dictionary<int, EdgeGlobalAddress>();
             int numberOfPhysicalBarrier = 0;
-            foreach (BarrierPolygons item in this.PhysicalBarriers)
+            foreach (BarrierPolygon item in this.PhysicalBarriers)
             {
                 numberOfPhysicalBarrier += item.BoundaryPoints.Length;
             }
@@ -216,7 +214,7 @@ namespace SpatialAnalysis.CellularEnvironment
             #region creating the edges of the fields and loading their addresses
             this.FieldBarrierEdgeAddress = new Dictionary<int, EdgeGlobalAddress>();
             int numberOfFieldBarriers = 0;
-            foreach (BarrierPolygons item in this.FieldBarriers)
+            foreach (BarrierPolygon item in this.FieldBarriers)
             {
                 numberOfFieldBarriers += item.BoundaryPoints.Length;
             }
@@ -267,14 +265,6 @@ namespace SpatialAnalysis.CellularEnvironment
                 {
                     this.FindCell(index).VisualBarrierEdgeIndices.Add(i);
                 }
-                if (intersectingCellIndices.Length != 0)
-                {
-                    this.FindCell(intersectingCellIndices[0]).ContainsVisualEdgeEndPoints = true;
-                }
-                if (intersectingCellIndices.Length != 1)
-                {
-                    this.FindCell(intersectingCellIndices[intersectingCellIndices.Length-1]).ContainsVisualEdgeEndPoints = true;
-                }
             }
             #endregion
 
@@ -286,14 +276,6 @@ namespace SpatialAnalysis.CellularEnvironment
                 {
                     this.FindCell(index).PhysicalBarrierEdgeIndices.Add(i);
                 }
-                if (intersectingCellIndices.Length != 0)
-                {
-                    this.FindCell(intersectingCellIndices[0]).ContainsPhysicalEdgeEndPoints = true;
-                }
-                if (intersectingCellIndices.Length != 1)
-                {
-                    this.FindCell(intersectingCellIndices[intersectingCellIndices.Length - 1]).ContainsPhysicalEdgeEndPoints = true;
-                }
             }
             #endregion
 
@@ -304,14 +286,6 @@ namespace SpatialAnalysis.CellularEnvironment
                 foreach (Index index in intersectingCellIndices)
                 {
                     this.FindCell(index).FieldBarrierEdgeIndices.Add(i);
-                }
-                if (intersectingCellIndices.Length != 0)
-                {
-                    this.FindCell(intersectingCellIndices[0]).ContainsFieldEdgeEndPoints = true;
-                }
-                if (intersectingCellIndices.Length != 1)
-                {
-                    this.FindCell(intersectingCellIndices[intersectingCellIndices.Length - 1]).ContainsFieldEdgeEndPoints = true;
                 }
             }
 
@@ -341,6 +315,54 @@ namespace SpatialAnalysis.CellularEnvironment
             }
             d = null;
             #endregion
+
+            #region loading edge end points to cells
+            foreach (BarrierPolygon polygon in this.VisualBarriers)
+            {
+                foreach (UV point in polygon.BoundaryPoints)
+                {
+                    Cell cell = this.FindCell(point);
+                    if(cell != null)
+                    {
+                        if (cell.VisualBarrierEndPoints == null)
+                        {
+                            cell.VisualBarrierEndPoints = new List<UV>();
+                        }
+                        cell.VisualBarrierEndPoints.Add(point);
+                    }
+                }
+            }
+            foreach (BarrierPolygon polygon in this.PhysicalBarriers)
+            {
+                foreach (UV point in polygon.BoundaryPoints)
+                {
+                    Cell cell = this.FindCell(point);
+                    if (cell != null)
+                    {
+                        if (cell.PhysicalBarrierEndPoints == null)
+                        {
+                            cell.PhysicalBarrierEndPoints = new List<UV>();
+                        }
+                        cell.PhysicalBarrierEndPoints.Add(point);
+                    }
+                }
+            }
+            foreach (BarrierPolygon polygon in this.FieldBarriers)
+            {
+                foreach (UV point in polygon.BoundaryPoints)
+                {
+                    Cell cell = this.FindCell(point);
+                    if (cell != null)
+                    {
+                        if (cell.FieldBarrierEndPoints == null)
+                        {
+                            cell.FieldBarrierEndPoints = new List<UV>();
+                        }
+                        cell.FieldBarrierEndPoints.Add(point);
+                    }
+                }
+            }
+            #endregion
         }
         /// <summary>
         /// Loads the cell size
@@ -353,7 +375,7 @@ namespace SpatialAnalysis.CellularEnvironment
             double xMax = max.U;
             double yMin = min.V;
             double yMax = max.V;
-            foreach (BarrierPolygons barrier in this.PhysicalBarriers)
+            foreach (BarrierPolygon barrier in this.PhysicalBarriers)
             {
                 foreach (UV point in barrier.BoundaryPoints)
                 {
@@ -1074,63 +1096,6 @@ namespace SpatialAnalysis.CellularEnvironment
             return lines;
         }
 
-        public virtual void GetCellBarrierEndPoint(Index cellIndex, List<UV> updatedEndPoints, BarrierType barrierType)
-        {
-            updatedEndPoints.Clear();
-            if (!ContainsCell(cellIndex)) return;
-            Cell cell = this.Cells[cellIndex.I, cellIndex.J];
-            switch (barrierType)
-            {
-                case BarrierType.Visual:
-                    foreach (var edgeIndex in cell.VisualBarrierEdgeIndices)
-                    {
-                        UVLine edge = this.VisualBarrierEdges[edgeIndex];
-                        if(cell.ContainsPoint(edge.Start,this.CellSize))
-                        {
-                            updatedEndPoints.Add(edge.Start);
-                        }
-                        if (cell.ContainsPoint(edge.End, this.CellSize))
-                        {
-                            updatedEndPoints.Add(edge.End);
-                        }
-                    }
-                    break;
-                case BarrierType.Physical:
-                    foreach (var edgeIndex in cell.PhysicalBarrierEdgeIndices)
-                    {
-                        UVLine edge = this.PhysicalBarrierEdges[edgeIndex];
-                        if (cell.ContainsPoint(edge.Start, this.CellSize))
-                        {
-                            updatedEndPoints.Add(edge.Start);
-                        }
-                        if (cell.ContainsPoint(edge.End, this.CellSize))
-                        {
-                            updatedEndPoints.Add(edge.End);
-                        }
-                    }
-                    break;
-                case BarrierType.Field:
-                    foreach (var edgeIndex in cell.FieldBarrierEdgeIndices)
-                    {
-                        UVLine edge = this.FieldBarrierEdges[edgeIndex];
-                        if (cell.ContainsPoint(edge.Start, this.CellSize))
-                        {
-                            updatedEndPoints.Add(edge.Start);
-                        }
-                        if (cell.ContainsPoint(edge.End, this.CellSize))
-                        {
-                            updatedEndPoints.Add(edge.End);
-                        }
-                    }
-                    break;
-                case BarrierType.BarrierBuffer:
-                    //Not loaded in the base class. Will be overloaded in the derived class.
-                    break;
-                default:
-                    break;
-            }
-        }
-
         #region Find cells inside a barrier
         /// <summary>
         /// For any polygon finds the cells that locate inside it or intersect with it
@@ -1138,7 +1103,7 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <param name="barrier">A polygon</param>
         /// <param name="tolerance">Tolerance factor by default set to the absolute tolerance of the main document</param>
         /// <returns></returns>
-        public HashSet<Index> GetIndicesInsideBarrier(BarrierPolygons barrier, double tolerance = OSMDocument.AbsoluteTolerance )
+        public HashSet<Index> GetIndicesInsideBarrier(BarrierPolygon barrier, double tolerance = OSMDocument.AbsoluteTolerance )
         {
             Dictionary<Index, List<UVLine>> indexToLines =
                 new Dictionary<Index, List<UVLine>>(new IndexComparer());
@@ -1207,7 +1172,7 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <param name="barrier">A polygon</param>
         /// <param name="tolerance">Tolerance factor by default set to the absolute tolerance of the main document</param>
         /// <returns></returns>
-        public HashSet<Index> GetIndicesOnBarrier(BarrierPolygons barrier, double tolerance = OSMDocument.AbsoluteTolerance)
+        public HashSet<Index> GetIndicesOnBarrier(BarrierPolygon barrier, double tolerance = OSMDocument.AbsoluteTolerance)
         {
             HashSet<Index> indices = new HashSet<Index>();
             for (int i = 0; i < barrier.Length; i++)

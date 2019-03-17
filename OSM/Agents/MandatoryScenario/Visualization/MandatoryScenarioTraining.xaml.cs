@@ -162,7 +162,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
         Activity _activity;
         int _gaussianRange;
         HashSet<Index> _trailIndices;
-        BarrierPolygons _destination;
+        BarrierPolygon _destination;
         StateBase _defaultState;
         Cell _cellDestination;
         private static object PropertyCoerce(DependencyObject obj, object value)
@@ -299,6 +299,25 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             }
             #endregion
 
+            #region validation of training subset
+            //double trainingRatio = 0;
+            //if(!double.TryParse(this._ratioOfTrainingSubset.Text, out trainingRatio))
+            //{
+            //    MessageBox.Show("Invalied 'Ratio of Training Subset'", "Invalid Input",
+            //        MessageBoxButton.OK, MessageBoxImage.Error);
+            //    return;
+            //}
+            //else
+            //{
+            //    if(trainingRatio<=0 || trainingRatio>1.0)
+            //    {
+            //        MessageBox.Show("'Ratio of Training Subset' must be larger than zero and smaller than or equal to 1", 
+            //            "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+            //        return;
+            //    }
+            //}
+            #endregion
+
             #region Validate duration and timeStep parameters
             double timeStep = 0;
             if (!double.TryParse(this._timeStep.Text, out timeStep))
@@ -425,7 +444,7 @@ namespace SpatialAnalysis.Agents.MandatoryScenario.Visualization
             var p2 = p1 + UV.UBase * this._host.cellularFloor.CellSize;
             var p3 = p1 + UV.UBase * this._host.cellularFloor.CellSize + UV.VBase * this._host.cellularFloor.CellSize;
             var p4 = p1 + UV.VBase * this._host.cellularFloor.CellSize;
-            this._destination = new BarrierPolygons(new UV[] { p1, p2, p3, p4 }); 
+            this._destination = new BarrierPolygon(new UV[] { p1, p2, p3, p4 }); 
             #endregion
             
             //execute visibility changes in the interface

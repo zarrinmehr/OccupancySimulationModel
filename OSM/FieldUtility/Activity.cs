@@ -54,11 +54,11 @@ namespace SpatialAnalysis.FieldUtility
         /// </summary>
         /// <value>The default state.</value>
         public StateBase DefaultState { get; set; }
-        private BarrierPolygons _destinationArea;
+        private BarrierPolygon _destinationArea;
         /// <summary>
         /// A polygon that shows the destination area
         /// </summary>
-        public BarrierPolygons DestinationArea { get { return _destinationArea; } }
+        public BarrierPolygon DestinationArea { get { return _destinationArea; } }
 
         /// <summary>
         /// Gets or sets the name of the engaged activity.
@@ -128,7 +128,7 @@ namespace SpatialAnalysis.FieldUtility
         /// <param name="origins">The origins of the activity.</param>
         /// <param name="defaultState">The default state of the agent in the activity area.</param>
         /// <param name="destinationArea">The destination area.</param>
-        public ActivityDestination(string name, HashSet<Cell> origins, StateBase defaultState, BarrierPolygons destinationArea)
+        public ActivityDestination(string name, HashSet<Cell> origins, StateBase defaultState, BarrierPolygon destinationArea)
         {
             this.DefaultState = defaultState;
             this._destinationArea = destinationArea;
@@ -212,7 +212,7 @@ namespace SpatialAnalysis.FieldUtility
                 throw new ArgumentException("Activity does not include a name!");
             }
             StateBase state = StateBase.FromStringRepresentation(lines[startIndex + 1]);
-            BarrierPolygons barrier = BarrierPolygons.FromStringRepresentation(lines[startIndex + 2]);
+            BarrierPolygon barrier = BarrierPolygon.FromStringRepresentation(lines[startIndex + 2]);
             //unit converion
             UnitConversion.Transform(state.Location, unitType, cellularFloor.UnitType);
             UnitConversion.Transform(state.Velocity, unitType, cellularFloor.UnitType);
@@ -312,7 +312,7 @@ namespace SpatialAnalysis.FieldUtility
         /// <param name="defaultState">The default state.</param>
         /// <param name="engagedActivityName">Name of the engaged activity.</param>
         /// <param name="cellularFloor">The cellular floor.</param>
-        public Activity(Dictionary<Cell, double> potentials, HashSet<Cell> origins, BarrierPolygons destinationArea, StateBase defaultState, string engagedActivityName, CellularFloor cellularFloor)
+        public Activity(Dictionary<Cell, double> potentials, HashSet<Cell> origins, BarrierPolygon destinationArea, StateBase defaultState, string engagedActivityName, CellularFloor cellularFloor)
             : base(engagedActivityName, origins, defaultState, destinationArea)
         {
             this.Potentials = potentials;

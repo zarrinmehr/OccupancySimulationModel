@@ -153,12 +153,12 @@ namespace SpatialAnalysis.Agents.OptionalScenario.Visualization
             }
             return _children[index];
         }
-        private void setGeometry(BarrierPolygons[] barriers)
+        private void setGeometry(BarrierPolygon[] barriers)
         {
             StreamGeometry sg = new StreamGeometry();
             using (StreamGeometryContext sgc = sg.Open())
             {
-                foreach (BarrierPolygons barrier in barriers)
+                foreach (BarrierPolygon barrier in barriers)
                 {
                     sgc.BeginFigure(this.toPoint(barrier.BoundaryPoints[0]), true, true);
                     for (int i = 1; i < barrier.Length; i++)

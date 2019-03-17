@@ -196,7 +196,7 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <param name="cellIDs">The visible cells.</param>
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <returns>List&lt;BarrierPolygons&gt;.</returns>
-        public static List<BarrierPolygons> GetBoundary(ICollection<int> cellIDs, CellularFloorBaseGeometry cellularFloor)
+        public static List<BarrierPolygon> GetBoundary(ICollection<int> cellIDs, CellularFloorBaseGeometry cellularFloor)
         {
             Dictionary<UVLine, int> guid = new Dictionary<UVLine, int>();
             foreach (var item in cellIDs)
@@ -225,13 +225,13 @@ namespace SpatialAnalysis.CellularEnvironment
             guid.Clear();
             guid = null;
             var plines = PLine.ExtractPLines(boundaryLines);
-            List<BarrierPolygons> boundary = new List<BarrierPolygons>();
+            List<BarrierPolygon> boundary = new List<BarrierPolygon>();
             foreach (PLine item in plines)
             {
                 var oneBoundary = item.Simplify(cellularFloor.CellSize / 10);
                 if (oneBoundary != null)
                 {
-                    boundary.Add(new BarrierPolygons(oneBoundary.ToArray()));
+                    boundary.Add(new BarrierPolygon(oneBoundary.ToArray()));
                 }
             }
             boundaryLines.Clear();
@@ -244,7 +244,7 @@ namespace SpatialAnalysis.CellularEnvironment
         /// </summary>
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <returns>List&lt;BarrierPolygons&gt;.</returns>
-        public static List<BarrierPolygons> GetFieldBoundary(CellularFloor cellularFloor)
+        public static List<BarrierPolygon> GetFieldBoundary(CellularFloor cellularFloor)
         {
             Dictionary<UVLine, int> guid = new Dictionary<UVLine, int>();
             foreach (var item in cellularFloor.Cells)
@@ -276,13 +276,13 @@ namespace SpatialAnalysis.CellularEnvironment
             guid.Clear();
             guid = null;
             var pLines = PLine.ExtractPLines(boundaryLines);
-            List<BarrierPolygons> boundary = new List<BarrierPolygons>();
+            List<BarrierPolygon> boundary = new List<BarrierPolygon>();
             foreach (PLine item in pLines)
             {
                 var oneBoundary = item.Simplify(cellularFloor.CellSize / 10);
                 if (oneBoundary != null)
                 {
-                    boundary.Add(new BarrierPolygons(oneBoundary.ToArray()));
+                    boundary.Add(new BarrierPolygon(oneBoundary.ToArray()));
                 }
             }
             boundaryLines.Clear();

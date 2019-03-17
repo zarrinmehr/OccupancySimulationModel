@@ -64,14 +64,14 @@ namespace SpatialAnalysis.Events
         /// Gets or sets the visual targets.
         /// </summary>
         /// <value>The visual targets.</value>
-        public SpatialAnalysis.Geometry.BarrierPolygons[] VisualTargets { get; set; }
+        public SpatialAnalysis.Geometry.BarrierPolygon[] VisualTargets { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="VisibilityEvaluationEvent"/> class.
         /// </summary>
         /// <param name="allVisibleCells">All visible cells.</param>
         /// <param name="visibilityTargetIsovists">The visibility target isovists.</param>
         /// <param name="visualTargets">The visual targets.</param>
-        public VisibilityTarget(HashSet<int> allVisibleCells, ICollection<Isovist> visibilityTargetIsovists, ICollection<SpatialAnalysis.Geometry.BarrierPolygons> visualTargets)
+        public VisibilityTarget(HashSet<int> allVisibleCells, ICollection<Isovist> visibilityTargetIsovists, ICollection<SpatialAnalysis.Geometry.BarrierPolygon> visualTargets)
         {
             this.AllVisibleCells = allVisibleCells;
             //this.VisibilityTargetIsovists = visibilityTargetIsovists;
@@ -99,11 +99,11 @@ namespace SpatialAnalysis.Events
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <param name="tolerance">The tolerance by default set to the main document's absolute tolerance value.</param>
         /// <exception cref="System.ArgumentException">Cannot generate 'Occupancy Visual Event' with no visibility target cells!</exception>
-        public VisibilityTarget(ICollection<SpatialAnalysis.Geometry.BarrierPolygons> visualTargets, CellularFloor cellularFloor, double tolerance = OSMDocument.AbsoluteTolerance)
+        public VisibilityTarget(ICollection<SpatialAnalysis.Geometry.BarrierPolygon> visualTargets, CellularFloor cellularFloor, double tolerance = OSMDocument.AbsoluteTolerance)
         {
             this.VisualTargets = visualTargets.ToArray();
             HashSet<Index> allIndices = new HashSet<Index>();
-            foreach (SpatialAnalysis.Geometry.BarrierPolygons item in this.VisualTargets)
+            foreach (SpatialAnalysis.Geometry.BarrierPolygon item in this.VisualTargets)
             {
                 allIndices.UnionWith(cellularFloor.GetIndicesInsideBarrier(item, tolerance));
             }
@@ -162,7 +162,7 @@ namespace SpatialAnalysis.Events
         public string SaveAsString()
         {
             StringBuilder sb = new StringBuilder();
-            foreach (SpatialAnalysis.Geometry.BarrierPolygons item in VisualTargets)
+            foreach (SpatialAnalysis.Geometry.BarrierPolygon item in VisualTargets)
             {
                 sb.AppendLine(item.ToString());
             }
@@ -181,10 +181,10 @@ namespace SpatialAnalysis.Events
         /// <returns>VisibilityEvaluationEvent.</returns>
         public static VisibilityTarget FromString(List<String> lines, int start, Length_Unit_Types unitType, CellularFloor cellularFloor, double tolerance = 0.0000001d)
         {
-            List<SpatialAnalysis.Geometry.BarrierPolygons> barriers = new List<Geometry.BarrierPolygons>();
+            List<SpatialAnalysis.Geometry.BarrierPolygon> barriers = new List<Geometry.BarrierPolygon>();
             for (int i = start; i < lines.Count; i++)
             {
-                var barrier = SpatialAnalysis.Geometry.BarrierPolygons.FromStringRepresentation(lines[i]);
+                var barrier = SpatialAnalysis.Geometry.BarrierPolygon.FromStringRepresentation(lines[i]);
                 UnitConversion.Transform(barrier.BoundaryPoints, unitType, cellularFloor.UnitType);
                 barriers.Add(barrier);
             }

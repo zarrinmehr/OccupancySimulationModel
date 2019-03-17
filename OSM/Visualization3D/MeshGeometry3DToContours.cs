@@ -87,7 +87,7 @@ namespace SpatialAnalysis.Visualization3D
         /// </summary>
         /// <param name="elevation">The elevation.</param>
         /// <returns>List&lt;BarrierPolygons&gt;.</returns>
-        public List<BarrierPolygons> GetIntersection(double elevation)
+        public List<BarrierPolygon> GetIntersection(double elevation)
         {
             var edges = new List<UVLine>();
             foreach (var item in this._faces)
@@ -101,13 +101,13 @@ namespace SpatialAnalysis.Visualization3D
                 }
             }
             var plines = PLine.ExtractPLines(edges);
-            List<BarrierPolygons> boundary = new List<BarrierPolygons>();
+            List<BarrierPolygon> boundary = new List<BarrierPolygon>();
             foreach (PLine item in plines)
             {
                 var oneBoundary = item.Simplify(0.001d,0.0001d);
                 if (oneBoundary != null)
                 {
-                    var polygon = new BarrierPolygons(oneBoundary.ToArray()) { IsClosed = item.Closed };
+                    var polygon = new BarrierPolygon(oneBoundary.ToArray()) { IsClosed = item.Closed };
                     boundary.Add(polygon);
                 }
             }
@@ -119,9 +119,9 @@ namespace SpatialAnalysis.Visualization3D
         /// </summary>
         /// <param name="elevations">The elevations.</param>
         /// <returns>List&lt;BarrierPolygons&gt;.</returns>
-        public List<BarrierPolygons> GetIntersection(IEnumerable<double> elevations)
+        public List<BarrierPolygon> GetIntersection(IEnumerable<double> elevations)
         {
-            List<BarrierPolygons> boundaries = new List<BarrierPolygons>();
+            List<BarrierPolygon> boundaries = new List<BarrierPolygon>();
             foreach (var item in elevations)
             {
                 var boundary = this.GetIntersection(item);

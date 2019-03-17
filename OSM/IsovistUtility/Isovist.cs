@@ -116,7 +116,7 @@ namespace SpatialAnalysis.IsovistUtility
         /// </summary>
         /// <param name="cellularFloor">The cellularFloor.</param>
         /// <returns>List&lt;BarrierPolygons&gt;.</returns>
-        public List<BarrierPolygons> GetBoundary(CellularFloor cellularFloor)
+        public List<BarrierPolygon> GetBoundary(CellularFloor cellularFloor)
         {
             Dictionary<UVLine, int> guid = new Dictionary<UVLine, int>();
             foreach (var item in this.VisibleCells)
@@ -145,13 +145,13 @@ namespace SpatialAnalysis.IsovistUtility
             guid.Clear();
             guid = null;
             var plines = PLine.ExtractPLines(boundaryLines);
-            List<BarrierPolygons> boundary = new List<BarrierPolygons>();
+            List<BarrierPolygon> boundary = new List<BarrierPolygon>();
             foreach (PLine item in plines)
             {
                 var oneBoundary = item.Simplify(cellularFloor.CellSize / 10);
                 if (oneBoundary != null)
                 {
-                    boundary.Add(new BarrierPolygons(oneBoundary.ToArray()));
+                    boundary.Add(new BarrierPolygon(oneBoundary.ToArray()));
                 }
             }
             boundaryLines.Clear();
@@ -218,8 +218,8 @@ namespace SpatialAnalysis.IsovistUtility
     /// <summary>
     /// Class IsovistPolygon represents polygonal isovists
     /// </summary>
-    /// <seealso cref="SpatialAnalysis.Geometry.BarrierPolygons" />
-    public class IsovistPolygon : BarrierPolygons
+    /// <seealso cref="SpatialAnalysis.Geometry.BarrierPolygon" />
+    public class IsovistPolygon : BarrierPolygon
     {
 
         /// <summary>
@@ -246,8 +246,8 @@ namespace SpatialAnalysis.IsovistUtility
     internal class Proxemics
     {
         public UV Center { get; set; }
-        public BarrierPolygons[] ProxemicsPolygons { get; set; }
-        public Proxemics(BarrierPolygons[] polygons, UV center)
+        public BarrierPolygon[] ProxemicsPolygons { get; set; }
+        public Proxemics(BarrierPolygon[] polygons, UV center)
         {
             this.Center = center;
             this.ProxemicsPolygons = polygons;

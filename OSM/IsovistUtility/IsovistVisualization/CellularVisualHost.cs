@@ -49,7 +49,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
         private Dictionary<Cell, double> _staticCosts { get; set; }
 
         private OSMDocument _host { get; set; }
-        private Dictionary<Cell, List<BarrierPolygons>> _edges;
+        private Dictionary<Cell, List<BarrierPolygon>> _edges;
         private List<IsovistEscapeRoutes> _escapeRoutes;
 
         private Brush _fillBrush { get; set; }
@@ -71,7 +71,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
         public CellularVisualHost()
         {
             _children = new VisualCollection(this);
-            this._edges = new Dictionary<Cell, List<BarrierPolygons>>();
+            this._edges = new Dictionary<Cell, List<BarrierPolygon>>();
             this._escapeRoutes = new List<IsovistEscapeRoutes>();
             this._centerBrush = Brushes.DarkRed.Clone();
             this._centerBrush.Opacity = .8;
@@ -540,7 +540,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
                 StreamGeometry sg = new StreamGeometry();
                 using (StreamGeometryContext sgc = sg.Open())
                 {
-                    foreach (BarrierPolygons item in boundaries)
+                    foreach (BarrierPolygon item in boundaries)
                     {
                         sgc.BeginFigure(new Point(item.BoundaryPoints[0].U, item.BoundaryPoints[0].V), true, true);
                         foreach (var uv in item.BoundaryPoints)

@@ -166,7 +166,7 @@ namespace SpatialAnalysis.Data.Visualization
         ///                                 "\nP1: " +
         ///                             this._cellularFloor.FindCell(current).Origin.ToString() + "\nP2: " + this._cellularFloor.FindCell(neighborIndex).Origin.ToString() +
         ///                             "\nDistance: " + this._cellularFloor.FindCell(current).Origin.DistanceTo(this._cellularFloor.FindCell(neighborIndex).Origin).ToString()</exception>
-        public Activity GetStaticPotentialFieldForTraining(Cell destination, BarrierPolygons destinationArea, StateBase defaultState, string name, HashSet<Index> trail)
+        public Activity GetStaticPotentialFieldForTraining(Cell destination, BarrierPolygon destinationArea, StateBase defaultState, string name, HashSet<Index> trail)
         {
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
@@ -269,7 +269,7 @@ namespace SpatialAnalysis.Data.Visualization
         ///                                 "\nP1: " +
         ///                             this._cellularFloor.FindCell(current).Origin.ToString() + "\nP2: " + this._cellularFloor.FindCell(neighborIndex).Origin.ToString() +
         ///                             "\nDistance: " + this._cellularFloor.FindCell(current).Origin.DistanceTo(this._cellularFloor.FindCell(neighborIndex).Origin).ToString()</exception>
-        public Activity GetStaticActivity(HashSet<Cell> destinations, BarrierPolygons destinationArea, StateBase defaultState, string name)
+        public Activity GetStaticActivity(HashSet<Cell> destinations, BarrierPolygon destinationArea, StateBase defaultState, string name)
         {
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
@@ -379,7 +379,7 @@ namespace SpatialAnalysis.Data.Visualization
         ///                                 "\nP1: " +
         ///                             this._cellularFloor.FindCell(current).Origin.ToString() + "\nP2: " + this._cellularFloor.FindCell(neighborIndex).Origin.ToString() +
         ///                             "\nDistance: " + this._cellularFloor.FindCell(current).Origin.DistanceTo(this._cellularFloor.FindCell(neighborIndex).Origin).ToString()</exception>
-        public Activity GetDynamicPotentialFieldForTraining(Cell destination, BarrierPolygons destinationArea, StateBase defaultState, string name, double angleCost, HashSet<Index> trail)
+        public Activity GetDynamicPotentialFieldForTraining(Cell destination, BarrierPolygon destinationArea, StateBase defaultState, string name, double angleCost, HashSet<Index> trail)
         {
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
@@ -501,7 +501,7 @@ namespace SpatialAnalysis.Data.Visualization
         ///                                 "\nP1: " +
         ///                             this._cellularFloor.FindCell(current).Origin.ToString() + "\nP2: " + this._cellularFloor.FindCell(neighborIndex).Origin.ToString() +
         ///                             "\nDistance: " + this._cellularFloor.FindCell(current).Origin.DistanceTo(this._cellularFloor.FindCell(neighborIndex).Origin).ToString()</exception>
-        public Activity GetDynamicActivity(HashSet<Cell> destinations, BarrierPolygons destinationArea, StateBase defaultState, string name, double angleCost)
+        public Activity GetDynamicActivity(HashSet<Cell> destinations, BarrierPolygon destinationArea, StateBase defaultState, string name, double angleCost)
         {
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
@@ -628,7 +628,7 @@ namespace SpatialAnalysis.Data.Visualization
         ///                                 "\nP1: " +
         ///                             this._cellularFloor.FindCell(current).Origin.ToString() + "\nP2: " + this._cellularFloor.FindCell(neighborIndex).Origin.ToString() +
         ///                             "\nDistance: " + this._cellularFloor.FindCell(current).Origin.DistanceTo(this._cellularFloor.FindCell(neighborIndex).Origin).ToString()</exception>
-        public Activity GetDynamicActivity(Cell destination, BarrierPolygons destinationArea, StateBase defaultState, string name, double angleCost, double radius)
+        public Activity GetDynamicActivity(Cell destination, BarrierPolygon destinationArea, StateBase defaultState, string name, double angleCost, double radius)
         {
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();

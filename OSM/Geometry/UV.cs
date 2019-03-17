@@ -128,7 +128,8 @@ namespace SpatialAnalysis.Geometry
         /// <returns>System.Double.</returns>
         public static double GetLengthSquared(UV a, UV b)
         {
-            return (a.U - b.U) * (a.U - b.U) + (a.V - b.V) * (a.V - b.V);
+            double _x = a.U - b.U, _y = a.V - b.V;
+            return _x*_x+_y*_y;
         }
         /// <summary>
         /// Gets the distance between two UVs as points.
@@ -537,6 +538,5 @@ namespace SpatialAnalysis.Geometry
             return new UV(this.U, this.V);
         }
     }
-
 }
 

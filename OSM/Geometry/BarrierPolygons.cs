@@ -31,9 +31,9 @@ using SpatialAnalysis.Interoperability;
 namespace SpatialAnalysis.Geometry
 {
     /// <summary>
-    /// Class BarrierPolygons.
+    /// Class BarrierPolygon.
     /// </summary>
-    public class BarrierPolygons
+    public class BarrierPolygon
     {
         /// <summary>
         /// Gets or sets a value indicating whether this instance is closed.
@@ -59,10 +59,10 @@ namespace SpatialAnalysis.Geometry
             get { return this.BoundaryPoints.Length; }
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BarrierPolygons"/> class.
+        /// Initializes a new instance of the <see cref="BarrierPolygon"/> class.
         /// </summary>
         /// <param name="points">An rray of UV points.</param>
-        public BarrierPolygons(UV[] points)
+        public BarrierPolygon(UV[] points)
         {
             this.AscendingOrder = true;
             this.BoundaryPoints = points;
@@ -192,7 +192,7 @@ namespace SpatialAnalysis.Geometry
         /// <returns><c>true</c> if this instance is convex; otherwise, <c>false</c>.</returns>
         public bool IsConvex()
         {
-            return BarrierPolygons.IsConvex(this.BoundaryPoints);
+            return BarrierPolygon.IsConvex(this.BoundaryPoints);
         }
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -226,7 +226,7 @@ namespace SpatialAnalysis.Geometry
         /// or
         /// Failed to parse polygon's points: " + strings[2 * i] + ", " + strings[2 * i + 1]
         /// </exception>
-        public static BarrierPolygons FromStringRepresentation(string s)
+        public static BarrierPolygon FromStringRepresentation(string s)
         {
             if (string.IsNullOrWhiteSpace(s) || string.IsNullOrEmpty(s))
             {
@@ -251,7 +251,7 @@ namespace SpatialAnalysis.Geometry
                     throw new ArgumentException("Failed to parse polygon's points: " + strings[2 * i] + ", " + strings[2 * i + 1]);
                 }
             }
-            BarrierPolygons polygon = new BarrierPolygons(pnts);
+            BarrierPolygon polygon = new BarrierPolygon(pnts);
             polygon.IsClosed = isclosed;
             strings = null;
             return polygon;
@@ -267,9 +267,9 @@ namespace SpatialAnalysis.Geometry
             return center / this.Length;
         }
 
-        public static void VisualizeBarriers(I_OSM_To_BIM visualizer, BarrierPolygons[] barriers, double height = 0)
+        public static void VisualizeBarriers(I_OSM_To_BIM visualizer, BarrierPolygon[] barriers, double height = 0)
         {
-            foreach (BarrierPolygons item in barriers)
+            foreach (BarrierPolygon item in barriers)
             {
                 visualizer.VisualizePolygon(item.BoundaryPoints, height);
             }

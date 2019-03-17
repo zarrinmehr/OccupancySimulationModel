@@ -81,21 +81,21 @@ namespace SpatialAnalysis.CellularEnvironment
         /// </summary>
         public Index CellToIndex { get { return _cellIndex; } }
         /// <summary>
-        /// true if the cell contains an end point for a visual barrier edge
+        /// Visual Barrier End Points
         /// </summary>
-        public bool ContainsVisualEdgeEndPoints { get; set; }
+        public List<UV> VisualBarrierEndPoints { get; set; }
         /// <summary>
-        /// true if the cell contains an end point for a physical barrier edge
+        /// Physical Barrier End Points
         /// </summary>
-        public bool ContainsPhysicalEdgeEndPoints { get; set; }
+        public List<UV> PhysicalBarrierEndPoints { get; set; }
         /// <summary>
-        /// true if the cell contains an end point for a field barrier edge
+        /// Field Barrier End Points
         /// </summary>
-        public bool ContainsFieldEdgeEndPoints { get; set; }
+        public List<UV> FieldBarrierEndPoints { get; set; }
         /// <summary>
-        /// true if the cell contains an end point for a barrier buffer edge
+        /// Buffer Barrier End Points
         /// </summary>
-        public bool ContainsBufferEdgeEndPoints { get; set; }
+        public List<UV> BufferBarrierEndPoints { get; set; }
         /// <summary>
         /// The constructor of the cell
         /// </summary>
@@ -110,8 +110,10 @@ namespace SpatialAnalysis.CellularEnvironment
             this.PhysicalBarrierEdgeIndices = new HashSet<int>();
             this.FieldBarrierEdgeIndices = new HashSet<int>();
             this._cellIndex = new Index(i, j);
-            this.ContainsBufferEdgeEndPoints = this.ContainsFieldEdgeEndPoints =
-                this.ContainsVisualEdgeEndPoints = this.ContainsPhysicalEdgeEndPoints = false;
+            this.VisualBarrierEndPoints = null;
+            this.PhysicalBarrierEndPoints = null;
+            this.FieldBarrierEndPoints = null;
+            this.BufferBarrierEndPoints = null;
         }
 
 
@@ -196,6 +198,22 @@ namespace SpatialAnalysis.CellularEnvironment
             bool widthIncluded = this.U <= pnt.U && pnt.U < (this.U + cellSize);
             bool heightIncluded = this.V <= pnt.V && pnt.V < (this.V + cellSize);
             return widthIncluded && heightIncluded;
+        }
+
+        public List<UV> GetEdgeEndPoint(BarrierType barrierType)
+        {
+            switch (barrierType)
+            {
+                case BarrierType.Visual:
+                    return this.VisualBarrierEndPoints;
+                case BarrierType.Physical:
+                    return this.PhysicalBarrierEndPoints;
+                case BarrierType.Field:
+                    return this.FieldBarrierEndPoints;
+                case BarrierType.BarrierBuffer:
+                    return this.BufferBarrierEndPoints;
+            }
+            return null;
         }
     }
 }

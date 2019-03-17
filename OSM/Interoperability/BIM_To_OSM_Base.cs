@@ -113,22 +113,22 @@ namespace SpatialAnalysis.Interoperability
         /// Gets or sets the physical barriers.
         /// </summary>
         /// <value>The physical barriers.</value>
-        public BarrierPolygons[] PhysicalBarriers { get; set; }
+        public BarrierPolygon[] PhysicalBarriers { get; set; }
         /// <summary>
         /// Gets or sets the visual barriers.
         /// </summary>
         /// <value>The visual barriers.</value>
-        public BarrierPolygons[] VisualBarriers { get; set; }
+        public BarrierPolygon[] VisualBarriers { get; set; }
         /// <summary>
         /// Gets or sets the field barriers.
         /// </summary>
         /// <value>The field barriers.</value>
-        public BarrierPolygons[] FieldBarriers { get; set; }
+        public BarrierPolygon[] FieldBarriers { get; set; }
         /// <summary>
         /// Gets or sets the field without holes.
         /// </summary>
         /// <value>The field without holes.</value>
-        public BarrierPolygons[] FieldWithoutHoles { get; set; }
+        public BarrierPolygon[] FieldWithoutHoles { get; set; }
         /// <summary>
         /// The floor minimum bound
         /// </summary>
@@ -253,7 +253,7 @@ namespace SpatialAnalysis.Interoperability
         /// </summary>
         /// <param name="ply">The ply.</param>
         /// <returns>BarrierPolygons.</returns>
-        public BarrierPolygons ConvertINTPolygonToBarrierPolygon(INTPolygon ply)
+        public BarrierPolygon ConvertINTPolygonToBarrierPolygon(INTPolygon ply)
         {
             List<UV> pnts = new List<UV>();
             for (int i = 0; i < ply.Count; i++)
@@ -261,7 +261,7 @@ namespace SpatialAnalysis.Interoperability
                 pnts.Add(ConvertIntPointToUV(ply[i]));
             }
             pnts = SimplifyPolygon(pnts);
-            return new BarrierPolygons(pnts.ToArray());
+            return new BarrierPolygon(pnts.ToArray());
         }
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace SpatialAnalysis.Interoperability
         /// </summary>
         /// <param name="offsetValue">Human body size which is the distance that you want the agents from barriers</param>
         /// <returns>Expanded version of all barrier polygons including field naked edges and holes, visual barriers and physical barriers </returns>
-        public BarrierPolygons[] ExpandAllBarrierPolygons(double offsetValue)
+        public BarrierPolygon[] ExpandAllBarrierPolygons(double offsetValue)
         {
             ClipperOffset clipperOffset = new ClipperOffset();
             //clipperOffset.AddPaths(this.FootPrintOfAllBarriers, JoinType.jtSquare, EndType.etClosedPolygon);
@@ -289,10 +289,10 @@ namespace SpatialAnalysis.Interoperability
             INTPolygons plygns = new INTPolygons();
             double uniqueOffsetValue = -Math.Pow(10.0, this.PolygonalBooleanPrecision) * offsetValue;
             clipperOffset.Execute(ref plygns, uniqueOffsetValue);
-            List<BarrierPolygons> brrs = new List<BarrierPolygons>();
+            List<BarrierPolygon> brrs = new List<BarrierPolygon>();
             for (int i = 0; i < plygns.Count; i++)
             {
-                BarrierPolygons brr = this.ConvertINTPolygonToBarrierPolygon(plygns[i]);
+                BarrierPolygon brr = this.ConvertINTPolygonToBarrierPolygon(plygns[i]);
                 if (brr.Length > 0)
                 {
                     brrs.Add(brr);
@@ -308,7 +308,7 @@ namespace SpatialAnalysis.Interoperability
         protected void setTerritory()
         {
             double xMin = double.PositiveInfinity, xMax = double.NegativeInfinity, yMin = double.PositiveInfinity, yMax = double.NegativeInfinity;
-            foreach (BarrierPolygons item in this.VisualBarriers)
+            foreach (BarrierPolygon item in this.VisualBarriers)
             {
                 foreach (UV p in item.BoundaryPoints)
                 {
@@ -318,7 +318,7 @@ namespace SpatialAnalysis.Interoperability
                     yMax = (p.V > yMax) ? p.V : yMax;
                 }
             }
-            foreach (BarrierPolygons item in this.FieldBarriers)
+            foreach (BarrierPolygon item in this.FieldBarriers)
             {
                 foreach (UV p in item.BoundaryPoints)
                 {
@@ -388,7 +388,7 @@ namespace SpatialAnalysis.Interoperability
         /// <param name="viewDepth">The view depth.</param>
         /// <param name="edges">The edges.</param>
         /// <returns>BarrierPolygons.</returns>
-        public BarrierPolygons IsovistPolygon(UV vantagePoint, double viewDepth, HashSet<UVLine> edges)
+        public BarrierPolygon IsovistPolygon(UV vantagePoint, double viewDepth, HashSet<UVLine> edges)
         {
             /*first and expand and shrink operation is performed to merge the shadowing edges*/
             double expandShrinkFactor = Math.Pow(10.0, this.PolygonalBooleanPrecision) * UnitConversion.Convert(0.075, Length_Unit_Types.FEET, UnitType);
@@ -452,7 +452,7 @@ namespace SpatialAnalysis.Interoperability
                 {
                     if (Clipper.PointInPolygon(iCenter, item) == 1)
                     {
-                        BarrierPolygons isovist = this.ConvertINTPolygonToBarrierPolygon(item);
+                        BarrierPolygon isovist = this.ConvertINTPolygonToBarrierPolygon(item);
                         results = null;
                         c = null;
                         clipperOffset = null;
@@ -474,7 +474,7 @@ namespace SpatialAnalysis.Interoperability
                     if (Clipper.PointInPolygon(iCenter, item) == 1)
                     {
                         item.Reverse();
-                        BarrierPolygons isovist = this.ConvertINTPolygonToBarrierPolygon(item);
+                        BarrierPolygon isovist = this.ConvertINTPolygonToBarrierPolygon(item);
                         results = null;
                         c = null;
                         clipperOffset = null;

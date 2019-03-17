@@ -49,7 +49,7 @@ namespace SpatialAnalysis.Data.Visualization
         private double _regionVal { get; set; }
         private Line _line { get; set; }
         private Polyline _polyline { get; set; }
-        private List<BarrierPolygons> _barriers { get; set; }
+        private List<BarrierPolygon> _barriers { get; set; }
         private List<double> _regionValues { get; set; }
         private double _strok_thickness;
         /// <summary>
@@ -64,7 +64,7 @@ namespace SpatialAnalysis.Data.Visualization
 
         private void visualization_Menu_Click(object sender, RoutedEventArgs e)
         {
-            this._barriers = new List<BarrierPolygons>();
+            this._barriers = new List<BarrierPolygon>();
             this._regionValues = new List<double>();
             this._addData = new AddDataField();
             foreach (Function item in this._host.cellularFloor.AllSpatialDataFields.Values)
@@ -228,7 +228,7 @@ namespace SpatialAnalysis.Data.Visualization
                 brush.Opacity=.3;
                 polygon.Fill = brush;
                 this.Children.Add(polygon);
-                this._barriers.Add(new BarrierPolygons(this._pnts.ToArray()));
+                this._barriers.Add(new BarrierPolygon(this._pnts.ToArray()));
                 this._regionValues.Add(this._regionVal);
             }
             this.Children.Remove(this._polyline);

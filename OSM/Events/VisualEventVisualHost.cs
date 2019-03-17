@@ -128,7 +128,7 @@ namespace SpatialAnalysis.Events
 
         void _generateData_Click(object sender, RoutedEventArgs e)
         {
-            this._barriers = new List<SpatialAnalysis.Geometry.BarrierPolygons>();
+            this._barriers = new List<SpatialAnalysis.Geometry.BarrierPolygon>();
             this._destinations = new HashSet<Cell>();
             this._settings = new VisualEventSettings(this._host.cellularFloor, true);
             this._settings.Owner = this._host;
@@ -166,7 +166,7 @@ namespace SpatialAnalysis.Events
         /// <param name="routedEventHandler">The routed event handler.</param>
         public void SetVisualEvents(EventHandler routedEventHandler)
         {
-            this._barriers = new List<SpatialAnalysis.Geometry.BarrierPolygons>();
+            this._barriers = new List<SpatialAnalysis.Geometry.BarrierPolygon>();
             this._destinations = new HashSet<Cell>();
             this._settings = new VisualEventSettings(this._host.cellularFloor, false);
             this._settings.Owner = this._host;
@@ -180,7 +180,7 @@ namespace SpatialAnalysis.Events
 
         void _setEvents_Click(object sender, RoutedEventArgs e)
         {
-            this._barriers = new List<SpatialAnalysis.Geometry.BarrierPolygons>();
+            this._barriers = new List<SpatialAnalysis.Geometry.BarrierPolygon>();
             this._destinations = new HashSet<Cell>();
             this._settings = new VisualEventSettings(this._host.cellularFloor, false);
             this._settings.Owner = this._host;
@@ -194,7 +194,7 @@ namespace SpatialAnalysis.Events
         void _close_Click(object sender, RoutedEventArgs e)
         {
             HashSet<Index> allIndices = new HashSet<Index>();
-            foreach (SpatialAnalysis.Geometry.BarrierPolygons item in this._barriers)
+            foreach (SpatialAnalysis.Geometry.BarrierPolygon item in this._barriers)
             {
                 allIndices.UnionWith(this._host.cellularFloor.GetIndicesInsideBarrier(item, 0.0000001));
             }
@@ -272,7 +272,7 @@ namespace SpatialAnalysis.Events
                 UV p2 = item + this._host.cellularFloor.CellSize * UV.UBase;
                 UV p3 = item + this._host.cellularFloor.CellSize * (UV.UBase + UV.VBase);
                 UV p4 = item + this._host.cellularFloor.CellSize * UV.VBase;
-                var polygon = new SpatialAnalysis.Geometry.BarrierPolygons(new UV[4] { p1, p2, p3, p4 });
+                var polygon = new SpatialAnalysis.Geometry.BarrierPolygon(new UV[4] { p1, p2, p3, p4 });
                 this._barriers.Add(polygon);
             }
             this._host.VisualEventSettings = new VisibilityTarget(visibleArea,
@@ -385,7 +385,7 @@ namespace SpatialAnalysis.Events
 
             #region get the vantage Cells
             HashSet<Index> allIndices = new HashSet<Index>();
-            foreach (SpatialAnalysis.Geometry.BarrierPolygons item in this._barriers)
+            foreach (SpatialAnalysis.Geometry.BarrierPolygon item in this._barriers)
             {
                 allIndices.UnionWith(this._host.cellularFloor.GetIndicesInsideBarrier(item, OSMDocument.AbsoluteTolerance));
             }
@@ -555,7 +555,7 @@ namespace SpatialAnalysis.Events
         private List<UV> _pnts { get; set; }
         private Line _line { get; set; }
         private Polyline _polyline { get; set; }
-        private List<SpatialAnalysis.Geometry.BarrierPolygons> _barriers { get; set; }
+        private List<SpatialAnalysis.Geometry.BarrierPolygon> _barriers { get; set; }
         private HashSet<Cell> _destinations { get; set; }
 
         #region Add area
@@ -617,7 +617,7 @@ namespace SpatialAnalysis.Events
                 brush.Opacity = .3;
                 polygon.Fill = brush;
                 this.Children.Add(polygon);
-                this._barriers.Add(new SpatialAnalysis.Geometry.BarrierPolygons(this._pnts.ToArray()));
+                this._barriers.Add(new SpatialAnalysis.Geometry.BarrierPolygon(this._pnts.ToArray()));
             }
             this.Children.Remove(this._polyline);
             this.Children.Remove(this._line);

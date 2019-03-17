@@ -77,7 +77,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
         private MenuItem _editeActivity_Menu { get; set; }
         private Line _line { get; set; }
         private Polyline _polyline { get; set; }
-        BarrierPolygons _barrier { get; set; }
+        BarrierPolygon _barrier { get; set; }
         private GenerateFields _fieldGenerator { get; set; }
         private HashSet<Cell> _destinations { get; set; }
         //private double _angularDeviationWeight = 1.0d;
@@ -234,7 +234,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
                 polygon.Points.Add(new Point(cell.U + this._host.cellularFloor.CellSize, cell.V));
                 polygon.Points.Add(new Point(cell.U + this._host.cellularFloor.CellSize, cell.V + this._host.cellularFloor.CellSize));
                 polygon.Points.Add(new Point(cell.U, cell.V + this._host.cellularFloor.CellSize));
-                this._barrier = new BarrierPolygons(
+                this._barrier = new BarrierPolygon(
                     new UV[4] 
                     {
                         new UV(cell.U, cell.V),
@@ -315,7 +315,7 @@ namespace SpatialAnalysis.FieldUtility.Visualization
                 brush.Opacity = .3;
                 polygon.Fill = brush;
                 this.Children.Add(polygon);
-                this._barrier = new BarrierPolygons(this._pnts.ToArray());
+                this._barrier = new BarrierPolygon(this._pnts.ToArray());
                 if (!this._barrier.IsConvex())
                 {
                     MessageBox.Show("The destination region should be a convex polygon. \nTry again...",

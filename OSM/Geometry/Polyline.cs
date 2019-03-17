@@ -163,7 +163,7 @@ namespace SpatialAnalysis.Geometry
         /// <returns><c>true</c> if this instance is convex; otherwise, <c>false</c>.</returns>
         public bool IsConvex()
         {
-            return BarrierPolygons.IsConvex(this._pntList.ToArray());
+            return BarrierPolygon.IsConvex(this._pntList.ToArray());
         }
         /// <summary>
         /// Splits the polygon to a list of points at given distances.

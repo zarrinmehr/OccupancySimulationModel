@@ -76,6 +76,8 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <value>The length.</value>
         public double Length { get; set; }
 
+        public double InitialDirectionLength { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Ray"/> class.
         /// </summary>
@@ -88,9 +90,19 @@ namespace SpatialAnalysis.CellularEnvironment
         {
             this.Origin = origin;
             this.Direction = direction;
-            if (this.Direction.GetLengthSquared() != 1.0)
+            double directionLengthSqrd = this.Direction.GetLengthSquared();
+            if (directionLengthSqrd != 1)
             {
-                this.Direction.Unitize();
+                if (directionLengthSqrd == 0)
+                {
+                    throw new ArgumentException("Ray direction vector cannot be zero");
+                }
+                this.InitialDirectionLength = Math.Sqrt(directionLengthSqrd);
+                this.Direction /= this.InitialDirectionLength;
+            }
+            else
+            {
+                this.InitialDirectionLength = 1;
             }
             this.Length = 0;
             if (this.Direction.U==0)

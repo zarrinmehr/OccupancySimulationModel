@@ -186,7 +186,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             }
             try
             {
-                BarrierPolygons[] barriers = new BarrierPolygons[this.radiuses.Length];
+                BarrierPolygon[] barriers = new BarrierPolygon[this.radiuses.Length];
                 for (int i = 0; i < this.radiuses.Length; i++)
                 {
                     HashSet<UVLine> blocks = this._host.cellularFloor.PolygonalIsovistVisualObstacles(p, this.radiuses[i], this._host.IsovistBarrierType);

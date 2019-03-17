@@ -851,7 +851,7 @@ namespace SpatialAnalysis.Visualization3D
             StreamGeometry contourGeoms = new StreamGeometry();
             using (var sgc = contourGeoms.Open())
             {
-                foreach (BarrierPolygons item in contours)
+                foreach (BarrierPolygon item in contours)
                 {
                     Point[] points = new Point[item.Length];
                     for (int i = 0; i < item.Length; i++)

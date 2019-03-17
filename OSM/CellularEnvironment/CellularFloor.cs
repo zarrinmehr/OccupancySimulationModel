@@ -415,7 +415,7 @@ namespace SpatialAnalysis.CellularEnvironment
         /// <summary>
         /// An array of polygons which form a buffer around the barriers using Minkowski addition
         /// </summary>
-        public BarrierPolygons[] BarrierBuffers { get; set; }
+        public BarrierPolygon[] BarrierBuffers { get; set; }
         /// <summary>
         /// Create the barrier buffer polygons around the edges of the walkable field using Minkowski addition
         /// </summary>
@@ -427,13 +427,13 @@ namespace SpatialAnalysis.CellularEnvironment
             this.BarrierBuffers = barrierEnvironment.ExpandAllBarrierPolygons(offsetValue);
             // creating lines for the boundaries
             int edgeNum = 0;
-            foreach (BarrierPolygons item in this.BarrierBuffers)
+            foreach (BarrierPolygon item in this.BarrierBuffers)
             {
                 edgeNum += item.Length;
             }
             this.BarrierBufferEdges = new UVLine[edgeNum];
             edgeNum = 0;
-            foreach (BarrierPolygons brr in this.BarrierBuffers)
+            foreach (BarrierPolygon brr in this.BarrierBuffers)
             {
                 for (int i = 0; i < brr.Length; i++)
                 {
@@ -454,7 +454,7 @@ namespace SpatialAnalysis.CellularEnvironment
                     cell.BarrierBufferEdgeIndices.Clear();
                 }
                 cell.BarrierBufferOverlapState = OverlapState.Outside;
-                cell.ContainsBufferEdgeEndPoints = false;
+                cell.BufferBarrierEndPoints = null;
             }
             // loading the lines into the cells
             for (int i = 0; i < this.BarrierBufferEdges.Length; i++)
@@ -467,14 +467,21 @@ namespace SpatialAnalysis.CellularEnvironment
                         this.Cells[item.I, item.J].BarrierBufferEdgeIndices.Add(i);
                     }
                 }
-                if (intersectingCellIndices.Length != 0 && this.ContainsCell(intersectingCellIndices[0]))
+            }
+            //loading edge end points into the cells
+            foreach (BarrierPolygon polygon in this.BarrierBuffers)
+            {
+                foreach (UV point in polygon.BoundaryPoints)
                 {
-                    this.FindCell(intersectingCellIndices[0]).ContainsBufferEdgeEndPoints = true;
-                }
-                int last = intersectingCellIndices.Length - 1;
-                if (intersectingCellIndices.Length != 1 && this.ContainsCell(intersectingCellIndices[last]))
-                {
-                    this.FindCell(intersectingCellIndices[last]).ContainsBufferEdgeEndPoints = true;
+                    Cell cell = this.FindCell(point);
+                    if (cell != null)
+                    {
+                        if (cell.BufferBarrierEndPoints == null)
+                        {
+                            cell.BufferBarrierEndPoints = new List<UV>();
+                        }
+                        cell.BufferBarrierEndPoints.Add(point);
+                    }
                 }
             }
             // setting the overlapping states of the cells that overlap
@@ -724,34 +731,6 @@ namespace SpatialAnalysis.CellularEnvironment
             */
             includedData = null;
             return staticCost;
-        }
-
-        public override void GetCellBarrierEndPoint(Index cellIndex, List<UV> updatedEndPoints, BarrierType barrierType)
-        {
-            if (barrierType != BarrierType.BarrierBuffer)
-            {
-                base.GetCellBarrierEndPoint(cellIndex, updatedEndPoints, barrierType);
-            }
-            else
-            {
-                updatedEndPoints.Clear();
-                if (!ContainsCell(cellIndex)) return;
-                if (this.BarrierBufferEdges == null ||
-                    this.BarrierBufferEdges.Length == 0) return;
-                Cell cell = this.Cells[cellIndex.I, cellIndex.J];
-                foreach (var edgeIndex in cell.BarrierBufferEdgeIndices)
-                {
-                    UVLine edge = this.BarrierBufferEdges[edgeIndex];
-                    if (cell.ContainsPoint(edge.Start, this.CellSize))
-                    {
-                        updatedEndPoints.Add(edge.Start);
-                    }
-                    if (cell.ContainsPoint(edge.End, this.CellSize))
-                    {
-                        updatedEndPoints.Add(edge.End);
-                    }
-                }
-            }
         }
     }
 

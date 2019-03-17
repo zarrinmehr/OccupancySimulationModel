@@ -25,15 +25,9 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using SpatialAnalysis.Geometry;
 using SpatialAnalysis.CellularEnvironment;
 using System.Windows;
-using System.Threading.Tasks;
-using SpatialAnalysis.Data;
-using System.Windows.Controls;
-using System.Windows.Threading;
-using System.Threading;
 
 namespace SpatialAnalysis.IsovistUtility
 {
@@ -78,7 +72,6 @@ namespace SpatialAnalysis.IsovistUtility
     /// </summary>
     public class CellularIsovistCalculator
     {
-        private List<UV> _encounteredPoints;
         private List<Index> _edge { get; set; }
         private List<Index> _temp_edge { get; set; }
         private CELL_STATE[,] _cell_states { get; set; }
@@ -87,6 +80,8 @@ namespace SpatialAnalysis.IsovistUtility
         private double _tolerance { get; set; }
         private BarrierType _barrierType { get; set; }
         private Index _vantageIndex { get; set; }
+        private double _depthSquared { get; set; }
+        private double _depth { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="CellularIsovistCalculator"/> class.
         /// This constructor is designed to be called in parallel and access to it is only allowed internally. 
@@ -96,9 +91,8 @@ namespace SpatialAnalysis.IsovistUtility
         /// <param name="cellularFloor">The cellular floor.</param>
         /// <param name="Tolerance">The tolerance.</param>
         internal CellularIsovistCalculator(UV isovistVantagePoint, BarrierType typeOfBarrier,
-            CellularFloor cellularFloor, double Tolerance = OSMDocument.AbsoluteTolerance)
+            CellularFloor cellularFloor, double depth, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            this._encounteredPoints = new List<UV>();
             this._edge = new List<Index>();
             this._temp_edge = new List<Index>();
             this._cell_states = new CELL_STATE[cellularFloor.GridWidth, cellularFloor.GridHeight];
@@ -107,11 +101,12 @@ namespace SpatialAnalysis.IsovistUtility
             this._tolerance = Tolerance;
             this._barrierType = typeOfBarrier;
             this._vantageIndex = cellularFloor.FindIndex(this._vantagePoint);
+            this._depth = Math.Abs(depth);
+            this._depthSquared = this._depth * this._depth;
         }
         private CellularIsovistCalculator(Cell cell, BarrierType typeOfBarrier,
-            CellularFloor cellularFloor, double Tolerance = 0.0000001)
+            CellularFloor cellularFloor, double depth, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            this._encounteredPoints = new List<UV>();
             this._edge = new List<Index>();
             this._temp_edge = new List<Index>();
             this._cell_states = new CELL_STATE[cellularFloor.GridWidth, cellularFloor.GridHeight];
@@ -120,6 +115,8 @@ namespace SpatialAnalysis.IsovistUtility
             this._tolerance = Tolerance;
             this._barrierType = typeOfBarrier;
             this._vantageIndex = cellularFloor.FindIndex(this._vantagePoint);
+            this._depth = Math.Abs(depth);
+            this._depthSquared = this._depth * this._depth;
         }
 
         private bool addToTempEdge(Index index)
@@ -148,11 +145,21 @@ namespace SpatialAnalysis.IsovistUtility
             this._temp_edge.Clear();
         }
 
-        private void addPointToExclude(UV endPoint)
+        private void shootRay(UV rayOrigin)
         {
-            UV direction = endPoint - this._vantagePoint;
-            Ray ray = new Ray(endPoint, direction, this._cellularFloor.Origin, this._cellularFloor.CellSize, this._tolerance);
-            Index baseIndex = this._cellularFloor.FindIndex(endPoint);
+            UV direction = rayOrigin - this._vantagePoint;
+            Ray ray = new Ray(rayOrigin, direction, this._cellularFloor.Origin, this._cellularFloor.CellSize, this._tolerance);
+            double rayLength = this._depth - ray.InitialDirectionLength;
+            if (rayLength < 0) return;//Very unlikely to happen
+            UV rayEndPoint = ray.PointAt(rayLength + this._tolerance);
+            Index rayEndPointIndex = this._cellularFloor.FindIndex(rayEndPoint);
+            bool rayEndindexBelongToFloor = this._cellularFloor.ContainsCell(rayEndPointIndex);
+            if (rayEndindexBelongToFloor)
+            {
+                this._cell_states[rayEndPointIndex.I, rayEndPointIndex.J] = CELL_STATE.RAY_EXCLUDED;
+            }
+            Index baseIndex = this._cellularFloor.FindIndex(rayOrigin);
+
             Index nextIndex = baseIndex.Copy();
             bool extendRay = true;
             //while (nextIndex != null)
@@ -179,7 +186,6 @@ namespace SpatialAnalysis.IsovistUtility
                                             }
                                         }
                                     }
-                                    //if this cell includes other endpoints ray shooting might be needed.
                                     break;
                                 case OverlapState.Inside:
                                     nextIndex = null;
@@ -284,6 +290,13 @@ namespace SpatialAnalysis.IsovistUtility
                 if (extendRay)
                 {
                     nextIndex = ray.NextIndex(this._cellularFloor.FindIndex, this._tolerance);
+                    if (nextIndex != null && this._cellularFloor.ContainsCell(nextIndex)) 
+                    {
+                        if(rayEndindexBelongToFloor && nextIndex == rayEndPointIndex)
+                        {
+                            extendRay = false;
+                        }
+                    }
                 }
             }
             if (nextIndex != null && nextIndex.Equals(baseIndex))
@@ -292,97 +305,23 @@ namespace SpatialAnalysis.IsovistUtility
             }
             if (nextIndex != null)
             {
-                //HashSet<UV> rayOrigins = new HashSet<UV>();
-                //int n = 0;
-                Index startPointIndex = null;
-                Index endPointIndex = null;
-                switch (this._barrierType)
+                /*
+                 * When a barrier blocks ray marching, the cell that contains it might be the end index at
+                 * the current marching ray; however, if this cell is on a corner, it may contain edge points
+                 * that should be considered for shooting new rays. If these rays are ignored the isovist 
+                 * will be calculated inaccurately. This case if rare in high resolution grids and is needed
+                 * for robustness of the calculation. Checking this condition adds around 15% to the time of
+                 * isovist calculation, but makes the results more accurate.
+                 */
+                List<UV> points = this._cellularFloor.Cells[nextIndex.I, nextIndex.J].GetEdgeEndPoint(this._barrierType);
+                if (null == points)
                 {
-                    case BarrierType.Visual:
-                        foreach (int id in this._cellularFloor.Cells[nextIndex.I, nextIndex.J].VisualBarrierEdgeIndices)
-                        {
-                            UVLine edge = this._cellularFloor.VisualBarrierEdges[id];
-                            startPointIndex = this._cellularFloor.FindIndex(edge.Start);
-                            if (startPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.Start);
-                                this.addPointToExclude(edge.Start);
-                            }
-                            endPointIndex = this._cellularFloor.FindIndex(edge.End);
-                            if (endPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.End);
-                                this.addPointToExclude(edge.End);
-                            }
-                        }
-                        break;
-                    case BarrierType.Physical:
-                        foreach (int id in this._cellularFloor.Cells[nextIndex.I, nextIndex.J].PhysicalBarrierEdgeIndices)
-                        {
-                            UVLine edge = this._cellularFloor.PhysicalBarrierEdges[id];
-                            startPointIndex = this._cellularFloor.FindIndex(edge.Start);
-                            if (startPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.Start);
-                                this.addPointToExclude(edge.Start);
-                            }
-                            endPointIndex = this._cellularFloor.FindIndex(edge.End);
-                            if (endPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.End);
-                                this.addPointToExclude(edge.End);
-                            }
-                        }
-                        break;
-                    case BarrierType.Field:
-                        foreach (int id in this._cellularFloor.Cells[nextIndex.I, nextIndex.J].FieldBarrierEdgeIndices)
-                        {
-                            UVLine edge = this._cellularFloor.FieldBarrierEdges[id];
-                            startPointIndex = this._cellularFloor.FindIndex(edge.Start);
-                            if (startPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.Start);
-                                this.addPointToExclude(edge.Start);
-                            }
-                            endPointIndex = this._cellularFloor.FindIndex(edge.End);
-                            if (endPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.End);
-                                this.addPointToExclude(edge.End);
-                            }
-                        }
-                        break;
-                    case BarrierType.BarrierBuffer:
-                        foreach (int id in this._cellularFloor.Cells[nextIndex.I, nextIndex.J].BarrierBufferEdgeIndices)
-                        {
-                            UVLine edge = this._cellularFloor.BarrierBufferEdges[id];
-                            startPointIndex = this._cellularFloor.FindIndex(edge.Start);
-                            if (startPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.Start);
-                                this.addPointToExclude(edge.Start);
-                            }
-                            endPointIndex = this._cellularFloor.FindIndex(edge.End);
-                            if (endPointIndex.Equals(nextIndex))
-                            {
-                                //n++;
-                                //rayOrigins.Add(edge.End);
-                                this.addPointToExclude(edge.End);
-                            }
-                        }
-                        break;
+                    return;
                 }
-                //foreach (UV item in rayOrigins)
-                //{
-                //    this.addPointToExclude(item);
-                //}
+                foreach (var other in points)
+                {
+                    this.shootRay(other);
+                }
             }
         }
 
@@ -390,24 +329,23 @@ namespace SpatialAnalysis.IsovistUtility
         /// This function tests to see if a new index (possible) juxtapposed to an existing visible index 
         /// should be added to the visible indices or not.
         /// </summary>
-        private void addNextIndex(Index possible, double depthSquared)
+        private void addNextIndex(Index possible)
         {
             if (this._cell_states[possible.I, possible.J] == CELL_STATE.UNKNOWN)
             {
                 double distance = UV.GetLengthSquared(this._cellularFloor.Cells[possible.I, possible.J], this._vantagePoint);
-                if (distance < depthSquared)
+                if (distance < this._depthSquared)
                 {
                     switch (this._barrierType)
                     {
                         case BarrierType.Visual:
                             if (this._cellularFloor.Cells[possible.I, possible.J].VisualOverlapState == OverlapState.Overlap)
                             {
-                                if(this._cellularFloor.Cells[possible.I, possible.J].ContainsVisualEdgeEndPoints)
+                                if(this._cellularFloor.Cells[possible.I, possible.J].VisualBarrierEndPoints != null)
                                 {
-                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.Visual);
-                                    foreach (var pt in this._encounteredPoints)
+                                    foreach (var pt in this._cellularFloor.Cells[possible.I, possible.J].VisualBarrierEndPoints)
                                     {
-                                        addPointToExclude(pt);
+                                        shootRay(pt);
                                     }
                                 }
                             }
@@ -419,12 +357,11 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.Physical:
                             if (this._cellularFloor.Cells[possible.I, possible.J].PhysicalOverlapState == OverlapState.Overlap)
                             {
-                                if (this._cellularFloor.Cells[possible.I, possible.J].ContainsPhysicalEdgeEndPoints)
+                                if (this._cellularFloor.Cells[possible.I, possible.J].PhysicalBarrierEndPoints != null)
                                 {
-                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.Physical);
-                                    foreach (var pt in this._encounteredPoints)
+                                    foreach (var pt in this._cellularFloor.Cells[possible.I, possible.J].PhysicalBarrierEndPoints)
                                     {
-                                        addPointToExclude(pt);
+                                        shootRay(pt);
                                     }
                                 }
                             }
@@ -436,12 +373,11 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.Field:
                             if (this._cellularFloor.Cells[possible.I, possible.J].FieldOverlapState == OverlapState.Overlap)
                             {
-                                if (this._cellularFloor.Cells[possible.I, possible.J].ContainsFieldEdgeEndPoints)
+                                if (this._cellularFloor.Cells[possible.I, possible.J].FieldBarrierEndPoints != null)
                                 {
-                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.Field);
-                                    foreach (var pt in this._encounteredPoints)
+                                    foreach (var pt in this._cellularFloor.Cells[possible.I, possible.J].FieldBarrierEndPoints)
                                     {
-                                        addPointToExclude(pt);
+                                        shootRay(pt);
                                     }
                                 }
                             }
@@ -453,12 +389,11 @@ namespace SpatialAnalysis.IsovistUtility
                         case BarrierType.BarrierBuffer:
                             if (this._cellularFloor.Cells[possible.I, possible.J].BarrierBufferOverlapState == OverlapState.Overlap)
                             {
-                                if (this._cellularFloor.Cells[possible.I, possible.J].ContainsBufferEdgeEndPoints)
+                                if (this._cellularFloor.Cells[possible.I, possible.J].BufferBarrierEndPoints != null)
                                 {
-                                    this._cellularFloor.GetCellBarrierEndPoint(possible, this._encounteredPoints, BarrierType.BarrierBuffer);
-                                    foreach (var pt in this._encounteredPoints)
+                                    foreach (var pt in this._cellularFloor.Cells[possible.I, possible.J].BufferBarrierEndPoints)
                                     {
-                                        addPointToExclude(pt);
+                                        shootRay(pt);
                                     }
                                 }
                             }
@@ -478,10 +413,9 @@ namespace SpatialAnalysis.IsovistUtility
         /// Returns a collection of cells that are completely visible from a vantage point withing a given distance
         /// </summary>
         /// <param name="vantagePoint">Center of Visibility</param>
-        /// <param name="depth">Visibility Range</param>
         /// <param name="tolerance">Numerical Tolerance</param>
         /// <returns>Isovist as Collection of Cells</returns>
-        private Isovist getIsovist(double depth)
+        private Isovist getIsovist()
         {
             Cell cell = this._cellularFloor.FindCell(this._vantageIndex);
             if (cell == null)
@@ -517,7 +451,6 @@ namespace SpatialAnalysis.IsovistUtility
                 default:
                     break;
             }
-            double depthSquared = depth * depth;
             //creating the first neighbors
             foreach (var item in Index.Neighbors)
             {
@@ -574,7 +507,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -582,7 +515,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -590,7 +523,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                     else if (_direction.J == 0)
@@ -601,7 +534,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J - 1);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -609,7 +542,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -617,7 +550,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + 1);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                     else
@@ -628,7 +561,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -636,7 +569,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -644,7 +577,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                 }
@@ -753,7 +686,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -761,7 +694,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -769,7 +702,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                     else if (_direction.J == 0)
@@ -780,7 +713,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J - 1);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -788,7 +721,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -796,7 +729,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + 1);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                     else
@@ -807,7 +740,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -815,7 +748,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -823,7 +756,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                 }
@@ -946,7 +879,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -954,7 +887,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -962,7 +895,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                     else if (_direction.J == 0)
@@ -973,7 +906,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J - 1);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -981,7 +914,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -989,7 +922,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + 1);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                     else
@@ -1000,7 +933,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // second
                         possible = new Index(
@@ -1008,7 +941,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J);
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                         // third
                         possible = new Index(
@@ -1016,7 +949,7 @@ namespace SpatialAnalysis.IsovistUtility
                             item.J + Math.Sign(_direction.J));
                         if (this._cellularFloor.ContainsCell(possible))
                         {
-                            this.addNextIndex(possible, depthSquared);
+                            this.addNextIndex(possible);
                         }
                     }
                 }
@@ -1035,8 +968,8 @@ namespace SpatialAnalysis.IsovistUtility
         public static Isovist GetIsovist(UV isovistVantagePoint, double depth, BarrierType typeOfBarrier,
             CellularFloor cellularFloor, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, Tolerance);
-            Isovist isovist = isovistCalculator.getIsovist(depth);
+            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, depth, Tolerance);
+            Isovist isovist = isovistCalculator.getIsovist();
             isovistCalculator._cellularFloor = null;
             isovistCalculator._vantagePoint = null;
             isovistCalculator._vantageIndex = null;
@@ -1063,7 +996,7 @@ namespace SpatialAnalysis.IsovistUtility
         public static IsovistEscapeRoutes GetAllEscapeRoute(UV isovistVantagePoint, double depth,
             BarrierType typeOfBarrier, CellularFloor cellularFloor, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, Tolerance);
+            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, depth, Tolerance);
             var cells = isovistCalculator.getEscapeRoute(depth);
             List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._cell_states, typeOfBarrier);
             cells.UnionWith(OtherCells);
@@ -1176,7 +1109,7 @@ namespace SpatialAnalysis.IsovistUtility
             BarrierType typeOfBarrier, CellularFloor cellularFloor, Dictionary<Cell, double> staticCost,
             int angleIntercept, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, Tolerance);
+            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(isovistVantagePoint, typeOfBarrier, cellularFloor, depth, Tolerance);
             var cells = isovistCalculator.getEscapeRoute(depth);
             List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._cell_states, typeOfBarrier);
             cells.UnionWith(OtherCells);
@@ -1213,7 +1146,7 @@ namespace SpatialAnalysis.IsovistUtility
             double isovistDepth, int desiredNumber,
             CellularFloor cellularFloor, Dictionary<Cell, double> staticCost, double Tolerance = OSMDocument.AbsoluteTolerance)
         {
-            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(vantageCell, BarrierType.BarrierBuffer, cellularFloor, Tolerance);
+            CellularIsovistCalculator isovistCalculator = new CellularIsovistCalculator(vantageCell, BarrierType.BarrierBuffer, cellularFloor, isovistDepth, Tolerance);
             var cells = isovistCalculator.getEscapeRoute(isovistDepth);
 
             List<Cell> OtherCells = CellularIsovistCalculator.ExtractIsovistEscapeRoute(cellularFloor, isovistCalculator._cell_states, BarrierType.BarrierBuffer);

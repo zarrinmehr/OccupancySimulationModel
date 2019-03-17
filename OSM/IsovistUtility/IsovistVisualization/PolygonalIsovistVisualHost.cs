@@ -155,7 +155,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             {
                 timer.Start();
                 HashSet<UVLine> blocks = this._host.cellularFloor.PolygonalIsovistVisualObstacles(p, this._host.IsovistDepth, this._host.IsovistBarrierType);
-                BarrierPolygons isovistPolygon = this._host.BIM_To_OSM.IsovistPolygon(p, this._host.IsovistDepth, blocks);
+                BarrierPolygon isovistPolygon = this._host.BIM_To_OSM.IsovistPolygon(p, this._host.IsovistDepth, blocks);
                 timer.Stop();
                 isovistPolygon.Visualize(this._host.OSM_to_BIM, this._host.BIM_To_OSM.PlanElevation);
                 this._host.IsovistInformation = new IsovistInformation(IsovistInformation.IsovistType.Polygonal,
@@ -248,7 +248,7 @@ namespace SpatialAnalysis.IsovistUtility.IsovistVisualization
             {
                 timer.Start();
                 HashSet<UVLine> blocks = this._host.cellularFloor.PolygonalIsovistVisualObstacles(p, this._host.IsovistDepth, this._host.IsovistBarrierType);
-                BarrierPolygons isovistPolygon = this._host.BIM_To_OSM.IsovistPolygon(p, this._host.IsovistDepth, blocks);
+                BarrierPolygon isovistPolygon = this._host.BIM_To_OSM.IsovistPolygon(p, this._host.IsovistDepth, blocks);
                 IsovistPolygon newIsovistPolygon = new IsovistPolygon(isovistPolygon.BoundaryPoints, p);
                 timer.Stop();
                 this._host.IsovistInformation = new IsovistInformation(IsovistInformation.IsovistType.Polygonal,

@@ -224,10 +224,10 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             visual.AddRange(UVPolygonsVisualStairs);
 
             this.FootPrintPolygonsOfVisualBarriers = this.getFootPrintWithOutHoles(visual);
-            List<BarrierPolygons> visualBarrierList = new List<BarrierPolygons>();
+            List<BarrierPolygon> visualBarrierList = new List<BarrierPolygon>();
             for (int i = 0; i < this.FootPrintPolygonsOfVisualBarriers.Count; i++)
             {
-                BarrierPolygons brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfVisualBarriers[i]);
+                BarrierPolygon brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfVisualBarriers[i]);
                 visualBarrierList.Add(brr);
             }
             this.VisualBarriers = visualBarrierList.ToArray();
@@ -243,10 +243,10 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             physical.AddRange(visual);
             
             this.FootPrintPolygonsOfPhysicalBarriers = this.getFootPrintWithOutHoles(physical);
-            List<BarrierPolygons> physicalBarrierList = new List<BarrierPolygons>();
+            List<BarrierPolygon> physicalBarrierList = new List<BarrierPolygon>();
             for (int i = 0; i < this.FootPrintPolygonsOfPhysicalBarriers.Count; i++)
             {
-                BarrierPolygons brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfPhysicalBarriers[i]);
+                BarrierPolygon brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfPhysicalBarriers[i]);
                 physicalBarrierList.Add(brr);
             }
             this.PhysicalBarriers = physicalBarrierList.ToArray();
@@ -355,10 +355,10 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             c.Execute(ClipType.ctDifference, difference);
             //offstting the polygons internally to get ride of narrow scraps
             this.FootPrintPolygonsOfFieldWithVoids = this.SimplifyINTPolygons(difference, .05);
-            List<BarrierPolygons> voids = new List<BarrierPolygons>();
+            List<BarrierPolygon> voids = new List<BarrierPolygon>();
             for (int i = 0; i < this.FootPrintPolygonsOfFieldWithVoids.Count; i++)
             {
-                BarrierPolygons brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfFieldWithVoids[i]);
+                BarrierPolygon brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfFieldWithVoids[i]);
                 if (brr.Length > 0)
                 {
                     voids.Add(brr);
@@ -381,10 +381,10 @@ namespace OSM_Revit.REVIT_INTEROPERABILITY
             c.Execute(ClipType.ctDifference, difference);
             //offstting the polygons internally to get ride of narrow scraps
             this.FootPrintPolygonsOfFieldWithOutVoids = this.SimplifyINTPolygons(difference, .1);
-            List<BarrierPolygons> voids = new List<BarrierPolygons>();
+            List<BarrierPolygon> voids = new List<BarrierPolygon>();
             for (int i = 0; i < this.FootPrintPolygonsOfFieldWithOutVoids.Count; i++)
             {
-                BarrierPolygons brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfFieldWithOutVoids[i]);
+                BarrierPolygon brr = this.ConvertINTPolygonToBarrierPolygon(this.FootPrintPolygonsOfFieldWithOutVoids[i]);
                 if (brr.Length > 0)
                 {
                     voids.Add(brr);
